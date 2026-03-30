@@ -1,0 +1,148 @@
+.container {
+  padding: 16px;
+  padding-bottom: 80px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+}
+
+.incomeAmount {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--color-success);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.bucket {
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  margin-bottom: 16px;
+}
+
+.bucketHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.bucketLabel {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.bucketRef {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.sliderRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider {
+  flex: 1;
+  accent-color: var(--color-primary);
+  height: 6px;
+}
+
+.amountInput {
+  width: 110px;
+  padding: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: right;
+}
+
+.mathBar {
+  height: 12px;
+  border-radius: 6px;
+  display: flex;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+
+.mathSegment {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.unallocated {
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 8px;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 16px;
+}
+
+.unallocated.balanced {
+  color: var(--color-success);
+  background-color: var(--color-success-light);
+}
+
+.unallocated.unbalanced {
+  color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.skipLink {
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 0.875rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.skipLink:hover {
+  color: var(--color-primary);
+}
+
+.periodSelect {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.periodPill {
+  padding: 8px 14px;
+  border-radius: var(--border-radius-xl);
+  font-size: 0.8125rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.periodPill.active {
+  background-color: var(--color-primary);
+  color: white;
+  border-color: var(--color-primary);
+}

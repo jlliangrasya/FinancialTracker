@@ -1,0 +1,48 @@
+.card {
+  padding: 14px 16px;
+  border-radius: var(--border-radius-md);
+  border-left: 4px solid;
+  background-color: var(--color-surface);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  cursor: pointer;
+}
+
+.card.alert {
+  border-left-color: var(--color-warning);
+  background-color: var(--color-warning-light);
+}
+
+.card.win {
+  border-left-color: var(--color-success);
+  background-color: var(--color-success-light);
+}
+
+.card.info {
+  border-left-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.card.warning {
+  border-left-color: var(--color-danger);
+  background-color: var(--color-danger-light);
+}
+
+.headline {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin-bottom: 4px;
+}
+
+.detail {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
+}
+
+.tip {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  margin-top: 6px;
+  font-style: italic;
+}

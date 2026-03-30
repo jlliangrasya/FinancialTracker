@@ -1,0 +1,289 @@
+.container {
+  padding: 16px;
+  padding-bottom: 80px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.headerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.logoIcon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-primary);
+  border-radius: var(--border-radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.logoText {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.monthLabel {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.netCashCard {
+  padding: 20px;
+  border-radius: var(--border-radius-lg);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.netCashLabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.netCashAmount {
+  font-size: 2rem;
+  font-weight: 800;
+}
+
+.rollover {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-top: 6px;
+}
+
+.burnAlert {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 16px;
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.burnAlert.safe {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.burnAlert.warning {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.burnAlert.critical {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.sectionTitle {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.seeAll {
+  font-size: 0.8125rem;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.bankScroll {
+  display: flex;
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+  scrollbar-width: none;
+}
+
+.bankScroll::-webkit-scrollbar {
+  display: none;
+}
+
+.budgetList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.budgetRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.budgetHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+}
+
+.budgetCategory {
+  font-weight: 500;
+}
+
+.budgetValues {
+  color: var(--color-text-secondary);
+  font-size: 0.75rem;
+}
+
+.billsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.billRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-sm);
+  border: 1px solid var(--color-border);
+}
+
+.billInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.billName {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.billDue {
+  font-size: 0.75rem;
+  color: var(--color-warning);
+}
+
+.billAmount {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.healthMini {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 16px;
+  cursor: pointer;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.healthScore {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.healthLabel {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.healthDesc {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.goalsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.goalRow {
+  cursor: pointer;
+}
+
+.goalName {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.goalValues {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+.fab {
+  position: fixed;
+  bottom: 80px;
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background-color: var(--color-primary);
+  color: white;
+  font-size: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.4);
+  z-index: 50;
+}
+
+.fab:hover {
+  background-color: #0D47A1;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 20px;
+  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+}
+
+.section {
+  margin-bottom: 20px;
+}
+
+.card {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-md);
+  padding: 16px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  border: 1px solid var(--color-border);
+}

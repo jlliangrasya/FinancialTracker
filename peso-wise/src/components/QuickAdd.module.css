@@ -1,0 +1,129 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0,0,0,0.3);
+  z-index: 300;
+}
+
+.modal {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 90vh;
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
+  z-index: 301;
+  animation: slideUp 0.3s ease-out;
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+.handle {
+  width: 40px;
+  height: 4px;
+  background-color: var(--color-border);
+  border-radius: 2px;
+  margin: 12px auto 8px;
+}
+
+.content {
+  padding: 0 20px 20px;
+}
+
+.tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-sm);
+  padding: 3px;
+}
+
+.tab {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: var(--border-radius-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: all 0.2s;
+}
+
+.tab.active {
+  background-color: var(--color-surface);
+  color: var(--color-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.amountInput {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  border: none;
+  border-bottom: 2px solid var(--color-primary);
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 20px;
+  background: transparent;
+  color: var(--color-text-primary);
+}
+
+.amountInput:focus {
+  outline: none;
+  border-bottom-color: var(--color-primary);
+}
+
+.amountInput::placeholder {
+  color: var(--color-text-hint);
+}
+
+.field {
+  margin-bottom: 14px;
+}
+
+.fieldLabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+}
+
+.row > * {
+  flex: 1;
+}
+
+.transferArrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--color-text-hint);
+  padding-top: 20px;
+  flex: 0 0 32px;
+}
+
+.balanceCheck {
+  font-size: 0.75rem;
+  color: var(--color-warning);
+  margin-top: 4px;
+}
+
+.saveBtn {
+  margin-top: 8px;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}

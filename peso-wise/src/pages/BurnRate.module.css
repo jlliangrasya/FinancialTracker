@@ -1,0 +1,133 @@
+.container {
+  padding: 16px;
+  padding-bottom: 80px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.bigStat {
+  text-align: center;
+  padding: 24px;
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  border: 1px solid var(--color-border);
+  margin-bottom: 16px;
+}
+
+.bigStatLabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.bigStatValue {
+  font-size: 2.5rem;
+  font-weight: 800;
+}
+
+.bigStatUnit {
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--color-text-secondary);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.statCard {
+  padding: 14px;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.statValue {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.alertBanner {
+  padding: 14px 16px;
+  border-radius: var(--border-radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.alertBanner.safe {
+  background-color: var(--color-success-light);
+  color: var(--color-success);
+}
+
+.alertBanner.warning {
+  background-color: var(--color-warning-light);
+  color: var(--color-warning);
+}
+
+.alertBanner.critical {
+  background-color: var(--color-danger-light);
+  color: var(--color-danger);
+}
+
+.velocityBar {
+  margin-bottom: 20px;
+}
+
+.velocityLabel {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 4px;
+}
+
+.velocityTrack {
+  height: 10px;
+  border-radius: 5px;
+  background-color: var(--color-background);
+  overflow: hidden;
+}
+
+.velocityFill {
+  height: 100%;
+  border-radius: 5px;
+  transition: width 0.3s;
+}
+
+.chartSection {
+  margin-top: 20px;
+}
+
+.chartTitle {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-text-secondary);
+}
+
+.emptyIcon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}

@@ -1,0 +1,182 @@
+.container {
+  min-height: 100vh;
+  padding: 24px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.stepLabel {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.skipBtn {
+  font-size: 0.875rem;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.progressBar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 32px;
+}
+
+.segment {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background-color: var(--color-border);
+}
+
+.segment.active {
+  background-color: var(--color-primary);
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 24px;
+}
+
+.bankList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.bankItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-surface);
+}
+
+.bankItem.selected {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary-light);
+}
+
+.checkbox {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--color-primary);
+}
+
+.bankName {
+  flex: 1;
+  font-weight: 500;
+}
+
+.balanceInput {
+  width: 120px;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.875rem;
+  text-align: right;
+}
+
+.addCustom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--border-radius-md);
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  color: var(--color-primary);
+  font-size: 0.875rem;
+}
+
+.categoryList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.categoryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.categoryLabel {
+  flex: 1;
+  font-size: 0.875rem;
+}
+
+.billItem {
+  padding: 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  margin-bottom: 12px;
+}
+
+.billForm {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.billRow {
+  display: flex;
+  gap: 10px;
+}
+
+.billRow > * {
+  flex: 1;
+}
+
+.removeBill {
+  font-size: 0.75rem;
+  color: var(--color-danger);
+  background: none;
+  border: none;
+  cursor: pointer;
+  align-self: flex-end;
+  margin-top: 4px;
+}
+
+.footer {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.footer > button {
+  flex: 1;
+}
+
+.addBankInput {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.addBankInput input {
+  flex: 1;
+}

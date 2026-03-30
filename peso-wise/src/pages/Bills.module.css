@@ -1,0 +1,152 @@
+.container {
+  padding: 16px;
+  padding-bottom: 80px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.summary {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.summaryCard {
+  flex: 1;
+  padding: 10px;
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+}
+
+.summaryLabel {
+  font-size: 0.6875rem;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+}
+
+.summaryValue {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  margin-top: 2px;
+}
+
+.billList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.billItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  min-width: 56px;
+  text-align: center;
+}
+
+.badge.overdue { background-color: var(--color-danger-light); color: var(--color-danger); }
+.badge.dueSoon { background-color: var(--color-warning-light); color: var(--color-warning); }
+.badge.upcoming { background-color: var(--color-background); color: var(--color-text-secondary); }
+.badge.paid { background-color: var(--color-success-light); color: var(--color-success); }
+
+.billInfo { flex: 1; min-width: 0; }
+.billName { font-size: 0.875rem; font-weight: 600; }
+.billMeta { font-size: 0.75rem; color: var(--color-text-secondary); }
+
+.billRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.billAmount {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.paidToggle {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--color-success);
+}
+
+.addForm {
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  margin-bottom: 16px;
+}
+
+.addForm h3 {
+  font-size: 0.9375rem;
+  margin-bottom: 12px;
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.formRow {
+  display: flex;
+  gap: 10px;
+}
+
+.formRow > * {
+  flex: 1;
+}
+
+.addBillBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px;
+  border: 1px dashed var(--color-primary);
+  border-radius: var(--border-radius-sm);
+  background: none;
+  cursor: pointer;
+  width: 100%;
+  color: var(--color-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+}
+
+.empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-text-secondary);
+}
+
+.deleteBtn {
+  font-size: 0.6875rem;
+  color: var(--color-danger);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+}

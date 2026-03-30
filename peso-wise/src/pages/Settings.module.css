@@ -1,0 +1,27 @@
+.container { padding: 16px; padding-bottom: 80px; max-width: 480px; margin: 0 auto; }
+.title { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; }
+.section { margin-bottom: 24px; }
+.sectionTitle { font-size: 0.9375rem; font-weight: 700; margin-bottom: 12px; color: var(--color-text-primary); padding-bottom: 6px; border-bottom: 1px solid var(--color-border); }
+.row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--color-background); }
+.rowLabel { font-size: 0.875rem; color: var(--color-text-secondary); }
+.rowValue { font-size: 0.875rem; font-weight: 500; }
+.bankRow { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--color-background); }
+.bankColor { width: 4px; height: 24px; border-radius: 2px; }
+.bankName { flex: 1; font-size: 0.875rem; font-weight: 500; }
+.bankBalance input { width: 100px; padding: 6px 8px; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); font-size: 0.8125rem; text-align: right; }
+.addRow { display: flex; gap: 8px; margin-top: 8px; }
+.addRow input { flex: 1; }
+.addRow button { white-space: nowrap; }
+.categoryList { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.categoryTag { padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; background-color: var(--color-background); color: var(--color-text-secondary); }
+.customCatRow { display: flex; gap: 8px; margin-top: 8px; }
+.customCatRow input { flex: 1; }
+.alertRow { display: flex; align-items: center; gap: 12px; padding: 10px 0; }
+.alertRow label { flex: 1; font-size: 0.875rem; }
+.alertRow input { width: 100px; padding: 6px 8px; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); text-align: right; }
+.exportBtns { display: flex; gap: 10px; flex-wrap: wrap; }
+.exportBtn { padding: 10px 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-surface); font-size: 0.8125rem; cursor: pointer; }
+.exportBtn:hover { background-color: var(--color-background); }
+.dangerZone { border: 1px solid var(--color-danger); border-radius: var(--border-radius-md); padding: 16px; }
+.dangerTitle { font-size: 0.875rem; font-weight: 600; color: var(--color-danger); margin-bottom: 8px; }
+.dangerDesc { font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 12px; }

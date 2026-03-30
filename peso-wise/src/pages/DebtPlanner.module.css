@@ -1,0 +1,28 @@
+.container { padding: 16px; padding-bottom: 80px; max-width: 480px; margin: 0 auto; }
+.title { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
+.summary { display: flex; gap: 8px; margin-bottom: 16px; }
+.summaryCard { flex: 1; padding: 10px; border-radius: var(--border-radius-sm); text-align: center; background-color: var(--color-danger-light); }
+.summaryLabel { font-size: 0.6875rem; color: var(--color-text-secondary); text-transform: uppercase; }
+.summaryValue { font-size: 0.9375rem; font-weight: 700; margin-top: 2px; }
+.strategyToggle { display: flex; gap: 0; margin-bottom: 12px; background-color: var(--color-background); border-radius: var(--border-radius-sm); padding: 3px; }
+.strategyBtn { flex: 1; padding: 10px; text-align: center; font-size: 0.8125rem; font-weight: 500; border-radius: var(--border-radius-sm); color: var(--color-text-secondary); cursor: pointer; background: none; border: none; }
+.strategyBtn.active { background-color: var(--color-surface); color: var(--color-primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.comparison { font-size: 0.8125rem; text-align: center; padding: 8px; margin-bottom: 16px; color: var(--color-success); background-color: var(--color-success-light); border-radius: var(--border-radius-sm); }
+.debtList { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.debtCard { padding: 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border); background: var(--color-surface); }
+.debtHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.debtName { font-size: 0.9375rem; font-weight: 600; }
+.priorityBadge { font-size: 0.6875rem; padding: 2px 8px; border-radius: 10px; background-color: var(--color-warning-light); color: var(--color-warning); font-weight: 600; }
+.debtMeta { display: flex; gap: 16px; font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 6px; }
+.debtBalance { font-size: 1.125rem; font-weight: 700; color: var(--color-danger); margin-bottom: 6px; }
+.extraCalc { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); background: var(--color-surface); margin-bottom: 16px; }
+.extraCalc h3 { font-size: 0.9375rem; margin-bottom: 10px; }
+.extraResult { font-size: 0.8125rem; color: var(--color-success); margin-top: 8px; }
+.addForm { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); background: var(--color-surface); margin-bottom: 16px; }
+.addForm h3 { font-size: 0.9375rem; margin-bottom: 12px; }
+.formGrid { display: flex; flex-direction: column; gap: 10px; }
+.formRow { display: flex; gap: 10px; }
+.formRow > * { flex: 1; }
+.addBtn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1px dashed var(--color-primary); border-radius: var(--border-radius-sm); background: none; cursor: pointer; width: 100%; color: var(--color-primary); font-size: 0.875rem; margin-bottom: 16px; }
+.deleteBtn { font-size: 0.6875rem; color: var(--color-danger); background: none; border: none; cursor: pointer; }
+.empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }

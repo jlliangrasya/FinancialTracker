@@ -1,0 +1,44 @@
+.container {
+  width: 100%;
+}
+
+.label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.labelLeft {
+  color: var(--color-text-secondary);
+}
+
+.labelRight {
+  font-weight: 600;
+}
+
+.track {
+  width: 100%;
+  height: 8px;
+  background-color: var(--color-background);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.fill.ok {
+  background-color: var(--color-success);
+}
+
+.fill.warning {
+  background-color: var(--color-warning);
+}
+
+.fill.over {
+  background-color: var(--color-danger);
+}

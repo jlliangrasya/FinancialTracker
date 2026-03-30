@@ -1,0 +1,5 @@
+.container { padding: 16px; padding-bottom: 80px; max-width: 480px; margin: 0 auto; }
+.title { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
+.insightList { display: flex; flex-direction: column; gap: 12px; }
+.empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }
+.emptyIcon { font-size: 3rem; margin-bottom: 12px; }

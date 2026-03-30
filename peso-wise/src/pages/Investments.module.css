@@ -1,0 +1,30 @@
+.container { padding: 16px; padding-bottom: 80px; max-width: 480px; margin: 0 auto; }
+.title { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
+.summary { display: flex; gap: 8px; margin-bottom: 16px; }
+.summaryCard { flex: 1; padding: 10px; border-radius: var(--border-radius-sm); text-align: center; }
+.summaryLabel { font-size: 0.6875rem; color: var(--color-text-secondary); text-transform: uppercase; }
+.summaryValue { font-size: 0.9375rem; font-weight: 700; margin-top: 2px; }
+.investList { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.investCard { padding: 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border); background: var(--color-surface); }
+.investHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.investName { font-size: 0.9375rem; font-weight: 600; }
+.typeBadge { font-size: 0.6875rem; padding: 2px 8px; border-radius: 10px; background-color: var(--color-primary-light); color: var(--color-primary); }
+.investMeta { font-size: 0.75rem; color: var(--color-text-secondary); margin-bottom: 6px; }
+.investValues { display: flex; gap: 16px; font-size: 0.8125rem; }
+.investValues span { display: flex; flex-direction: column; }
+.investValues .label { font-size: 0.6875rem; color: var(--color-text-secondary); }
+.investValues .value { font-weight: 600; }
+.gainLoss { font-weight: 700; font-size: 0.875rem; margin-top: 6px; }
+.gainLoss.gain { color: var(--color-success); }
+.gainLoss.loss { color: var(--color-danger); }
+.editRow { display: flex; gap: 8px; margin-top: 8px; }
+.editRow input { flex: 1; }
+.editRow button { white-space: nowrap; padding: 8px 12px; }
+.addForm { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); background: var(--color-surface); margin-bottom: 16px; }
+.addForm h3 { font-size: 0.9375rem; margin-bottom: 12px; }
+.formGrid { display: flex; flex-direction: column; gap: 10px; }
+.formRow { display: flex; gap: 10px; }
+.formRow > * { flex: 1; }
+.addBtn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1px dashed var(--color-primary); border-radius: var(--border-radius-sm); background: none; cursor: pointer; width: 100%; color: var(--color-primary); font-size: 0.875rem; margin-bottom: 16px; }
+.deleteBtn { font-size: 0.6875rem; color: var(--color-danger); background: none; border: none; cursor: pointer; }
+.empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }

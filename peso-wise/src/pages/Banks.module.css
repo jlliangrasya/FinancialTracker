@@ -1,0 +1,155 @@
+.container {
+  padding: 16px;
+  padding-bottom: 80px;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.bankCards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bankCard {
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.bankHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.bankColor {
+  width: 4px;
+  height: 32px;
+  border-radius: 2px;
+}
+
+.bankName {
+  font-size: 1rem;
+  font-weight: 600;
+  flex: 1;
+}
+
+.bankBalance {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.bankStatus {
+  font-size: 0.8125rem;
+}
+
+.totalCard {
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  background-color: var(--color-primary-light);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.totalLabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.totalAmount {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.sectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+  margin-top: 8px;
+}
+
+.transferForm {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+  margin-bottom: 24px;
+}
+
+.transferRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.transferRow > * {
+  flex: 1;
+}
+
+.transferArrow {
+  flex: 0 0 32px;
+  text-align: center;
+  font-size: 1.25rem;
+  color: var(--color-text-hint);
+}
+
+.warningText {
+  font-size: 0.75rem;
+  color: var(--color-warning);
+}
+
+.transferList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.transferItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-sm);
+  background-color: var(--color-surface);
+}
+
+.transferInfo {
+  font-size: 0.875rem;
+}
+
+.transferRoute {
+  font-weight: 500;
+}
+
+.transferDate {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.transferAmount {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

@@ -22,6 +22,9 @@
 .exportBtns { display: flex; gap: 10px; flex-wrap: wrap; }
 .exportBtn { padding: 10px 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-surface); font-size: 0.8125rem; cursor: pointer; }
 .exportBtn:hover { background-color: var(--color-background); }
+.installRow { display: flex; flex-direction: column; gap: 12px; }
+.installDesc { font-size: 0.8125rem; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
+.installedBadge { font-size: 0.875rem; color: var(--color-success); font-weight: 500; }
 .dangerZone { border: 1px solid var(--color-danger); border-radius: var(--border-radius-md); padding: 16px; }
 .dangerTitle { font-size: 0.875rem; font-weight: 600; color: var(--color-danger); margin-bottom: 8px; }
 .dangerDesc { font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 12px; }

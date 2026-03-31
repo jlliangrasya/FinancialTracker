@@ -20,10 +20,24 @@ export default function Settings() {
   const [newExpCat, setNewExpCat] = useState('')
   const [newIncCat, setNewIncCat] = useState('')
   const [lowAlert, setLowAlert] = useState('')
+  const [installPrompt, setInstallPrompt] = useState(null)
+  const [appInstalled, setAppInstalled] = useState(false)
   const { currentUser, logout } = useAuth()
   const { resetPinVerified } = usePin()
   const { showToast } = useToast()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const handler = (e) => { e.preventDefault(); setInstallPrompt(e) }
+    const installed = () => setAppInstalled(true)
+    window.addEventListener('beforeinstallprompt', handler)
+    window.addEventListener('appinstalled', installed)
+    if (window.matchMedia('(display-mode: standalone)').matches) setAppInstalled(true)
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handler)
+      window.removeEventListener('appinstalled', installed)
+    }
+  }, [])
 
   useEffect(() => { loadData() }, [currentUser])
   async function loadData() {
@@ -98,6 +112,14 @@ export default function Settings() {
     } catch (err) { showToast('Export failed', 'error') }
   }
 
+  async function handleInstall() {
+    if (!installPrompt) return
+    installPrompt.prompt()
+    const { outcome } = await installPrompt.userChoice
+    if (outcome === 'accepted') setAppInstalled(true)
+    setInstallPrompt(null)
+  }
+
   function handleChangePin() {
     if (currentUser) clearPin(currentUser.uid)
     navigate('/pin-setup')
@@ -170,6 +192,24 @@ export default function Settings() {
           <button className={styles.exportBtn} onClick={handleExportCSV}>Export as CSV</button>
           <button className={styles.exportBtn} onClick={handleExportJSON}>Export as JSON</button>
         </div>
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Install App</div>
+        {appInstalled ? (
+          <div className={styles.installRow}>
+            <span className={styles.installedBadge}>Peso Wise is installed on your device</span>
+          </div>
+        ) : installPrompt ? (
+          <div className={styles.installRow}>
+            <p className={styles.installDesc}>Add Peso Wise to your home screen for quick access and offline use.</p>
+            <button className="btn-primary" onClick={handleInstall}>Add to Home Screen</button>
+          </div>
+        ) : (
+          <div className={styles.installRow}>
+            <p className={styles.installDesc}>To install: open this page in your mobile browser, tap the browser menu, and select "Add to Home Screen".</p>
+          </div>
+        )}
       </div>
 
       <div className={styles.section}>

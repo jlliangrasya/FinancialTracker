@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
 import styles from './BottomNav.module.css'
 
 const DRAWER_ITEMS = [
@@ -13,10 +14,15 @@ const DRAWER_ITEMS = [
   { label: 'Settings', icon: '\u2699\uFE0F', path: '/settings', bg: '#ECEFF1' },
 ]
 
+const ADMIN_ITEM = { label: 'Admin', icon: '\u{1F6E1}\uFE0F', path: '/admin', bg: '#EDE7F6' }
+
 export default function BottomNav({ onAddClick }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  const { isAdmin } = useAuth()
+
+  const drawerItems = isAdmin ? [...DRAWER_ITEMS, ADMIN_ITEM] : DRAWER_ITEMS
 
   function handleDrawerNav(path) {
     setDrawerOpen(false)
@@ -65,7 +71,7 @@ export default function BottomNav({ onAddClick }) {
           <div className={styles.drawer}>
             <div className={styles.drawerHandle} />
             <div className={styles.drawerGrid}>
-              {DRAWER_ITEMS.map(item => (
+              {drawerItems.map(item => (
                 <button
                   key={item.path}
                   className={styles.drawerItem}

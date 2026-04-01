@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { getTransactions } from '../firebase/transactions'
-import { getActiveBudgetPeriod, addBudgetPeriod } from '../firebase/budgetPeriods'
+import { getActiveBudgetPeriod } from '../firebase/budgetPeriods'
 import { getBills, markBillPaid, markBillUnpaid } from '../firebase/bills'
+import { getBudgets } from '../firebase/budgets'
 import { useToast } from '../components/Toast'
 import ProgressBar from '../components/ProgressBar'
 import { formatCurrency } from '../utils/formatCurrency'
@@ -13,12 +14,10 @@ export default function BudgetTracker() {
   const [transactions, setTransactions] = useState([])
   const [period, setPeriod] = useState(null)
   const [bills, setBills] = useState([])
+  const [budgets, setBudgets] = useState([])
   const [loading, setLoading] = useState(true)
-  const [mode, setMode] = useState('combined')
+  const [view, setView] = useState('type') // 'type' | 'category'
   const [activeTab, setActiveTab] = useState('expenses')
-  const [periodType, setPeriodType] = useState('monthly')
-  const [customStart, setCustomStart] = useState('')
-  const [customEnd, setCustomEnd] = useState('')
   const { currentUser } = useAuth()
   const { showToast } = useToast()
   const currentMonthStr = getCurrentMonthString()
@@ -29,15 +28,16 @@ export default function BudgetTracker() {
     if (!currentUser) return
     setLoading(true)
     try {
-      const [txns, ap, bl] = await Promise.all([
+      const [txns, ap, bl, bg] = await Promise.all([
         getTransactions(currentUser.uid),
         getActiveBudgetPeriod(currentUser.uid),
         getBills(currentUser.uid),
+        getBudgets(currentUser.uid),
       ])
       setTransactions(txns)
       setPeriod(ap)
       setBills(bl)
-      if (ap?.mode) setMode(ap.mode)
+      setBudgets(bg || [])
     } catch (err) { console.error(err) }
     setLoading(false)
   }
@@ -58,10 +58,6 @@ export default function BudgetTracker() {
     })
   }, [transactions, periodStart, periodEnd])
 
-  const totalSpent = periodTxns.reduce((s, t) => s + t.amount, 0)
-  const totalBudget = period ? (mode === 'combined' ? (period.totalBudget || 0) : ((period.expensesBudget || 0) + (period.billsBudget || 0))) : 0
-  const remaining = totalBudget - totalSpent
-
   const periodBills = useMemo(() => {
     const today = new Date()
     return bills.filter(b => b.isActive).map(b => {
@@ -78,8 +74,46 @@ export default function BudgetTracker() {
     })
   }, [bills, currentMonthStr])
 
+  const totalExpensesSpent = periodTxns.reduce((s, t) => s + t.amount, 0)
   const billsPaid = periodBills.filter(b => b.isPaid).reduce((s, b) => s + b.amount, 0)
   const billsUnpaid = periodBills.filter(b => !b.isPaid).reduce((s, b) => s + b.amount, 0)
+  const billsTotal = billsPaid + billsUnpaid
+
+  // Per-type values
+  const expensesBudget = period?.expensesBudget || 0
+  const billsBudget = period?.billsBudget || 0
+  const expensesRemaining = expensesBudget - totalExpensesSpent
+  const billsRemaining = billsBudget - billsTotal
+
+  // Hero values depend on active tab in "By Type" view
+  const typeHeroAmount = activeTab === 'expenses' ? expensesBudget : billsBudget
+  const typeHeroSpent = activeTab === 'expenses' ? totalExpensesSpent : billsTotal
+  const typeHeroRemaining = activeTab === 'expenses' ? expensesRemaining : billsRemaining
+  const typePercentUsed = typeHeroAmount > 0 ? typeHeroSpent / typeHeroAmount : 0
+  const typeStatus = typePercentUsed >= 1 ? 'Over budget!' : typePercentUsed >= 0.8 ? 'Running low' : 'On track'
+  const typeStatusColor = typePercentUsed >= 1 ? 'var(--color-danger)' : typePercentUsed >= 0.8 ? 'var(--color-warning)' : 'var(--color-success)'
+
+  // Category spending map (all transactions, not just period)
+  const categorySpending = useMemo(() => {
+    const map = {}
+    periodTxns.forEach(t => {
+      map[t.category] = (map[t.category] || 0) + t.amount
+    })
+    return map
+  }, [periodTxns])
+
+  // All categories that have either a budget or spending this period
+  const categoryRows = useMemo(() => {
+    const cats = new Set([
+      ...budgets.map(b => b.category),
+      ...Object.keys(categorySpending),
+    ])
+    return Array.from(cats).map(cat => {
+      const budget = budgets.find(b => b.category === cat)
+      const spent = categorySpending[cat] || 0
+      return { cat, limit: budget?.monthlyLimit || 0, spent, id: budget?.id }
+    }).sort((a, b) => b.spent - a.spent)
+  }, [budgets, categorySpending])
 
   async function handleTogglePaid(bill) {
     try {
@@ -89,14 +123,10 @@ export default function BudgetTracker() {
         await markBillPaid(bill.id, currentMonthStr)
       }
       await loadData()
-    } catch (err) {
+    } catch {
       showToast('Failed to update bill', 'error')
     }
   }
-
-  const percentUsed = totalBudget > 0 ? totalSpent / totalBudget : 0
-  const budgetStatus = percentUsed >= 1 ? 'Over budget!' : percentUsed >= 0.8 ? 'Running low' : 'On track'
-  const statusColor = percentUsed >= 1 ? 'var(--color-danger)' : percentUsed >= 0.8 ? 'var(--color-warning)' : 'var(--color-success)'
 
   if (loading) {
     return (
@@ -107,135 +137,214 @@ export default function BudgetTracker() {
     )
   }
 
-  if (!period) {
-    return (
-      <div className={styles.container}>
-        <h1 className={styles.title}>Budget Tracker</h1>
-        <div className={styles.empty}>
-          <p>No active budget period.</p>
-          <p style={{ marginTop: 8 }}>Add income via the + button and use the Paycheck Allocator to set up your budget.</p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Budget Tracker</h1>
 
-      <div className={styles.periodTabs}>
-        {['weekly', 'biweekly', 'monthly', 'custom'].map(p => (
-          <button key={p} className={`${styles.periodPill} ${periodType === p ? styles.active : ''}`} onClick={() => setPeriodType(p)}>
-            {p.charAt(0).toUpperCase() + p.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {periodStart && periodEnd && (
-        <div className={styles.dateRange}>
-          {formatDate(periodStart)} – {formatDate(periodEnd)} · {daysLeft} days left
-        </div>
-      )}
-
+      {/* View toggle */}
       <div className={styles.modeToggle}>
-        <button className={`${styles.modeTab} ${mode === 'combined' ? styles.active : ''}`} onClick={() => setMode('combined')}>
-          Combined
+        <button className={`${styles.modeTab} ${view === 'type' ? styles.active : ''}`} onClick={() => setView('type')}>
+          By Type
         </button>
-        <button className={`${styles.modeTab} ${mode === 'separate' ? styles.active : ''}`} onClick={() => setMode('separate')}>
-          Separate
-        </button>
-      </div>
-
-      <div className={styles.hero}>
-        <div className={styles.heroLabel}>
-          {mode === 'combined' ? 'Total allocated budget' : activeTab === 'expenses' ? 'Expenses budget' : 'Bills budget'}
-        </div>
-        <div className={styles.heroAmount}>{formatCurrency(totalBudget)}</div>
-        <ProgressBar value={totalSpent} max={totalBudget} showLabel={false} />
-        <div className={styles.heroSub}>
-          {formatCurrency(totalSpent)} spent — {(percentUsed * 100).toFixed(0)}% used
-        </div>
-      </div>
-
-      <div className={styles.tabNav}>
-        <button className={`${styles.tabBtn} ${activeTab === 'expenses' ? styles.active : ''}`} onClick={() => setActiveTab('expenses')}>
-          Expenses
-        </button>
-        <button className={`${styles.tabBtn} ${activeTab === 'bills' ? styles.active : ''}`} onClick={() => setActiveTab('bills')}>
-          Bills
+        <button className={`${styles.modeTab} ${view === 'category' ? styles.active : ''}`} onClick={() => setView('category')}>
+          By Category
         </button>
       </div>
 
-      {activeTab === 'expenses' && (
+      {/* ── BY TYPE VIEW ── */}
+      {view === 'type' && (
         <>
-          {periodTxns.length > 0 ? (
-            <div className={styles.txnList}>
-              {periodTxns.map(t => (
-                <div key={t.id} className={styles.txnRow}>
-                  <div className={styles.dot} style={{ backgroundColor: 'var(--color-primary)' }} />
-                  <div className={styles.txnInfo}>
-                    <div className={styles.txnDesc}>{t.description || t.category}</div>
-                    <div className={styles.txnMeta}>{t.category} · {formatDate(t.date)} · {t.bank}</div>
-                  </div>
-                  <div className={styles.txnAmount}>-{formatCurrency(t.amount)}</div>
-                </div>
-              ))}
+          {periodStart && periodEnd && (
+            <div className={styles.dateRange}>
+              {formatDate(periodStart)} – {formatDate(periodEnd)} · {daysLeft} days left
+            </div>
+          )}
+
+          <div className={styles.tabNav}>
+            <button className={`${styles.tabBtn} ${activeTab === 'expenses' ? styles.active : ''}`} onClick={() => setActiveTab('expenses')}>
+              Daily Expenses
+            </button>
+            <button className={`${styles.tabBtn} ${activeTab === 'bills' ? styles.active : ''}`} onClick={() => setActiveTab('bills')}>
+              Bills
+            </button>
+          </div>
+
+          {!period ? (
+            <div className={styles.empty}>
+              <p>No active budget period.</p>
+              <p style={{ marginTop: 8 }}>Tap the <strong>+</strong> button to log income and set up your budget via the Paycheck Allocator.</p>
             </div>
           ) : (
-            <div className={styles.empty}>No expenses logged this period yet.</div>
+            <>
+              <div className={styles.hero}>
+                <div className={styles.heroLabel}>
+                  {activeTab === 'expenses' ? 'Daily expenses budget' : 'Bills budget'}
+                </div>
+                {typeHeroAmount > 0 ? (
+                  <>
+                    <div className={styles.heroAmount}>{formatCurrency(typeHeroAmount)}</div>
+                    <ProgressBar value={typeHeroSpent} max={typeHeroAmount} showLabel={false} />
+                    <div className={styles.heroSub}>
+                      {formatCurrency(typeHeroSpent)} {activeTab === 'expenses' ? 'spent' : 'total'} — {(typePercentUsed * 100).toFixed(0)}% used
+                    </div>
+                  </>
+                ) : (
+                  <div className={styles.heroSub} style={{ marginTop: 8 }}>No budget set for this type</div>
+                )}
+              </div>
+
+              {activeTab === 'expenses' && (
+                <>
+                  {periodTxns.length > 0 ? (
+                    <div className={styles.txnList}>
+                      {periodTxns.map(t => (
+                        <div key={t.id} className={styles.txnRow}>
+                          <div className={styles.dot} style={{ backgroundColor: 'var(--color-primary)' }} />
+                          <div className={styles.txnInfo}>
+                            <div className={styles.txnDesc}>{t.description || t.category}</div>
+                            <div className={styles.txnMeta}>{t.category} · {formatDate(t.date)} · {t.bank}</div>
+                          </div>
+                          <div className={styles.txnAmount}>-{formatCurrency(t.amount)}</div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={styles.empty}>No expenses logged this period yet.</div>
+                  )}
+                </>
+              )}
+
+              {activeTab === 'bills' && (
+                <>
+                  {periodBills.length > 0 ? (
+                    <div className={styles.txnList}>
+                      {periodBills.map(b => (
+                        <div key={b.id} className={styles.billRow}>
+                          <span className={`${styles.badge} ${styles[b.status]}`}>{b.status === 'dueSoon' ? 'Due Soon' : b.status}</span>
+                          <div className={styles.billInfo}>
+                            <div className={styles.billName}>{b.name}</div>
+                            <div className={styles.billDue}>Due day {b.dueDay} · {b.bank}</div>
+                          </div>
+                          <div className={styles.billAmount}>{formatCurrency(b.amount)}</div>
+                          <input type="checkbox" className={styles.paidToggle} checked={b.isPaid} onChange={() => handleTogglePaid(b)} />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={styles.empty}>No bills added yet. Add bills in the Bills section.</div>
+                  )}
+                </>
+              )}
+
+              <div style={{ height: 120 }} />
+
+              <div className={styles.footer}>
+                <div className={styles.footerInner}>
+                  {activeTab === 'expenses' ? (
+                    <>
+                      <div className={styles.footerRow}>
+                        <span className={styles.footerLabel}>Expenses budget</span>
+                        <span className={styles.footerValue}>{formatCurrency(expensesBudget)}</span>
+                      </div>
+                      <div className={styles.footerRow}>
+                        <span className={styles.footerLabel}>Spent</span>
+                        <span className={styles.footerValue} style={{ color: 'var(--color-danger)' }}>-{formatCurrency(totalExpensesSpent)}</span>
+                      </div>
+                      <div className={styles.footerDivider} />
+                      <div className={styles.footerRemaining}>
+                        <span>Remaining</span>
+                        <span style={{ color: expensesRemaining < 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>
+                          {formatCurrency(expensesRemaining)}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className={styles.footerRow}>
+                        <span className={styles.footerLabel}>Bills budget</span>
+                        <span className={styles.footerValue}>{formatCurrency(billsBudget)}</span>
+                      </div>
+                      <div className={styles.footerRow}>
+                        <span className={styles.footerLabel}>Paid</span>
+                        <span className={styles.footerValue} style={{ color: 'var(--color-success)' }}>-{formatCurrency(billsPaid)}</span>
+                      </div>
+                      <div className={styles.footerRow}>
+                        <span className={styles.footerLabel}>Unpaid</span>
+                        <span className={styles.footerValue} style={{ color: 'var(--color-warning)' }}>-{formatCurrency(billsUnpaid)}</span>
+                      </div>
+                      <div className={styles.footerDivider} />
+                      <div className={styles.footerRemaining}>
+                        <span>Remaining</span>
+                        <span style={{ color: billsRemaining < 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>
+                          {formatCurrency(billsRemaining)}
+                        </span>
+                      </div>
+                    </>
+                  )}
+                  {typeHeroAmount > 0 && (
+                    <div className={styles.footerStatus}>
+                      <span className={styles.statusPill} style={{ backgroundColor: typeStatusColor + '20', color: typeStatusColor }}>{typeStatus}</span>
+                      <span>{periodEnd ? `Resets ${formatDate(periodEnd)}` : ''}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
           )}
         </>
       )}
 
-      {activeTab === 'bills' && (
+      {/* ── BY CATEGORY VIEW ── */}
+      {view === 'category' && (
         <>
-          {periodBills.length > 0 ? (
-            <div className={styles.txnList}>
-              {periodBills.map(b => (
-                <div key={b.id} className={styles.billRow}>
-                  <span className={`${styles.badge} ${styles[b.status]}`}>{b.status === 'dueSoon' ? 'Due Soon' : b.status}</span>
-                  <div className={styles.billInfo}>
-                    <div className={styles.billName}>{b.name}</div>
-                    <div className={styles.billDue}>Due day {b.dueDay} · {b.bank}</div>
-                  </div>
-                  <div className={styles.billAmount}>{formatCurrency(b.amount)}</div>
-                  <input type="checkbox" className={styles.paidToggle} checked={b.isPaid} onChange={() => handleTogglePaid(b)} />
-                </div>
-              ))}
+          {categoryRows.length === 0 ? (
+            <div className={styles.empty}>
+              <p>No spending or category budgets found.</p>
+              <p style={{ marginTop: 8 }}>Log expenses via the <strong>+</strong> button, or set budget limits per category in <strong>Settings → Monthly Budgets</strong>.</p>
             </div>
           ) : (
-            <div className={styles.empty}>No bills due this period.</div>
+            <>
+              {budgets.length === 0 && (
+                <div className={styles.catHint}>
+                  No limits set — showing spending only. Go to <strong>Settings → Monthly Budgets</strong> to set limits per category.
+                </div>
+              )}
+              <div className={styles.catList}>
+                {categoryRows.map(({ cat, limit, spent }) => {
+                  const pct = limit > 0 ? spent / limit : 0
+                  const color = pct >= 1 ? 'var(--color-danger)' : pct >= 0.8 ? 'var(--color-warning)' : 'var(--color-success)'
+                  return (
+                    <div key={cat} className={styles.catRow}>
+                      <div className={styles.catHeader}>
+                        <span className={styles.catName}>{cat}</span>
+                        <span className={styles.catAmounts}>
+                          <span style={{ color: 'var(--color-danger)' }}>{formatCurrency(spent)}</span>
+                          {limit > 0 && <span className={styles.catLimit}> / {formatCurrency(limit)}</span>}
+                        </span>
+                      </div>
+                      {limit > 0 ? (
+                        <>
+                          <ProgressBar value={spent} max={limit} showLabel={false} />
+                          <div className={styles.catSub}>
+                            {pct >= 1
+                              ? <span style={{ color: 'var(--color-danger)' }}>Over by {formatCurrency(spent - limit)}</span>
+                              : <span style={{ color }}>
+                                  {formatCurrency(limit - spent)} left · {(pct * 100).toFixed(0)}% used
+                                </span>
+                            }
+                          </div>
+                        </>
+                      ) : (
+                        <div className={styles.catSub} style={{ color: 'var(--color-text-secondary)' }}>No limit set</div>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </>
           )}
         </>
       )}
-
-      <div style={{ height: 140 }} />
-
-      <div className={styles.footer}>
-        <div className={styles.footerInner}>
-          <div className={styles.footerRow}>
-            <span className={styles.footerLabel}>Total expenses</span>
-            <span className={styles.footerValue} style={{ color: 'var(--color-danger)' }}>-{formatCurrency(totalSpent)}</span>
-          </div>
-          <div className={styles.footerRow}>
-            <span className={styles.footerLabel}>Bills paid</span>
-            <span className={styles.footerValue}>-{formatCurrency(billsPaid)}</span>
-          </div>
-          <div className={styles.footerRow}>
-            <span className={styles.footerLabel}>Bills unpaid</span>
-            <span className={styles.footerValue} style={{ color: 'var(--color-warning)' }}>-{formatCurrency(billsUnpaid)}</span>
-          </div>
-          <div className={styles.footerDivider} />
-          <div className={styles.footerRemaining}>
-            <span>Remaining</span>
-            <span style={{ color: statusColor }}>{formatCurrency(remaining)}</span>
-          </div>
-          <div className={styles.footerStatus}>
-            <span className={styles.statusPill} style={{ backgroundColor: statusColor + '20', color: statusColor }}>{budgetStatus}</span>
-            <span>Resets {periodEnd ? formatDate(periodEnd) : ''}</span>
-          </div>
-        </div>
-      </div>
     </div>
   )
 }

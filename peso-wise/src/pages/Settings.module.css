@@ -22,6 +22,12 @@
 .exportBtns { display: flex; gap: 10px; flex-wrap: wrap; }
 .exportBtn { padding: 10px 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); background: var(--color-surface); font-size: 0.8125rem; cursor: pointer; }
 .exportBtn:hover { background-color: var(--color-background); }
+.inlineEdit { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.budgetRow { display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--color-background); }
+.budgetCat { flex: 1; font-size: 0.875rem; }
+.budgetInput { width: 90px; padding: 6px 8px; border: 1px solid var(--color-border); border-radius: var(--border-radius-sm); font-size: 0.8125rem; text-align: right; }
+.deleteBudgetBtn { background: none; border: none; color: var(--color-text-secondary); cursor: pointer; font-size: 0.875rem; padding: 4px 6px; }
+.deleteBudgetBtn:hover { color: var(--color-danger); }
 .installRow { display: flex; flex-direction: column; gap: 12px; }
 .installDesc { font-size: 0.8125rem; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
 .installedBadge { font-size: 0.875rem; color: var(--color-success); font-weight: 500; }

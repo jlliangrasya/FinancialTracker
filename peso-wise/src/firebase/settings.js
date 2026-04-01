@@ -1,5 +1,5 @@
 import { db } from './config'
-import { doc, getDoc, setDoc, updateDoc, Timestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, Timestamp } from 'firebase/firestore'
 
 const COLLECTION = 'settings'
 
@@ -12,9 +12,10 @@ export async function getUserSettings(userId) {
   return null
 }
 
-export async function createUserSettings(userId, data = {}) {
+export async function createUserSettings(userId, email = '', data = {}) {
   const defaults = {
     userId,
+    email,
     banks: [],
     payDay: 15,
     currency: 'PHP',
@@ -23,6 +24,13 @@ export async function createUserSettings(userId, data = {}) {
     customIncomeCategories: [],
     onboardingCompleted: false,
     pinSetupCompleted: false,
+    // Account access control
+    role: 'user',
+    status: 'pending',
+    paymentReference: '',
+    approvedAt: null,
+    rejectedAt: null,
+    rejectedReason: '',
     createdAt: Timestamp.now(),
     updatedAt: Timestamp.now(),
   }
@@ -37,4 +45,36 @@ export async function updateUserSettings(userId, data) {
     ...data,
     updatedAt: Timestamp.now(),
   })
+}
+
+export async function updatePaymentRef(userId, paymentReference) {
+  const docRef = doc(db, COLLECTION, userId)
+  await updateDoc(docRef, { paymentReference, updatedAt: Timestamp.now() })
+}
+
+export async function approveUser(userId) {
+  const docRef = doc(db, COLLECTION, userId)
+  await updateDoc(docRef, {
+    status: 'approved',
+    approvedAt: Timestamp.now(),
+    rejectedAt: null,
+    rejectedReason: '',
+    updatedAt: Timestamp.now(),
+  })
+}
+
+export async function rejectUser(userId, reason = '') {
+  const docRef = doc(db, COLLECTION, userId)
+  await updateDoc(docRef, {
+    status: 'rejected',
+    rejectedAt: Timestamp.now(),
+    rejectedReason: reason,
+    approvedAt: null,
+    updatedAt: Timestamp.now(),
+  })
+}
+
+export async function getAllUsers() {
+  const snapshot = await getDocs(collection(db, COLLECTION))
+  return snapshot.docs.map(d => ({ id: d.id, ...d.data() }))
 }

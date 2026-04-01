@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { usePin } from '../auth/PinContext'
-import { clearPin } from '../utils/hashPin'
+import { clearPin, getPinKey } from '../utils/hashPin'
 import styles from './PinEntry.module.css'
 
 export default function PinEntry() {
@@ -16,6 +16,7 @@ export default function PinEntry() {
   const { checkPin } = usePin()
   const navigate = useNavigate()
 
+  const hasPinStored = currentUser ? !!localStorage.getItem(getPinKey(currentUser.uid)) : false
   const firstName = currentUser?.displayName?.split(' ')[0] ||
                     currentUser?.email?.split('@')[0] || 'User'
   const initials = currentUser?.displayName
@@ -82,6 +83,24 @@ export default function PinEntry() {
     }
     await logout()
     navigate('/login')
+  }
+
+  if (!hasPinStored) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.avatar}>{initials}</div>
+        <h1 className={styles.greeting}>Welcome back, {firstName}</h1>
+        <p className={styles.subtitle} style={{ marginBottom: 24 }}>
+          Your PIN was cleared from this device (browser storage was reset). Please create a new PIN to continue.
+        </p>
+        <button className="btn-primary" style={{ width: '100%', maxWidth: 280 }} onClick={() => navigate('/pin-setup')}>
+          Create new PIN
+        </button>
+        <button className={styles.switchAccount} onClick={handleSwitchAccount} style={{ marginTop: 16 }}>
+          Switch account
+        </button>
+      </div>
+    )
   }
 
   if (locked) {

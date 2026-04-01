@@ -278,12 +278,53 @@
   font-size: 0.875rem;
 }
 
-.customDates {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 12px;
+.catHint {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  line-height: 1.5;
 }
 
-.customDates input {
-  flex: 1;
+.catList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 80px;
+}
+
+.catRow {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  padding: 14px 16px;
+}
+
+.catHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 8px;
+}
+
+.catName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.catAmounts {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.catLimit {
+  color: var(--color-text-secondary);
+  font-weight: 400;
+}
+
+.catSub {
+  font-size: 0.75rem;
+  margin-top: 6px;
 }

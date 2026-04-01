@@ -6,6 +6,7 @@ import { getUserSettings, updateUserSettings } from '../firebase/settings'
 import { getTransactions } from '../firebase/transactions'
 import { getTransfers } from '../firebase/transfers'
 import { getBills } from '../firebase/bills'
+import { getBudgets, addBudget, updateBudget, deleteBudget } from '../firebase/budgets'
 import { useToast } from '../components/Toast'
 import { clearPin } from '../utils/hashPin'
 import { formatCurrency } from '../utils/formatCurrency'
@@ -22,7 +23,12 @@ export default function Settings() {
   const [lowAlert, setLowAlert] = useState('')
   const [installPrompt, setInstallPrompt] = useState(null)
   const [appInstalled, setAppInstalled] = useState(false)
-  const { currentUser, logout } = useAuth()
+  const [editingName, setEditingName] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [budgets, setBudgets] = useState([])
+  const [newBudgetCat, setNewBudgetCat] = useState('')
+  const [newBudgetLimit, setNewBudgetLimit] = useState('')
+  const { currentUser, logout, updateDisplayName, isAdmin } = useAuth()
   const { resetPinVerified } = usePin()
   const { showToast } = useToast()
   const navigate = useNavigate()
@@ -43,8 +49,12 @@ export default function Settings() {
   async function loadData() {
     if (!currentUser) return; setLoading(true)
     try {
-      const s = await getUserSettings(currentUser.uid)
+      const [s, b] = await Promise.all([
+        getUserSettings(currentUser.uid),
+        getBudgets(currentUser.uid),
+      ])
       setSettings(s)
+      setBudgets(b || [])
       setLowAlert(String(s?.lowBalanceAlert || 1000))
     } catch (err) { console.error(err) }
     setLoading(false)
@@ -112,6 +122,44 @@ export default function Settings() {
     } catch (err) { showToast('Export failed', 'error') }
   }
 
+  async function handleUpdateName() {
+    if (!newName.trim()) return
+    try {
+      await updateDisplayName(newName.trim())
+      showToast('Name updated ✓')
+      setEditingName(false)
+    } catch { showToast('Failed to update name', 'error') }
+  }
+
+  async function handleUpdateBudgetLimit(id, value) {
+    const limit = Number(value)
+    if (!limit || limit <= 0) return
+    await updateBudget(id, { monthlyLimit: limit })
+    await loadData()
+  }
+
+  async function handleDeleteBudget(id) {
+    await deleteBudget(id)
+    showToast('Budget removed ✓')
+    await loadData()
+  }
+
+  async function handleAddBudget() {
+    if (!newBudgetCat || !newBudgetLimit) return
+    const limit = Number(newBudgetLimit)
+    if (!limit || limit <= 0) return
+    const existing = budgets.find(b => b.category === newBudgetCat)
+    if (existing) {
+      await updateBudget(existing.id, { monthlyLimit: limit })
+    } else {
+      await addBudget(currentUser.uid, { category: newBudgetCat, monthlyLimit: limit })
+    }
+    setNewBudgetCat('')
+    setNewBudgetLimit('')
+    showToast('Budget saved ✓')
+    await loadData()
+  }
+
   async function handleInstall() {
     if (!installPrompt) return
     installPrompt.prompt()
@@ -133,9 +181,27 @@ export default function Settings() {
 
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Account</div>
-        <div className={styles.row}><span className={styles.rowLabel}>Name</span><span className={styles.rowValue}>{currentUser?.displayName || 'User'}</span></div>
+        <div className={styles.row}>
+          <span className={styles.rowLabel}>Name</span>
+          {editingName ? (
+            <div className={styles.inlineEdit}>
+              <input className="input-field" style={{ padding: '6px 10px', fontSize: '0.875rem' }} value={newName} onChange={e => setNewName(e.target.value)} autoFocus />
+              <button className="btn-primary" style={{ width: 'auto', padding: '6px 12px', fontSize: '0.8125rem' }} onClick={handleUpdateName}>Save</button>
+              <button className="btn-secondary" style={{ width: 'auto', padding: '6px 12px', fontSize: '0.8125rem' }} onClick={() => setEditingName(false)}>Cancel</button>
+            </div>
+          ) : (
+            <div className={styles.inlineEdit}>
+              <span className={styles.rowValue}>{currentUser?.displayName || 'Not set'}</span>
+              <button className="btn-secondary" style={{ width: 'auto', padding: '4px 10px', fontSize: '0.75rem' }} onClick={() => { setNewName(currentUser?.displayName || ''); setEditingName(true) }}>Edit</button>
+            </div>
+          )}
+        </div>
         <div className={styles.row}><span className={styles.rowLabel}>Email</span><span className={styles.rowValue}>{currentUser?.email}</span></div>
+        <div className={styles.row}><span className={styles.rowLabel}>User ID</span><span className={styles.rowValue} style={{ fontSize: '0.75rem', wordBreak: 'break-all', color: 'var(--color-text-hint)' }}>{currentUser?.uid}</span></div>
         <div className={styles.row}><button className="btn-secondary" style={{ width: 'auto', padding: '8px 16px' }} onClick={handleChangePin}>Change PIN</button></div>
+        {isAdmin && (
+          <div className={styles.row}><button className="btn-secondary" style={{ width: 'auto', padding: '8px 16px' }} onClick={() => navigate('/admin')}>Admin Panel</button></div>
+        )}
         <div className={styles.row}><button className="btn-secondary" style={{ width: 'auto', padding: '8px 16px' }} onClick={handleSignOut}>Sign out</button></div>
       </div>
 
@@ -175,6 +241,33 @@ export default function Settings() {
         <div className={styles.customCatRow}>
           <input type="text" className="input-field" placeholder="Add income category" value={newIncCat} onChange={e => setNewIncCat(e.target.value)} />
           <button className="btn-primary" style={{ width: 'auto', padding: '8px 16px' }} onClick={addCustomIncomeCategory}>Add</button>
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Monthly Budgets</div>
+        {budgets.length === 0 && <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: 8 }}>No budgets set yet.</p>}
+        {budgets.map(b => (
+          <div key={b.id} className={styles.budgetRow}>
+            <span className={styles.budgetCat}>{b.category}</span>
+            <input
+              type="number"
+              className={styles.budgetInput}
+              defaultValue={b.monthlyLimit}
+              onBlur={e => handleUpdateBudgetLimit(b.id, e.target.value)}
+              inputMode="decimal"
+            />
+            <button className={styles.deleteBudgetBtn} onClick={() => handleDeleteBudget(b.id)}>✕</button>
+          </div>
+        ))}
+        <div className={styles.addRow} style={{ marginTop: 12 }}>
+          <select className="select-field" value={newBudgetCat} onChange={e => setNewBudgetCat(e.target.value)} style={{ flex: 1 }}>
+            <option value="">Category</option>
+            {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            {(settings?.customExpenseCategories || []).map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+          <input type="number" className="input-field" placeholder="₱ limit" value={newBudgetLimit} onChange={e => setNewBudgetLimit(e.target.value)} inputMode="decimal" style={{ width: 90 }} />
+          <button className="btn-primary" style={{ width: 'auto', padding: '8px 16px' }} onClick={handleAddBudget}>Add</button>
         </div>
       </div>
 

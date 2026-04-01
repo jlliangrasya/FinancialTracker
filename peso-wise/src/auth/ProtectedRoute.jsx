@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react'
 import { getUserSettings } from '../firebase/settings'
 
 export default function ProtectedRoute({ children }) {
-  const { currentUser, loading: authLoading } = useAuth()
+  const { currentUser, loading: authLoading, userProfile } = useAuth()
   const { isPinVerified } = usePin()
   const location = useLocation()
   const [settings, setSettings] = useState(null)
@@ -43,8 +43,16 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  const hasPinStored = !!localStorage.getItem(getPinKey(currentUser.uid))
-  const pinSetupDone = settings?.pinSetupCompleted && hasPinStored
+  // Account approval check (skip for existing users without a status field)
+  const accountStatus = userProfile?.status
+  if (accountStatus === 'pending') {
+    return <Navigate to="/pending-approval" replace />
+  }
+  if (accountStatus === 'rejected') {
+    return <Navigate to="/rejected" replace />
+  }
+
+  const pinSetupDone = settings?.pinSetupCompleted
 
   if (!pinSetupDone && location.pathname !== '/pin-setup') {
     return <Navigate to="/pin-setup" replace />
@@ -56,6 +64,24 @@ export default function ProtectedRoute({ children }) {
 
   if (!settings?.onboardingCompleted && location.pathname !== '/onboarding' && isPinVerified) {
     return <Navigate to="/onboarding" replace />
+  }
+
+  return children
+}
+
+export function AdminRoute({ children }) {
+  const { currentUser, loading: authLoading, isAdmin } = useAuth()
+
+  if (authLoading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <div className="skeleton" style={{ width: 48, height: 48, borderRadius: '50%' }} />
+      </div>
+    )
+  }
+
+  if (!currentUser || !isAdmin) {
+    return <Navigate to="/dashboard" replace />
   }
 
   return children

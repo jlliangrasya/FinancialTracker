@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './auth/AuthContext'
 import { PinProvider } from './auth/PinContext'
 import { ToastProvider } from './components/Toast'
-import ProtectedRoute from './auth/ProtectedRoute'
+import ProtectedRoute, { AdminRoute } from './auth/ProtectedRoute'
 import AppLayout from './AppLayout'
 import Login from './pages/Login'
 import PinSetup from './pages/PinSetup'
@@ -22,6 +22,9 @@ import SmartInsights from './pages/SmartInsights'
 import Reports from './pages/Reports'
 import PaycheckAllocator from './pages/PaycheckAllocator'
 import Settings from './pages/Settings'
+import PendingApproval from './pages/PendingApproval'
+import RejectedAccount from './pages/RejectedAccount'
+import AdminDashboard from './pages/admin/AdminDashboard'
 
 export default function App() {
   return (
@@ -33,6 +36,9 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/pin-setup" element={<PinSetup />} />
               <Route path="/pin" element={<PinEntry />} />
+              <Route path="/pending-approval" element={<PendingApproval />} />
+              <Route path="/rejected" element={<RejectedAccount />} />
+              <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
               <Route path="/onboarding" element={
                 <ProtectedRoute><Onboarding /></ProtectedRoute>
               } />

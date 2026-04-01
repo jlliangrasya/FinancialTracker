@@ -17,9 +17,17 @@ export function PinProvider({ children }) {
   }, [])
 
   useEffect(() => {
+    let hiddenAt = null
+    const LOCK_AFTER_MS = 15 * 60 * 1000 // 15 minutes
+
     function handleVisibilityChange() {
       if (document.visibilityState === 'hidden') {
-        resetPinVerified()
+        hiddenAt = Date.now()
+      } else if (document.visibilityState === 'visible' && hiddenAt !== null) {
+        if (Date.now() - hiddenAt >= LOCK_AFTER_MS) {
+          resetPinVerified()
+        }
+        hiddenAt = null
       }
     }
     document.addEventListener('visibilitychange', handleVisibilityChange)
@@ -37,6 +45,7 @@ export function PinProvider({ children }) {
     const valid = await verifyPinUtil(currentUser.uid, pin)
     if (valid) {
       setIsPinVerified(true)
+      localStorage.setItem('pesowise_lastActive', String(Date.now()))
     }
     return valid
   }

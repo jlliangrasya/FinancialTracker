@@ -25,6 +25,34 @@
   margin-bottom: 24px;
 }
 
+.totalBudgetRow {
+  margin-bottom: 8px;
+}
+
+.totalBudgetLabel {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 8px;
+}
+
+.totalBudgetInput {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  border: 2px solid var(--color-border);
+  border-radius: var(--border-radius-md);
+  text-align: center;
+  color: var(--color-success);
+  background-color: var(--color-surface);
+}
+
+.totalBudgetInput:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
 .bucket {
   padding: 16px;
   border-radius: var(--border-radius-md);

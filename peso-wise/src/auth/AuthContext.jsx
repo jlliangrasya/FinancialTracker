@@ -45,12 +45,20 @@ export function AuthProvider({ children }) {
   }, [])
 
   useEffect(() => {
+    const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000
     setPersistence(auth, browserLocalPersistence).catch(console.error)
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      setCurrentUser(user)
       if (user) {
+        const lastActive = localStorage.getItem('pesowise_lastActive')
+        if (lastActive && Date.now() - Number(lastActive) > THREE_DAYS_MS) {
+          localStorage.removeItem('pesowise_lastActive')
+          await signOut(auth)
+          return
+        }
+        setCurrentUser(user)
         await refreshUserProfile(user.uid)
       } else {
+        setCurrentUser(null)
         setUserProfile(null)
       }
       setLoading(false)

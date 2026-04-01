@@ -78,9 +78,26 @@
   text-align: center;
 }
 
+.heroTopRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
 .heroLabel {
   font-size: 0.8125rem;
   color: var(--color-text-secondary);
+}
+
+.editBudgetBtn {
+  font-size: 0.75rem;
+  color: var(--color-primary);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 0;
+  font-weight: 500;
 }
 
 .heroAmount {

@@ -61,7 +61,14 @@ export default function Settings() {
   }
 
   async function handleSignOut() {
+    resetPinVerified()
+    await logout()
+    navigate('/login')
+  }
+
+  async function handleSignOutAndClearPin() {
     if (currentUser) clearPin(currentUser.uid)
+    localStorage.removeItem('pesowise_lastActive')
     resetPinVerified()
     await logout()
     navigate('/login')
@@ -308,8 +315,8 @@ export default function Settings() {
       <div className={styles.section}>
         <div className={styles.dangerZone}>
           <div className={styles.dangerTitle}>Danger Zone</div>
-          <div className={styles.dangerDesc}>Signing out will clear your PIN on this device. Your data is safe in the cloud.</div>
-          <button className="btn-danger" onClick={handleSignOut}>Sign Out & Clear PIN</button>
+          <div className={styles.dangerDesc}>This will sign you out AND clear your saved PIN from this device. You will need to create a new PIN on your next login.</div>
+          <button className="btn-danger" onClick={handleSignOutAndClearPin}>Sign Out & Clear PIN</button>
         </div>
       </div>
     </div>

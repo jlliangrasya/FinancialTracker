@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getTransactions } from '../firebase/transactions'
 import { getActiveBudgetPeriod } from '../firebase/budgetPeriods'
@@ -20,6 +21,7 @@ export default function BudgetTracker() {
   const [activeTab, setActiveTab] = useState('expenses')
   const { currentUser } = useAuth()
   const { showToast } = useToast()
+  const navigate = useNavigate()
   const currentMonthStr = getCurrentMonthString()
 
   useEffect(() => { loadData() }, [currentUser])
@@ -172,13 +174,21 @@ export default function BudgetTracker() {
           {!period ? (
             <div className={styles.empty}>
               <p>No active budget period.</p>
-              <p style={{ marginTop: 8 }}>Tap the <strong>+</strong> button to log income and set up your budget via the Paycheck Allocator.</p>
+              <p style={{ marginTop: 8, marginBottom: 20 }}>Set a budget to track your expenses and bills.</p>
+              <button className="btn-primary" onClick={() => navigate('/paycheck-allocator')}>
+                Set Budget Period
+              </button>
             </div>
           ) : (
             <>
               <div className={styles.hero}>
-                <div className={styles.heroLabel}>
-                  {activeTab === 'expenses' ? 'Daily expenses budget' : 'Bills budget'}
+                <div className={styles.heroTopRow}>
+                  <div className={styles.heroLabel}>
+                    {activeTab === 'expenses' ? 'Daily expenses budget' : 'Bills budget'}
+                  </div>
+                  <button className={styles.editBudgetBtn} onClick={() => navigate('/paycheck-allocator?edit=1')}>
+                    Edit Budget
+                  </button>
                 </div>
                 {typeHeroAmount > 0 ? (
                   <>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { usePin } from '../auth/PinContext'
-import { clearPin, getPinKey } from '../utils/hashPin'
+import { getPinKey } from '../utils/hashPin'
 import styles from './PinEntry.module.css'
 
 export default function PinEntry() {
@@ -78,9 +78,6 @@ export default function PinEntry() {
   }
 
   async function handleSwitchAccount() {
-    if (currentUser) {
-      clearPin(currentUser.uid)
-    }
     await logout()
     navigate('/login')
   }

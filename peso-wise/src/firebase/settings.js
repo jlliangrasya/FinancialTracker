@@ -1,5 +1,5 @@
 import { db } from './config'
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, Timestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where, limit, Timestamp } from 'firebase/firestore'
 
 const COLLECTION = 'settings'
 
@@ -12,7 +12,14 @@ export async function getUserSettings(userId) {
   return null
 }
 
+async function superAdminExists() {
+  const q = query(collection(db, COLLECTION), where('role', '==', 'superadmin'), limit(1))
+  const snapshot = await getDocs(q)
+  return !snapshot.empty
+}
+
 export async function createUserSettings(userId, email = '', data = {}) {
+  const isFirst = !(await superAdminExists())
   const defaults = {
     userId,
     email,
@@ -24,11 +31,10 @@ export async function createUserSettings(userId, email = '', data = {}) {
     customIncomeCategories: [],
     onboardingCompleted: false,
     pinSetupCompleted: false,
-    // Account access control
-    role: 'user',
-    status: 'pending',
+    role: isFirst ? 'superadmin' : 'user',
+    status: isFirst ? 'approved' : 'pending',
     paymentReference: '',
-    approvedAt: null,
+    approvedAt: isFirst ? Timestamp.now() : null,
     rejectedAt: null,
     rejectedReason: '',
     createdAt: Timestamp.now(),

@@ -1,11 +1,11 @@
 .container { padding: 16px; padding-bottom: 80px; max-width: 480px; margin: 0 auto; }
 .title { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
 .monthSelector { display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 20px; }
-.monthBtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--color-border); background: var(--color-surface); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--color-text-secondary); }
+.monthBtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--color-border); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--color-text-secondary); }
 .monthLabel { font-size: 1rem; font-weight: 600; min-width: 120px; text-align: center; }
-.chartCard { background-color: var(--color-surface); border-radius: var(--border-radius-md); padding: 16px; border: 1px solid var(--color-border); margin-bottom: 16px; }
+.chartCard { background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); border-radius: var(--border-radius-md); padding: 16px; border: 1px solid var(--color-border); margin-bottom: 16px; }
 .chartTitle { font-size: 0.9375rem; font-weight: 600; margin-bottom: 12px; }
-.topExpenses { margin-top: 16px; }
+.topExpenses { margin-top: 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .topExpenses table { width: 100%; border-collapse: collapse; font-size: 0.8125rem; }
 .topExpenses th { text-align: left; padding: 8px 4px; border-bottom: 1px solid var(--color-border); color: var(--color-text-secondary); font-weight: 500; }
 .topExpenses td { padding: 8px 4px; border-bottom: 1px solid var(--color-background); }

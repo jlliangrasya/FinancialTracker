@@ -1,6 +1,6 @@
 .container { padding: 16px; padding-bottom: 80px; max-width: 480px; margin: 0 auto; }
 .title { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
-.goalCard { padding: 16px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border); background-color: var(--color-surface); margin-bottom: 12px; }
+.goalCard { padding: 16px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); margin-bottom: 12px; }
 .goalHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
 .goalName { font-size: 1rem; font-weight: 600; }
 .goalBank { font-size: 0.75rem; color: var(--color-text-secondary); }
@@ -13,9 +13,9 @@
 .updateRow input { flex: 1; }
 .updateRow button { white-space: nowrap; padding: 8px 16px; }
 .actions { display: flex; gap: 8px; }
-.actionBtn { font-size: 0.75rem; padding: 4px 8px; border-radius: var(--border-radius-sm); cursor: pointer; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-secondary); }
+.actionBtn { font-size: 0.75rem; padding: 4px 8px; border-radius: var(--border-radius-sm); cursor: pointer; border: 1px solid var(--color-border); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); color: var(--color-text-secondary); }
 .actionBtn.delete { color: var(--color-danger); border-color: var(--color-danger); }
-.addForm { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); background: var(--color-surface); margin-bottom: 16px; }
+.addForm { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); margin-bottom: 16px; }
 .addForm h3 { font-size: 0.9375rem; margin-bottom: 12px; }
 .formGrid { display: flex; flex-direction: column; gap: 10px; }
 .formRow { display: flex; gap: 10px; }

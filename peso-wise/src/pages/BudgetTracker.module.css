@@ -23,7 +23,10 @@
   border-radius: var(--border-radius-xl);
   font-size: 0.8125rem;
   border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   cursor: pointer;
   color: var(--color-text-secondary);
 }
@@ -72,7 +75,10 @@
 .hero {
   padding: 20px;
   border-radius: var(--border-radius-lg);
-  background-color: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   border: 1px solid var(--color-border);
   margin-bottom: 16px;
   text-align: center;
@@ -96,7 +102,8 @@
   background: none;
   border: none;
   cursor: pointer;
-  padding: 2px 0;
+  padding: 8px 12px;
+  min-height: 44px;
   font-weight: 500;
 }
 
@@ -222,7 +229,10 @@
   bottom: 64px;
   left: 0;
   right: 0;
-  background-color: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   border-top: 1px solid var(--color-border);
   padding: 12px 16px;
   z-index: 50;
@@ -313,7 +323,10 @@
 }
 
 .catRow {
-  background-color: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   border: 1px solid var(--color-border);
   border-radius: var(--border-radius-md);
   padding: 14px 16px;

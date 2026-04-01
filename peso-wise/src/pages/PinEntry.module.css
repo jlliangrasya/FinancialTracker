@@ -4,77 +4,83 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 24px;
-  max-width: 400px;
-  margin: 0 auto;
+  animation: fadeIn 0.4s ease;
 }
 
 .avatar {
   width: 64px;
   height: 64px;
   border-radius: 50%;
-  background-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 12px;
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.25);
 }
 
 .greeting {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: var(--color-text-primary);
+  font-size: 1.375rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  letter-spacing: -0.02em;
 }
 
 .subtitle {
-  font-size: 0.875rem;
+  font-size: 0.9375rem;
   color: var(--color-text-secondary);
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .dots {
   display: flex;
   gap: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .dot {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 2px solid var(--color-border);
+  border: 2px solid var(--color-border-solid);
   background-color: transparent;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .dot.filled {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
+  box-shadow: 0 0 8px var(--color-primary-glow);
 }
 
 .dot.error {
-  background-color: var(--color-danger);
   border-color: var(--color-danger);
 }
 
+.dot.filled.error {
+  background-color: var(--color-danger);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.3);
+}
+
 .errorText {
-  color: var(--color-danger);
+  height: 24px;
   font-size: 0.8125rem;
-  margin-top: 8px;
-  min-height: 20px;
-  text-align: center;
+  color: var(--color-danger);
+  margin-bottom: 16px;
+  font-weight: 500;
 }
 
 .numpad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 24px;
-  width: 260px;
+  gap: 10px;
+  max-width: 280px;
+  width: 100%;
 }
 
 .numKey {
@@ -87,74 +93,84 @@
   font-size: 1.5rem;
   font-weight: 500;
   color: var(--color-text-primary);
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  background: var(--numpad-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: none;
   cursor: pointer;
-  transition: background-color 0.15s;
   margin: 0 auto;
+  transition: all var(--transition-fast);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .numKey:hover {
-  background-color: var(--color-primary-light);
+  background: var(--numpad-active);
 }
 
 .numKey:active {
-  background-color: var(--color-primary);
-  color: white;
+  transform: scale(0.92);
+  background: var(--numpad-active);
 }
 
 .numKey.empty {
-  visibility: hidden;
+  background: transparent;
+  cursor: default;
 }
 
 .numKey.backspace {
-  font-size: 1.25rem;
-  background-color: transparent;
-  border: none;
+  font-size: 1.375rem;
+  color: var(--color-text-secondary);
+  background: transparent;
+}
+
+.numKey.backspace:hover {
+  color: var(--color-text-primary);
+  background: var(--numpad-bg);
 }
 
 .switchAccount {
-  margin-top: 32px;
+  margin-top: 24px;
+  font-size: 0.875rem;
+  color: var(--color-primary);
   background: none;
   border: none;
-  color: var(--color-text-secondary);
-  font-size: 0.875rem;
   cursor: pointer;
-}
-
-.switchAccount:hover {
-  color: var(--color-primary);
+  font-weight: 500;
 }
 
 .lockout {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
   gap: 16px;
 }
 
-.lockIcon {
-  font-size: 3rem;
-  color: var(--color-danger);
-}
+.lockIcon { font-size: 2.5rem; }
 
 .lockMessage {
   font-size: 1rem;
-  font-weight: 600;
-  color: var(--color-danger);
-  text-align: center;
+  color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .countdownBar {
   width: 200px;
   height: 4px;
-  background-color: var(--color-border);
+  background-color: var(--color-background);
   border-radius: 2px;
   overflow: hidden;
 }
 
 .countdownFill {
   height: 100%;
-  background-color: var(--color-danger);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
+  border-radius: 2px;
   transition: width 1s linear;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

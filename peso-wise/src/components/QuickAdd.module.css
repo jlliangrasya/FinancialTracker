@@ -1,8 +1,11 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0,0,0,0.3);
+  background-color: var(--overlay-bg);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 300;
+  animation: fadeIn 0.2s ease;
 }
 
 .modal {
@@ -11,20 +14,23 @@
   left: 0;
   right: 0;
   max-height: 90vh;
-  background-color: var(--color-surface);
+  background: var(--nav-bg);
+  backdrop-filter: blur(32px) saturate(180%);
+  -webkit-backdrop-filter: blur(32px) saturate(180%);
   border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
   z-index: 301;
-  animation: slideUp 0.3s ease-out;
+  animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   overflow-y: auto;
-  padding-bottom: env(safe-area-inset-bottom, 16px);
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+  box-shadow: 0 -8px 40px rgba(15, 23, 42, 0.1);
 }
 
 .handle {
-  width: 40px;
+  width: 36px;
   height: 4px;
-  background-color: var(--color-border);
+  background-color: rgba(148, 163, 184, 0.3);
   border-radius: 2px;
-  margin: 12px auto 8px;
+  margin: 10px auto 8px;
 }
 
 .content {
@@ -35,7 +41,7 @@
   display: flex;
   gap: 0;
   margin-bottom: 20px;
-  background-color: var(--color-background);
+  background: var(--numpad-bg);
   border-radius: var(--border-radius-sm);
   padding: 3px;
 }
@@ -44,25 +50,25 @@
   flex: 1;
   padding: 10px;
   text-align: center;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 500;
-  border-radius: var(--border-radius-sm);
+  border-radius: calc(var(--border-radius-sm) - 1px);
   color: var(--color-text-secondary);
   cursor: pointer;
   background: none;
   border: none;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .tab.active {
-  background-color: var(--color-surface);
+  background-color: var(--tab-active-bg);
   color: var(--color-primary);
   font-weight: 600;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
 }
 
 .amountInput {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 700;
   text-align: center;
   border: none;
@@ -72,11 +78,12 @@
   margin-bottom: 20px;
   background: transparent;
   color: var(--color-text-primary);
+  letter-spacing: -0.02em;
 }
 
 .amountInput:focus {
   outline: none;
-  border-bottom-color: var(--color-primary);
+  border-bottom-color: var(--color-primary-dark);
 }
 
 .amountInput::placeholder {
@@ -90,8 +97,9 @@
 .fieldLabel {
   font-size: 0.8125rem;
   color: var(--color-text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: 6px;
   display: block;
+  font-weight: 500;
 }
 
 .row {
@@ -99,9 +107,7 @@
   gap: 12px;
 }
 
-.row > * {
-  flex: 1;
-}
+.row > * { flex: 1; }
 
 .transferArrow {
   display: flex;
@@ -116,14 +122,20 @@
 .balanceCheck {
   font-size: 0.75rem;
   color: var(--color-warning);
-  margin-top: 4px;
+  margin-top: 6px;
+  font-weight: 500;
 }
 
 .saveBtn {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 @keyframes slideUp {
   from { transform: translateY(100%); }
   to { transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }

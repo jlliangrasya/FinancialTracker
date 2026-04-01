@@ -12,6 +12,7 @@ import { clearPin } from '../utils/hashPin'
 import { formatCurrency } from '../utils/formatCurrency'
 import { exportToCSV, exportToJSON } from '../utils/exportData'
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../utils/categories'
+import { useTheme } from '../auth/ThemeContext'
 import styles from './Settings.module.css'
 
 export default function Settings() {
@@ -31,6 +32,7 @@ export default function Settings() {
   const { currentUser, logout, updateDisplayName, isAdmin } = useAuth()
   const { resetPinVerified } = usePin()
   const { showToast } = useToast()
+  const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -185,6 +187,16 @@ export default function Settings() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Settings</h1>
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Appearance</div>
+        <div className={styles.row}>
+          <span className={styles.rowLabel}>Dark Mode</span>
+          <button className={`${styles.themeToggle} ${isDark ? styles.toggleOn : ''}`} onClick={toggleTheme} aria-label="Toggle dark mode">
+            <span className={styles.toggleThumb} />
+          </button>
+        </div>
+      </div>
 
       <div className={styles.section}>
         <div className={styles.sectionTitle}>Account</div>

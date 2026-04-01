@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
+import { ThemeProvider } from './auth/ThemeContext'
 import { AuthProvider } from './auth/AuthContext'
 import { PinProvider } from './auth/PinContext'
 import { ToastProvider } from './components/Toast'
@@ -28,6 +29,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 
 export default function App() {
   return (
+    <ThemeProvider>
     <Router>
       <AuthProvider>
         <PinProvider>
@@ -92,5 +94,6 @@ export default function App() {
         </PinProvider>
       </AuthProvider>
     </Router>
+    </ThemeProvider>
   )
 }

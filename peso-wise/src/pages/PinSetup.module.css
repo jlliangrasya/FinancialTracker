@@ -4,21 +4,26 @@
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  min-height: 100dvh;
   padding: 24px;
   max-width: 400px;
   margin: 0 auto;
+  animation: fadeIn 0.4s ease;
 }
 
 .stepIndicator {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
-  margin-bottom: 8px;
+  font-size: 0.8125rem;
+  color: var(--color-text-hint);
+  margin-bottom: 10px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .progressBar {
   display: flex;
   gap: 8px;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
   width: 120px;
 }
 
@@ -26,60 +31,67 @@
   flex: 1;
   height: 4px;
   border-radius: 2px;
-  background-color: var(--color-border);
+  background-color: var(--color-background);
+  transition: background-color var(--transition-base);
 }
 
 .progressSegment.active {
-  background-color: var(--color-primary);
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
 }
 
 .title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 1.375rem;
+  font-weight: 700;
   margin-bottom: 32px;
   color: var(--color-text-primary);
   text-align: center;
+  letter-spacing: -0.02em;
 }
 
 .dots {
   display: flex;
   gap: 16px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .dot {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  border: 2px solid var(--color-border);
+  border: 2px solid var(--color-border-solid);
   background-color: transparent;
-  transition: all 0.2s;
+  transition: all var(--transition-fast);
 }
 
 .dot.filled {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
+  box-shadow: 0 0 8px var(--color-primary-glow);
 }
 
 .dot.error {
-  background-color: var(--color-danger);
   border-color: var(--color-danger);
 }
 
+.dot.filled.error {
+  background-color: var(--color-danger);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.3);
+}
+
 .errorText {
-  color: var(--color-danger);
+  height: 24px;
   font-size: 0.8125rem;
-  margin-top: 8px;
-  min-height: 20px;
-  text-align: center;
+  color: var(--color-danger);
+  margin-bottom: 16px;
+  font-weight: 500;
 }
 
 .numpad {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-top: 24px;
-  width: 260px;
+  gap: 10px;
+  max-width: 280px;
+  width: 100%;
 }
 
 .numKey {
@@ -92,32 +104,43 @@
   font-size: 1.5rem;
   font-weight: 500;
   color: var(--color-text-primary);
-  background-color: var(--color-background);
-  border: 1px solid var(--color-border);
+  background: var(--numpad-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: none;
   cursor: pointer;
-  transition: background-color 0.15s;
   margin: 0 auto;
+  transition: all var(--transition-fast);
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .numKey:hover {
-  background-color: var(--color-primary-light);
+  background: var(--numpad-active);
 }
 
 .numKey:active {
-  background-color: var(--color-primary);
-  color: white;
+  transform: scale(0.92);
+  background: var(--numpad-active);
 }
 
 .numKey.empty {
-  visibility: hidden;
+  background: transparent;
+  cursor: default;
 }
 
 .numKey.backspace {
-  font-size: 1.25rem;
-  background-color: transparent;
-  border: none;
+  font-size: 1.375rem;
+  color: var(--color-text-secondary);
+  background: transparent;
 }
 
 .numKey.backspace:hover {
-  background-color: var(--color-background);
+  color: var(--color-text-primary);
+  background: var(--numpad-bg);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

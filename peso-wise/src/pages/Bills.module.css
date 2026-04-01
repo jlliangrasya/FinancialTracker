@@ -25,7 +25,7 @@
 }
 
 .summaryLabel {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   color: var(--color-text-secondary);
   text-transform: uppercase;
 }
@@ -49,14 +49,17 @@
   gap: 10px;
   padding: 14px;
   border-radius: var(--border-radius-md);
-  background-color: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   border: 1px solid var(--color-border);
 }
 
 .badge {
   padding: 3px 8px;
   border-radius: 4px;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   flex-shrink: 0;
@@ -95,7 +98,10 @@
   padding: 16px;
   border-radius: var(--border-radius-md);
   border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
   margin-bottom: 16px;
 }
 
@@ -143,10 +149,12 @@
 }
 
 .deleteBtn {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   color: var(--color-danger);
   background: none;
   border: none;
   cursor: pointer;
   padding: 4px;
+  min-width: 44px;
+  min-height: 44px;
 }

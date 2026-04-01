@@ -1,6 +1,6 @@
 .container {
   padding: 16px;
-  padding-bottom: 80px;
+  padding-bottom: 88px;
   max-width: 480px;
   margin: 0 auto;
 }
@@ -9,19 +9,20 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  padding-top: 4px;
 }
 
 .logoRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .logoIcon {
-  width: 32px;
-  height: 32px;
-  background-color: var(--color-primary);
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   border-radius: var(--border-radius-sm);
   display: flex;
   align-items: center;
@@ -29,41 +30,62 @@
   color: white;
   font-weight: 700;
   font-size: 1rem;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
 }
 
 .logoText {
-  font-size: 1rem;
+  font-size: 1.0625rem;
   font-weight: 700;
   color: var(--color-text-primary);
+  letter-spacing: -0.02em;
 }
 
 .monthLabel {
-  font-size: 0.875rem;
-  color: var(--color-text-secondary);
+  font-size: 0.8125rem;
+  color: var(--color-text-hint);
+  font-weight: 500;
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 5px 12px;
+  border-radius: var(--border-radius-full);
+  border: var(--glass-border);
 }
 
 .netCashCard {
-  padding: 20px;
+  padding: 24px 20px;
   border-radius: var(--border-radius-lg);
   margin-bottom: 16px;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.netCashCard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,0.3) 0%, transparent 100%);
+  pointer-events: none;
 }
 
 .netCashLabel {
   font-size: 0.8125rem;
   color: var(--color-text-secondary);
   margin-bottom: 4px;
+  font-weight: 500;
 }
 
 .netCashAmount {
-  font-size: 2rem;
+  font-size: 2.25rem;
   font-weight: 800;
+  letter-spacing: -0.03em;
 }
 
 .rollover {
   font-size: 0.75rem;
   color: var(--color-text-secondary);
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .burnAlert {
@@ -76,30 +98,26 @@
   cursor: pointer;
   font-size: 0.8125rem;
   font-weight: 500;
+  transition: transform var(--transition-fast);
 }
 
-.burnAlert.safe {
-  background-color: var(--color-success-light);
-  color: var(--color-success);
-}
+.burnAlert:active { transform: scale(0.98); }
+.burnAlert.safe { background-color: var(--color-success-light); color: var(--color-success); }
+.burnAlert.warning { background-color: var(--color-warning-light); color: var(--color-warning); }
+.burnAlert.critical { background-color: var(--color-danger-light); color: var(--color-danger); }
 
-.burnAlert.warning {
-  background-color: var(--color-warning-light);
-  color: var(--color-warning);
-}
-
-.burnAlert.critical {
-  background-color: var(--color-danger-light);
-  color: var(--color-danger);
+.section {
+  margin-bottom: 20px;
 }
 
 .sectionTitle {
   font-size: 0.9375rem;
   font-weight: 700;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  letter-spacing: -0.01em;
 }
 
 .seeAll {
@@ -108,32 +126,37 @@
   background: none;
   border: none;
   cursor: pointer;
+  font-weight: 600;
 }
 
 .bankScroll {
   display: flex;
   gap: 12px;
   overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 20px;
+  padding-bottom: 4px;
+  margin-bottom: 4px;
   scrollbar-width: none;
+  scroll-snap-type: x mandatory;
 }
 
-.bankScroll::-webkit-scrollbar {
-  display: none;
-}
+.bankScroll::-webkit-scrollbar { display: none; }
 
 .budgetList {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: 14px;
 }
 
 .budgetRow {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--border-radius-sm);
+  padding: 12px 14px;
+  border: var(--glass-border);
 }
 
 .budgetHeader {
@@ -142,51 +165,35 @@
   font-size: 0.8125rem;
 }
 
-.budgetCategory {
-  font-weight: 500;
-}
-
-.budgetValues {
-  color: var(--color-text-secondary);
-  font-size: 0.75rem;
-}
+.budgetCategory { font-weight: 600; }
+.budgetValues { color: var(--color-text-secondary); font-size: 0.75rem; }
 
 .billsList {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  margin-bottom: 20px;
 }
 
 .billRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 12px;
-  background-color: var(--color-surface);
+  padding: 12px 14px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: var(--border-radius-sm);
-  border: 1px solid var(--color-border);
+  border: var(--glass-border);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
 }
 
-.billInfo {
-  display: flex;
-  flex-direction: column;
-}
+.billRow:active { transform: scale(0.98); }
 
-.billName {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.billDue {
-  font-size: 0.75rem;
-  color: var(--color-warning);
-}
-
-.billAmount {
-  font-size: 0.875rem;
-  font-weight: 600;
-}
+.billInfo { display: flex; flex-direction: column; }
+.billName { font-size: 0.875rem; font-weight: 600; }
+.billDue { font-size: 0.75rem; color: var(--color-warning); font-weight: 500; }
+.billAmount { font-size: 0.875rem; font-weight: 700; }
 
 .healthMini {
   display: flex;
@@ -196,13 +203,19 @@
   border-radius: var(--border-radius-md);
   margin-bottom: 16px;
   cursor: pointer;
-  border: 1px solid var(--color-border);
-  background-color: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow);
+  transition: transform var(--transition-fast);
 }
 
+.healthMini:active { transform: scale(0.98); }
+
 .healthScore {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -211,49 +224,49 @@
   font-weight: 700;
   color: white;
   flex-shrink: 0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
 
-.healthLabel {
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.healthDesc {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-}
+.healthLabel { font-size: 0.875rem; font-weight: 600; }
+.healthDesc { font-size: 0.75rem; color: var(--color-text-secondary); }
 
 .goalsList {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-bottom: 20px;
+  gap: 12px;
 }
 
 .goalRow {
   cursor: pointer;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-radius: var(--border-radius-sm);
+  padding: 12px 14px;
+  border: var(--glass-border);
+  transition: transform var(--transition-fast);
 }
 
-.goalName {
+.goalRow:active { transform: scale(0.98); }
+
+.goalName { font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; }
+.goalValues { font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 4px; }
+
+.emptyState {
+  text-align: center;
+  padding: 24px;
+  color: var(--color-text-hint);
   font-size: 0.8125rem;
-  font-weight: 500;
-  margin-bottom: 4px;
-}
-
-.goalValues {
-  font-size: 0.75rem;
-  color: var(--color-text-secondary);
-  margin-top: 2px;
 }
 
 .fab {
   position: fixed;
-  bottom: 80px;
+  bottom: 84px;
   right: 20px;
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background-color: var(--color-primary);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: white;
   font-size: 2rem;
   display: flex;
@@ -261,29 +274,16 @@
   justify-content: center;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(21, 101, 192, 0.4);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
   z-index: 50;
 }
 
-.fab:hover {
-  background-color: #0D47A1;
-}
-
-.emptyState {
-  text-align: center;
-  padding: 20px;
-  color: var(--color-text-secondary);
-  font-size: 0.8125rem;
-}
-
-.section {
-  margin-bottom: 20px;
-}
-
 .card {
-  background-color: var(--color-surface);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border-radius: var(--border-radius-md);
   padding: 16px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-  border: 1px solid var(--color-border);
+  box-shadow: var(--glass-shadow);
+  border: var(--glass-border);
 }

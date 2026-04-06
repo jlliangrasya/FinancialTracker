@@ -22,7 +22,7 @@ export default function PendingApproval() {
       const newStatus = settings?.status
       if (newStatus === 'approved') {
         await refreshUserProfile(currentUser.uid)
-        navigate('/pin-setup')
+        navigate('/pin')
       } else if (newStatus === 'rejected') {
         setStatus('rejected')
       }

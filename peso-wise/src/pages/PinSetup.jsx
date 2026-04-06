@@ -70,7 +70,7 @@ export default function PinSetup() {
     await savePin(currentUser.uid, finalPin)
     let settings = await getUserSettings(currentUser.uid)
     if (!settings) {
-      await createUserSettings(currentUser.uid, { pinSetupCompleted: true })
+      await createUserSettings(currentUser.uid, currentUser.email || '', { pinSetupCompleted: true })
     } else {
       await updateUserSettings(currentUser.uid, { pinSetupCompleted: true })
     }

@@ -107,11 +107,12 @@ export default function AdminDashboard() {
             <div key={user.id} className={styles.card}>
               <div className={styles.cardHeader}>
                 <div className={styles.avatar}>
-                  {(user.email || user.userId || user.id).slice(0, 2).toUpperCase()}
+                  {(user.email || user.id).slice(0, 2).toUpperCase()}
                 </div>
                 <div className={styles.cardInfo}>
-                  <p className={styles.email}>{user.email || user.userId || user.id}</p>
+                  <p className={styles.email}>{user.email || 'No email'}</p>
                   <p className={styles.date}>Joined {formatDate(user.createdAt)}</p>
+                  {user.role === 'superadmin' && <span className={styles.adminBadge}>Admin</span>}
                 </div>
               </div>
 

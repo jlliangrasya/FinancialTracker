@@ -1,15 +1,52 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{collection}/{document} {
-      allow read, write: if request.auth != null
-        && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null
-        && request.auth.uid == request.resource.data.userId;
-    }
+
+    // Settings collection (document ID = userId)
     match /settings/{userId} {
-      allow read, write: if request.auth != null
+      // Any authenticated user can create their OWN settings doc
+      allow create: if request.auth != null
         && request.auth.uid == userId;
+      // Users can read/write their own settings
+      allow read, update, delete: if request.auth != null
+        && request.auth.uid == userId;
+      // Superadmins can read and update ANY settings (admin dashboard)
+      allow read, update: if request.auth != null
+        && get(/databases/$(database)/documents/settings/$(request.auth.uid)).data.role == 'superadmin';
+    }
+
+    // All other user-scoped collections (transactions, transfers, bills, budgets, etc.)
+    match /transactions/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /transfers/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /bills/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /budgets/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /budgetPeriods/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /savingsGoals/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /investments/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+    match /debts/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
   }
 }

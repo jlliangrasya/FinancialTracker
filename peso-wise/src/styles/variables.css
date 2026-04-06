@@ -30,7 +30,7 @@
 
   --bg-gradient: linear-gradient(160deg, #E8F0FE 0%, #F0F4FA 30%, #FCE7F3 70%, #EDE9FE 100%);
   --overlay-bg: rgba(15, 23, 42, 0.2);
-  --nav-bg: rgba(255, 255, 255, 0.72);
+  --nav-bg: rgba(255, 255, 255, 0.82);
   --numpad-bg: rgba(241, 245, 249, 0.6);
   --numpad-active: rgba(203, 213, 225, 0.8);
   --tab-active-bg: var(--color-surface-solid);
@@ -70,7 +70,7 @@
 
   --bg-gradient: linear-gradient(160deg, #0B1120 0%, #111827 30%, #1A1033 70%, #0B1120 100%);
   --overlay-bg: rgba(0, 0, 0, 0.4);
-  --nav-bg: rgba(15, 23, 42, 0.8);
+  --nav-bg: rgba(15, 23, 42, 0.85);
   --numpad-bg: rgba(51, 65, 85, 0.4);
   --numpad-active: rgba(71, 85, 105, 0.6);
   --tab-active-bg: var(--color-surface-solid);

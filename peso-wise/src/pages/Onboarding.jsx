@@ -11,7 +11,7 @@ import styles from './Onboarding.module.css'
 export default function Onboarding() {
   const [step, setStep] = useState(1)
   const [banks, setBanks] = useState(
-    DEFAULT_BANKS.map(name => ({ name, selected: true, openingBalance: 0, color: getColor(name) }))
+    DEFAULT_BANKS.map(name => ({ name, selected: false, openingBalance: 0, color: getColor(name) }))
   )
   const [customBankName, setCustomBankName] = useState('')
   const [showAddBank, setShowAddBank] = useState(false)
@@ -67,7 +67,7 @@ export default function Onboarding() {
 
       let settings = await getUserSettings(currentUser.uid)
       if (!settings) {
-        await createUserSettings(currentUser.uid, {
+        await createUserSettings(currentUser.uid, currentUser.email || '', {
           banks: selectedBanks,
           onboardingCompleted: true,
           pinSetupCompleted: true,
@@ -129,8 +129,8 @@ export default function Onboarding() {
 
       {step === 1 && (
         <>
-          <h1 className={styles.title}>Which banks do you use?</h1>
-          <p className={styles.subtitle}>Enter your current balance in each account</p>
+          <h1 className={styles.title}>Select your bank accounts</h1>
+          <p className={styles.subtitle}>Pick your banks and enter your current balance for each one</p>
           <div className={styles.bankList}>
             {banks.map((bank, i) => (
               <div key={bank.name} className={`${styles.bankItem} ${bank.selected ? styles.selected : ''}`}>
@@ -145,10 +145,11 @@ export default function Onboarding() {
                   <input
                     type="number"
                     className={styles.balanceInput}
-                    placeholder="₱0.00"
+                    placeholder="Current balance"
                     value={bank.openingBalance || ''}
                     onChange={e => updateBalance(i, e.target.value)}
                     inputMode="decimal"
+                    autoFocus
                   />
                 )}
               </div>

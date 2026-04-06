@@ -12,14 +12,13 @@ export async function getUserSettings(userId) {
   return null
 }
 
-async function superAdminExists() {
-  const q = query(collection(db, COLLECTION), where('role', '==', 'superadmin'), limit(1))
-  const snapshot = await getDocs(q)
-  return !snapshot.empty
-}
-
 export async function createUserSettings(userId, email = '', data = {}) {
-  const isFirst = !(await superAdminExists())
+  // Check if this user's doc already exists (shouldn't, but safety check)
+  const existing = await getUserSettings(userId)
+  if (existing) return existing
+
+  // New users are always regular users with pending status.
+  // The first superadmin was set up during initial deployment.
   const defaults = {
     userId,
     email,
@@ -31,10 +30,10 @@ export async function createUserSettings(userId, email = '', data = {}) {
     customIncomeCategories: [],
     onboardingCompleted: false,
     pinSetupCompleted: false,
-    role: isFirst ? 'superadmin' : 'user',
-    status: isFirst ? 'approved' : 'pending',
+    role: 'user',
+    status: 'pending',
     paymentReference: '',
-    approvedAt: isFirst ? Timestamp.now() : null,
+    approvedAt: null,
     rejectedAt: null,
     rejectedReason: '',
     createdAt: Timestamp.now(),

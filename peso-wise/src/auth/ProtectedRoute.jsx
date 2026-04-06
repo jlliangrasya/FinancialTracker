@@ -43,17 +43,9 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/login" state={{ from: location }} replace />
   }
 
-  // Account approval check (skip for existing users without a status field)
-  const accountStatus = userProfile?.status
-  if (accountStatus === 'pending') {
-    return <Navigate to="/pending-approval" replace />
-  }
-  if (accountStatus === 'rejected') {
-    return <Navigate to="/rejected" replace />
-  }
-
   const pinSetupDone = settings?.pinSetupCompleted
 
+  // Let users complete PIN + onboarding first, even if pending
   if (!pinSetupDone && location.pathname !== '/pin-setup') {
     return <Navigate to="/pin-setup" replace />
   }
@@ -64,6 +56,15 @@ export default function ProtectedRoute({ children }) {
 
   if (!settings?.onboardingCompleted && location.pathname !== '/onboarding' && isPinVerified) {
     return <Navigate to="/onboarding" replace />
+  }
+
+  // Only enforce approval AFTER setup is complete
+  const accountStatus = userProfile?.status
+  if (settings?.onboardingCompleted && accountStatus === 'pending') {
+    return <Navigate to="/pending-approval" replace />
+  }
+  if (accountStatus === 'rejected') {
+    return <Navigate to="/rejected" replace />
   }
 
   return children

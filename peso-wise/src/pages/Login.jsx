@@ -21,20 +21,16 @@ export default function Login() {
     if (!settings) {
       settings = await createUserSettings(user.uid, user.email || '')
     }
-    // Block pending/rejected users before proceeding
-    if (settings.status === 'pending') {
-      navigate('/pending-approval')
-      return
-    }
-    if (settings.status === 'rejected') {
-      navigate('/rejected')
-      return
-    }
+    // Let new users complete setup first (PIN + onboarding), then check approval
     const hasPinStored = !!localStorage.getItem(getPinKey(user.uid))
     if (!settings.pinSetupCompleted || !hasPinStored) {
       navigate('/pin-setup')
     } else if (!settings.onboardingCompleted) {
       navigate('/onboarding')
+    } else if (settings.status === 'pending') {
+      navigate('/pending-approval')
+    } else if (settings.status === 'rejected') {
+      navigate('/rejected')
     } else {
       navigate('/pin')
     }
@@ -59,6 +55,7 @@ export default function Login() {
       else if (err.code === 'auth/email-already-in-use') setError('Email is already registered.')
       else if (err.code === 'auth/weak-password') setError('Password must be at least 6 characters.')
       else if (err.code === 'auth/invalid-email') setError('Please enter a valid email address.')
+      else if (err.code === 'permission-denied' || err.message?.includes('permission')) setError('Account creation failed. Please try again.')
       else setError(err.message)
     }
     setLoading(false)

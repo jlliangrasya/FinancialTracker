@@ -136,8 +136,8 @@
 }
 
 .email {
-  font-size: 0.875rem;
-  font-weight: 500;
+  font-size: 0.9375rem;
+  font-weight: 600;
   color: var(--color-text-primary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -148,6 +148,19 @@
   font-size: 0.75rem;
   color: var(--color-text-hint);
   margin-top: 2px;
+}
+
+.adminBadge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 2px 8px;
+  border-radius: var(--border-radius-full);
+  margin-top: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .refRow,

@@ -13,12 +13,28 @@ export async function getUserSettings(userId) {
 }
 
 export async function createUserSettings(userId, email = '', data = {}) {
-  // Check if this user's doc already exists (shouldn't, but safety check)
+  // Check if this user's doc already exists
   const existing = await getUserSettings(userId)
   if (existing) return existing
 
-  // New users are always regular users with pending status.
-  // The first superadmin was set up during initial deployment.
+  // First user becomes superadmin (auto-approved).
+  // We check by reading only OUR OWN doc — if it doesn't exist and we're
+  // creating it, we optimistically assume we're the first user.
+  // The Firestore rule only lets us read our own settings doc, so we can't
+  // query other users' docs. Instead, we use a dedicated "meta" doc.
+  let isFirst = false
+  try {
+    const metaRef = doc(db, 'settings', '__meta__')
+    const metaSnap = await getDoc(metaRef)
+    if (!metaSnap.exists()) {
+      // No meta doc → this is the very first user
+      isFirst = true
+    }
+  } catch {
+    // If we can't read the meta doc, assume superadmin already exists
+    isFirst = false
+  }
+
   const defaults = {
     userId,
     email,
@@ -30,8 +46,8 @@ export async function createUserSettings(userId, email = '', data = {}) {
     customIncomeCategories: [],
     onboardingCompleted: false,
     pinSetupCompleted: false,
-    role: 'user',
-    status: 'pending',
+    role: isFirst ? 'superadmin' : 'user',
+    status: isFirst ? 'approved' : 'pending',
     paymentReference: '',
     approvedAt: null,
     rejectedAt: null,
@@ -41,6 +57,14 @@ export async function createUserSettings(userId, email = '', data = {}) {
   }
   const settings = { ...defaults, ...data }
   await setDoc(doc(db, COLLECTION, userId), settings)
+
+  // Mark that at least one user exists so future registrations aren't superadmin
+  if (isFirst) {
+    try {
+      await setDoc(doc(db, COLLECTION, '__meta__'), { initialized: true, createdAt: Timestamp.now() })
+    } catch { /* non-critical */ }
+  }
+
   return settings
 }
 

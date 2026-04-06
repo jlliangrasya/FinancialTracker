@@ -14,15 +14,16 @@
   left: 0;
   right: 0;
   max-height: 90vh;
-  background: var(--nav-bg);
-  backdrop-filter: blur(32px) saturate(180%);
-  -webkit-backdrop-filter: blur(32px) saturate(180%);
+  background: var(--nav-glass);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
   border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
   z-index: 301;
   animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
   overflow-y: auto;
   padding-bottom: env(safe-area-inset-bottom, 20px);
   box-shadow: 0 -8px 40px rgba(15, 23, 42, 0.1);
+  border-top: 1px solid var(--nav-border);
 }
 
 .handle {

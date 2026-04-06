@@ -2,6 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // Settings meta doc — any authenticated user can read/create (used to detect first user)
+    match /settings/__meta__ {
+      allow read, create: if request.auth != null;
+    }
+
     // Settings collection (document ID = userId)
     match /settings/{userId} {
       // Any authenticated user can create their OWN settings doc

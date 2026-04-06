@@ -25,7 +25,7 @@ export default function Onboarding() {
   const navigate = useNavigate()
 
   function getColor(name) {
-    const colors = { EastWest: '#1565C0', Maribank: '#E65100', GCash: '#2E7D32', PNB: '#C62828' }
+    const colors = { Cash: '#6D4C41', GCash: '#2E7D32', EastWest: '#1565C0', Maribank: '#E65100', PNB: '#C62828' }
     return colors[name] || '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
   }
 

@@ -79,23 +79,23 @@ export default function PendingApproval() {
           <div className={styles.paymentCard}>
             <div className={styles.paymentRow}>
               <span className={styles.paymentLabel}>Amount</span>
-              <span className={styles.paymentValue}>₱99.00</span>
+              <span className={styles.paymentValue}>₱399.00</span>
             </div>
             <div className={styles.paymentRow}>
               <span className={styles.paymentLabel}>GCash Number</span>
-              <span className={styles.paymentValue}>09XX-XXX-XXXX</span>
+              <span className={styles.paymentValue}>0938-505-6299</span>
             </div>
             <div className={styles.paymentRow}>
               <span className={styles.paymentLabel}>Account Name</span>
-              <span className={styles.paymentValue}>Peso Wise</span>
+              <span className={styles.paymentValue}>JI****N GR**CE B.</span>
             </div>
           </div>
 
           <form className={styles.form} onSubmit={handleSubmit}>
             <div className={styles.fieldGroup}>
-              <label className={styles.label}>GCash Reference Number</label>
+              <label className={styles.label}>GCash Reference Number (Last 6 Digits)</label>
               <input
-                className="input"
+                className="input-field"
                 type="text"
                 placeholder="e.g. 1234567890123"
                 value={refNumber}
@@ -104,7 +104,7 @@ export default function PendingApproval() {
               />
             </div>
             {error && <p className={styles.error}>{error}</p>}
-            <button className="btn btn-primary" type="submit" disabled={loading}>
+            <button className="btn-primary" type="submit" disabled={loading}>
               {loading ? <span className={styles.spinner} /> : 'Submit Payment'}
             </button>
           </form>

@@ -42,4 +42,4 @@ export const BILL_FREQUENCIES = [
   'Monthly', 'Quarterly', 'Semi-Annual', 'Annual', 'One-time'
 ]
 
-export const DEFAULT_BANKS = ['EastWest', 'Maribank', 'GCash', 'PNB']
+export const DEFAULT_BANKS = ['Cash', 'GCash', 'EastWest', 'Maribank', 'PNB']

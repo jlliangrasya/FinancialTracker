@@ -116,12 +116,12 @@ export default function AdminDashboard() {
                 </div>
               </div>
 
-              {user.paymentReference && (
-                <div className={styles.refRow}>
-                  <span className={styles.refLabel}>GCash Ref</span>
-                  <span className={styles.refValue}>{user.paymentReference}</span>
-                </div>
-              )}
+              <div className={styles.refRow}>
+                <span className={styles.refLabel}>GCash Ref</span>
+                <span className={`${styles.refValue} ${!user.paymentReference ? styles.noPayment : ''}`}>
+                  {user.paymentReference || 'No payment yet'}
+                </span>
+              </div>
 
               {user.status === 'rejected' && user.rejectedReason && (
                 <div className={styles.rejectedReason}>

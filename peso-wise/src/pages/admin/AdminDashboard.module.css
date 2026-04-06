@@ -150,6 +150,11 @@
   margin-top: 2px;
 }
 
+.noPayment {
+  color: var(--color-warning);
+  font-style: italic;
+}
+
 .adminBadge {
   display: inline-block;
   font-size: 0.6875rem;

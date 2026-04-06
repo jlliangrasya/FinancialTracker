@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { getAllUsers } from '../firebase/settings'
 import styles from './BottomNav.module.css'
 
 const DRAWER_ITEMS = [
@@ -18,9 +19,17 @@ const ADMIN_ITEM = { label: 'Admin', icon: '\u{1F6E1}\uFE0F', path: '/admin', bg
 
 export default function BottomNav({ onAddClick }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const [pendingCount, setPendingCount] = useState(0)
   const navigate = useNavigate()
   const location = useLocation()
   const { isAdmin } = useAuth()
+
+  useEffect(() => {
+    if (!isAdmin) return
+    getAllUsers()
+      .then(users => setPendingCount(users.filter(u => u.status === 'pending').length))
+      .catch(() => {})
+  }, [isAdmin, drawerOpen])
 
   const drawerItems = isAdmin ? [...DRAWER_ITEMS, ADMIN_ITEM] : DRAWER_ITEMS
 
@@ -60,7 +69,10 @@ export default function BottomNav({ onAddClick }) {
           className={`${styles.tab} ${drawerOpen ? styles.active : ''}`}
           onClick={() => setDrawerOpen(!drawerOpen)}
         >
-          <span className={styles.icon}>{'\u2630'}</span>
+          <span className={styles.iconWrap}>
+            <span className={styles.icon}>{'\u2630'}</span>
+            {isAdmin && pendingCount > 0 && <span className={styles.redDot} />}
+          </span>
           More
         </button>
       </nav>
@@ -77,8 +89,13 @@ export default function BottomNav({ onAddClick }) {
                   className={styles.drawerItem}
                   onClick={() => handleDrawerNav(item.path)}
                 >
-                  <div className={styles.drawerIcon} style={{ backgroundColor: item.bg }}>
-                    {item.icon}
+                  <div className={styles.drawerIconWrap}>
+                    <div className={styles.drawerIcon} style={{ backgroundColor: item.bg }}>
+                      {item.icon}
+                    </div>
+                    {item.path === '/admin' && pendingCount > 0 && (
+                      <span className={styles.badge}>{pendingCount}</span>
+                    )}
                   </div>
                   {item.label}
                 </button>

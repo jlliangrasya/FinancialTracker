@@ -85,11 +85,10 @@ export default function Settings() {
     await loadData()
   }
 
-  async function updateBankBalance(index, value) {
+  async function saveBankBalance(index, value) {
     const banks = [...settings.banks]
     banks[index] = { ...banks[index], openingBalance: Number(value) || 0 }
     await updateUserSettings(currentUser.uid, { banks })
-    await loadData()
   }
 
   async function addCustomExpenseCategory() {
@@ -231,7 +230,7 @@ export default function Settings() {
             <div className={styles.bankColor} style={{ backgroundColor: b.color }} />
             <span className={styles.bankName}>{b.name}</span>
             <div className={styles.bankBalance}>
-              <input type="number" value={b.openingBalance} onChange={e => updateBankBalance(i, e.target.value)} inputMode="decimal" />
+              <input type="number" defaultValue={b.openingBalance} onBlur={e => saveBankBalance(i, e.target.value)} inputMode="decimal" />
             </div>
           </div>
         ))}

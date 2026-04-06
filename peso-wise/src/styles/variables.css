@@ -38,6 +38,17 @@
   --tab-active-bg: var(--color-surface-solid);
   --skeleton-a: #E2E8F0;
   --skeleton-b: #F1F5F9;
+
+  /* Liquid Glass tokens — iOS style */
+  --lg-tint: rgba(245, 248, 255, 0.55);
+  --lg-highlight: rgba(255, 255, 255, 0.5);
+  --lg-edge: rgba(255, 255, 255, 0.55);
+  --lg-edge-inner: rgba(255, 255, 255, 0.3);
+  --lg-shadow: rgba(0, 0, 0, 0.06);
+  --lg-handle: rgba(0, 0, 0, 0.12);
+  --lg-item-active: rgba(0, 0, 0, 0.04);
+  --lg-pill-bg: rgba(0, 0, 0, 0.03);
+  --lg-tab-active: rgba(255, 255, 255, 0.8);
 }
 
 /* ── Dark Mode ── */
@@ -80,6 +91,17 @@
   --tab-active-bg: var(--color-surface-solid);
   --skeleton-a: #1E293B;
   --skeleton-b: #334155;
+
+  /* Liquid Glass tokens — dark */
+  --lg-tint: rgba(30, 41, 59, 0.45);
+  --lg-highlight: rgba(148, 163, 184, 0.08);
+  --lg-edge: rgba(148, 163, 184, 0.15);
+  --lg-edge-inner: rgba(148, 163, 184, 0.06);
+  --lg-shadow: rgba(0, 0, 0, 0.2);
+  --lg-handle: rgba(255, 255, 255, 0.15);
+  --lg-item-active: rgba(255, 255, 255, 0.05);
+  --lg-pill-bg: rgba(255, 255, 255, 0.04);
+  --lg-tab-active: rgba(255, 255, 255, 0.1);
 }
 
 /* ── Shared tokens ── */

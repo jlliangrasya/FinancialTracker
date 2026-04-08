@@ -40,9 +40,9 @@
   --skeleton-b: #F1F5F9;
 
   /* Liquid Glass tokens — iOS style */
-  --lg-tint: rgba(245, 248, 255, 0.55);
-  --lg-highlight: rgba(255, 255, 255, 0.5);
-  --lg-edge: rgba(255, 255, 255, 0.55);
+  --lg-tint: rgba(245, 248, 255, 0.35);
+  --lg-highlight: rgba(255, 255, 255, 0.35);
+  --lg-edge: rgba(255, 255, 255, 0.6);
   --lg-edge-inner: rgba(255, 255, 255, 0.3);
   --lg-shadow: rgba(0, 0, 0, 0.06);
   --lg-handle: rgba(0, 0, 0, 0.12);
@@ -93,9 +93,9 @@
   --skeleton-b: #334155;
 
   /* Liquid Glass tokens — dark */
-  --lg-tint: rgba(30, 41, 59, 0.45);
-  --lg-highlight: rgba(148, 163, 184, 0.08);
-  --lg-edge: rgba(148, 163, 184, 0.15);
+  --lg-tint: rgba(30, 41, 59, 0.3);
+  --lg-highlight: rgba(148, 163, 184, 0.06);
+  --lg-edge: rgba(148, 163, 184, 0.2);
   --lg-edge-inner: rgba(148, 163, 184, 0.06);
   --lg-shadow: rgba(0, 0, 0, 0.2);
   --lg-handle: rgba(255, 255, 255, 0.15);

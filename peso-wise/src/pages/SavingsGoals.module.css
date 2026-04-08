@@ -21,5 +21,9 @@
 .formRow { display: flex; gap: 10px; }
 .formRow > * { flex: 1; }
 .addBtn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1px dashed var(--color-primary); border-radius: var(--border-radius-sm); background: none; cursor: pointer; width: 100%; color: var(--color-primary); font-size: 0.875rem; margin-bottom: 16px; }
+.linkToggle { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 0.8125rem; color: var(--color-text-primary); cursor: pointer; padding: 8px 0; }
+.linkToggle input { width: 18px; height: 18px; accent-color: var(--color-primary); }
+.linkHint { width: 100%; font-size: 0.75rem; color: var(--color-text-hint); font-style: italic; }
+.linkedNote { font-size: 0.75rem; color: var(--color-primary); margin-top: 4px; font-style: italic; }
 .empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }
 .emptyIcon { font-size: 3rem; margin-bottom: 12px; }

@@ -17,6 +17,7 @@ export default function HealthScore() {
   const [debts, setDebts] = useState([])
   const [savingsGoals, setSavingsGoals] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showInfo, setShowInfo] = useState(false)
   const { currentUser } = useAuth()
   const monthLabel = getMonthLabel()
 
@@ -65,7 +66,10 @@ export default function HealthScore() {
 
   return (
     <div className={styles.container}>
-      <h1 className={styles.title}>Financial Health Score</h1>
+      <div className={styles.titleRow}>
+        <h1 className={styles.title}>Financial Health Score</h1>
+        <button className={styles.infoBtn} onClick={() => setShowInfo(!showInfo)} aria-label="Score guide">?</button>
+      </div>
       <div className={styles.gauge}>
         <div className={styles.scoreCircle} style={{ borderColor: color }}>
           <div className={styles.scoreNumber} style={{ color }}>{score.total}</div>
@@ -84,6 +88,98 @@ export default function HealthScore() {
           </div>
         ))}
       </div>
+
+      {showInfo && (
+        <div className={styles.infoSection}>
+          <h2 className={styles.infoTitle}>Understanding Your Score</h2>
+
+          <div className={styles.infoCard}>
+            <h3>Score Colors</h3>
+            <div className={styles.legendList}>
+              <div className={styles.legendItem}>
+                <span className={styles.legendDot} style={{ backgroundColor: 'var(--color-success)' }} />
+                <div>
+                  <strong>Green — Excellent (80–100)</strong>
+                  <p>Your finances are in great shape. Keep up healthy habits.</p>
+                </div>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={styles.legendDot} style={{ backgroundColor: 'var(--color-warning)' }} />
+                <div>
+                  <strong>Yellow — Fair (50–79)</strong>
+                  <p>You're on track but there's room to improve in a few areas.</p>
+                </div>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={styles.legendDot} style={{ backgroundColor: 'var(--color-danger)' }} />
+                <div>
+                  <strong>Red — Needs Attention (0–49)</strong>
+                  <p>Some areas need immediate focus. Start with your weakest pillar.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.infoCard}>
+            <h3>The 5 Pillars (20 pts each)</h3>
+            <div className={styles.pillarGuideList}>
+              <div className={styles.pillarGuide}>
+                <span className={styles.pillarGuideIcon}>💰</span>
+                <div>
+                  <strong>Savings Rate</strong>
+                  <p>How much of your income you save each month. Aim for at least 20%.</p>
+                </div>
+              </div>
+              <div className={styles.pillarGuide}>
+                <span className={styles.pillarGuideIcon}>📊</span>
+                <div>
+                  <strong>Budget Adherence</strong>
+                  <p>How well you stay within your set category budgets. Overspending lowers this score.</p>
+                </div>
+              </div>
+              <div className={styles.pillarGuide}>
+                <span className={styles.pillarGuideIcon}>📋</span>
+                <div>
+                  <strong>Bill Consistency</strong>
+                  <p>Whether your bills are paid on time. Unpaid or overdue bills reduce this score.</p>
+                </div>
+              </div>
+              <div className={styles.pillarGuide}>
+                <span className={styles.pillarGuideIcon}>💳</span>
+                <div>
+                  <strong>Debt-to-Income</strong>
+                  <p>Your total debt relative to your income. Lower debt = higher score. Aim to keep debt under 30% of income.</p>
+                </div>
+              </div>
+              <div className={styles.pillarGuide}>
+                <span className={styles.pillarGuideIcon}>🛡️</span>
+                <div>
+                  <strong>Emergency Fund</strong>
+                  <p>Whether you have an active savings goal for emergencies. A fund covering 3–6 months of expenses is ideal.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.infoCard}>
+            <h3>Progress Bar Colors</h3>
+            <div className={styles.legendList}>
+              <div className={styles.legendItem}>
+                <div className={styles.barSwatch} style={{ backgroundColor: 'var(--color-success)' }} />
+                <p>High score (14–20) — Doing well in this area</p>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.barSwatch} style={{ backgroundColor: 'var(--color-warning)' }} />
+                <p>Mid score (7–13) — Can be improved</p>
+              </div>
+              <div className={styles.legendItem}>
+                <div className={styles.barSwatch} style={{ backgroundColor: 'var(--color-danger)' }} />
+                <p>Low score (0–6) — Needs attention</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

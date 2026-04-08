@@ -9,10 +9,33 @@
   margin-bottom: 16px;
 }
 
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 12px;
+}
+
+.monthSelect {
+  padding: 6px 12px;
+  border: 1.5px solid var(--color-border-solid);
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  background-color: var(--color-surface-solid);
+  color: var(--color-primary);
+  min-height: 36px;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%232563EB' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 24px;
+}
+
 .title {
   font-size: 1.25rem;
   font-weight: 700;
-  margin-bottom: 12px;
 }
 
 .summary {
@@ -135,6 +158,10 @@
 
 .txnAmount.expense {
   color: var(--color-danger);
+}
+
+.txnAmount.bill {
+  color: var(--color-warning);
 }
 
 .txnAmount.transfer {

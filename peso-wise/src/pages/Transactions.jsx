@@ -4,7 +4,8 @@ import { getTransactions, deleteTransaction } from '../firebase/transactions'
 import { getTransfers } from '../firebase/transfers'
 import { useToast } from '../components/Toast'
 import { formatCurrency } from '../utils/formatCurrency'
-import { formatDate, isToday, isYesterday, getMonthLabel } from '../utils/dateHelpers'
+import { formatDate, isToday, isYesterday, getMonthLabel, getCurrentMonthString } from '../utils/dateHelpers'
+import { getBills } from '../firebase/bills'
 import { EXPENSE_CATEGORIES } from '../utils/categories'
 import styles from './Transactions.module.css'
 
@@ -15,11 +16,13 @@ EXPENSE_CATEGORIES.forEach((cat, i) => { CATEGORY_COLORS[cat] = COLORS[i % COLOR
 export default function Transactions() {
   const [transactions, setTransactions] = useState([])
   const [transfers, setTransfers] = useState([])
+  const [bills, setBillsData] = useState([])
   const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState('all')
   const [bankFilter, setBankFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
   const [search, setSearch] = useState('')
+  const [monthFilter, setMonthFilter] = useState(getCurrentMonthString())
   const { currentUser } = useAuth()
   const { showToast } = useToast()
 
@@ -31,17 +34,49 @@ export default function Transactions() {
     if (!currentUser) return
     setLoading(true)
     try {
-      const [txns, xfers] = await Promise.all([
+      const [txns, xfers, bl] = await Promise.all([
         getTransactions(currentUser.uid),
         getTransfers(currentUser.uid),
+        getBills(currentUser.uid),
       ])
       setTransactions(txns)
       setTransfers(xfers)
+      setBillsData(bl)
     } catch (err) {
       console.error(err)
     }
     setLoading(false)
   }
+
+  // Generate month options from all data
+  const monthOptions = useMemo(() => {
+    const months = new Set()
+    transactions.forEach(t => {
+      const d = t.date?.toDate ? t.date.toDate() : new Date(t.date)
+      months.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+    })
+    transfers.forEach(t => {
+      const d = t.date?.toDate ? t.date.toDate() : new Date(t.date)
+      months.add(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`)
+    })
+    months.add(getCurrentMonthString())
+    return [...months].sort().reverse()
+  }, [transactions, transfers])
+
+  // Bills paid this month
+  const paidBills = useMemo(() => {
+    return bills
+      .filter(b => b.paidMonths && b.paidMonths.includes(monthFilter))
+      .map(b => ({
+        id: `bill-${b.id}-${monthFilter}`,
+        itemType: 'bill',
+        description: b.name,
+        category: 'Bills & Utilities',
+        amount: b.amount,
+        bank: b.bank || '',
+        sortDate: new Date(`${monthFilter}-${String(b.dueDay || 1).padStart(2, '0')}`),
+      }))
+  }, [bills, monthFilter])
 
   const allItems = useMemo(() => {
     const items = [
@@ -57,9 +92,16 @@ export default function Transactions() {
         category: 'Transfer',
         sortDate: t.date?.toDate ? t.date.toDate() : new Date(t.date),
       })),
-    ].sort((a, b) => b.sortDate - a.sortDate)
-    return items
-  }, [transactions, transfers])
+      ...paidBills,
+    ]
+    // Filter by selected month
+    const filtered = items.filter(item => {
+      const d = item.sortDate
+      const m = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      return m === monthFilter
+    })
+    return filtered.sort((a, b) => b.sortDate - a.sortDate)
+  }, [transactions, transfers, paidBills, monthFilter])
 
   const filtered = useMemo(() => {
     return allItems.filter(item => {
@@ -132,7 +174,16 @@ export default function Transactions() {
   return (
     <div className={styles.container}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Transactions</h1>
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>Transactions</h1>
+          <select className={styles.monthSelect} value={monthFilter} onChange={e => setMonthFilter(e.target.value)}>
+            {monthOptions.map(m => {
+              const [y, mo] = m.split('-')
+              const label = new Date(y, mo - 1).toLocaleDateString('en-PH', { month: 'short', year: 'numeric' })
+              return <option key={m} value={m}>{label}</option>
+            })}
+          </select>
+        </div>
         <div className={styles.summary}>
           <div className={styles.summaryCard} style={{ backgroundColor: 'var(--color-success-light)' }}>
             <div className={styles.summaryLabel}>Income</div>
@@ -155,6 +206,7 @@ export default function Transactions() {
           <option value="expense">Expenses</option>
           <option value="income">Income</option>
           <option value="transfer">Transfers</option>
+          <option value="bill">Bills Paid</option>
         </select>
         <select value={bankFilter} onChange={e => setBankFilter(e.target.value)}>
           <option value="all">All banks</option>
@@ -165,7 +217,7 @@ export default function Transactions() {
           {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
         </select>
         <input
-          type="text"
+          type="text" 
           className={styles.searchInput}
           placeholder="Search..."
           value={search}
@@ -196,9 +248,9 @@ export default function Transactions() {
                   </div>
                 </div>
                 <div className={`${styles.txnAmount} ${styles[item.itemType]}`}>
-                  {item.itemType === 'income' ? '+' : item.itemType === 'expense' ? '-' : ''}{formatCurrency(item.amount)}
+                  {item.itemType === 'income' ? '+' : item.itemType === 'expense' || item.itemType === 'bill' ? '-' : ''}{formatCurrency(item.amount)}
                 </div>
-                {item.itemType !== 'transfer' && (
+                {item.itemType === 'expense' && (
                   <button className={styles.deleteBtn} onClick={() => handleDelete(item)}>✕</button>
                 )}
               </div>

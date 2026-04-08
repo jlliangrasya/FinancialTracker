@@ -5,6 +5,7 @@ import { getAllUsers } from '../firebase/settings'
 import styles from './BottomNav.module.css'
 
 const DRAWER_ITEMS = [
+  { label: 'Transactions', icon: '\u{1F4DD}', path: '/transactions', bg: '#E3F2FD' },
   { label: 'Bills', icon: '\u{1F4CB}', path: '/bills', bg: '#FFF3E0' },
   { label: 'Savings', icon: '\u{1F3AF}', path: '/savings-goals', bg: '#E8F5E9' },
   { label: 'Invest', icon: '\u{1F4C8}', path: '/investments', bg: '#E3F2FD' },

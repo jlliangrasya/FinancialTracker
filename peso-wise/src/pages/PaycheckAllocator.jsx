@@ -17,6 +17,8 @@ export default function PaycheckAllocator() {
 
   const [totalBudget, setTotalBudget] = useState(rawAmount || 0)
   const [periodType, setPeriodType] = useState('monthly')
+  const [customStart, setCustomStart] = useState('')
+  const [customEnd, setCustomEnd] = useState('')
   const [billsAlloc, setBillsAlloc] = useState(0)
   const [savingsAlloc, setSavingsAlloc] = useState(0)
   const [spendingAlloc, setSpendingAlloc] = useState(0)
@@ -101,6 +103,9 @@ export default function PaycheckAllocator() {
   const spendingPct = incomeAmount > 0 ? (spendingAlloc / incomeAmount) * 100 : 0
 
   function getPeriodDates() {
+    if (periodType === 'custom' && customStart && customEnd) {
+      return { start: new Date(customStart), end: new Date(customEnd) }
+    }
     const now = new Date()
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     let end
@@ -186,17 +191,31 @@ export default function PaycheckAllocator() {
       </p>
 
       {!editMode && (
-        <div className={styles.periodSelect}>
-          {['weekly', 'biweekly', 'monthly'].map(p => (
-            <button
-              key={p}
-              className={`${styles.periodPill} ${periodType === p ? styles.active : ''}`}
-              onClick={() => setPeriodType(p)}
-            >
-              {p.charAt(0).toUpperCase() + p.slice(1)}
-            </button>
-          ))}
-        </div>
+        <>
+          <div className={styles.periodSelect}>
+            {['weekly', 'biweekly', 'monthly', 'custom'].map(p => (
+              <button
+                key={p}
+                className={`${styles.periodPill} ${periodType === p ? styles.active : ''}`}
+                onClick={() => setPeriodType(p)}
+              >
+                {p.charAt(0).toUpperCase() + p.slice(1)}
+              </button>
+            ))}
+          </div>
+          {periodType === 'custom' && (
+            <div className={styles.dateRange}>
+              <div className={styles.dateField}>
+                <label className={styles.dateLabel}>Start date</label>
+                <input type="date" className="input-field" value={customStart} onChange={e => setCustomStart(e.target.value)} />
+              </div>
+              <div className={styles.dateField}>
+                <label className={styles.dateLabel}>End date</label>
+                <input type="date" className="input-field" value={customEnd} onChange={e => setCustomEnd(e.target.value)} />
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       <div className={styles.bucket}>

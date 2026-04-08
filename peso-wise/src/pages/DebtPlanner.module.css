@@ -1,28 +1,68 @@
 .container { padding: 16px; padding-bottom: 80px; max-width: 480px; margin: 0 auto; }
-.title { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
+.titleRow { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0; }
+.infoBtn { width: 32px; height: 32px; border-radius: 50%; background-color: var(--color-primary); color: white; border: none; font-size: 1rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+.infoOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-end; }
+.infoModal { background-color: var(--color-surface-solid); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; width: 100%; max-height: 85vh; overflow-y: auto; }
+.infoHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 12px; border-bottom: 1px solid var(--color-border-solid); position: sticky; top: 0; background-color: var(--color-surface-solid); z-index: 1; }
+.infoTitle { font-size: 1.125rem; font-weight: 700; margin: 0; }
+.infoClose { background: none; border: none; font-size: 1.25rem; color: var(--color-text-secondary); cursor: pointer; padding: 4px 8px; }
+.infoBody { padding: 16px 20px 32px; }
+.infoSection { margin-bottom: 20px; }
+.infoSection h3 { font-size: 0.9375rem; font-weight: 700; margin-bottom: 8px; color: var(--color-text-primary); }
+.infoSection p { font-size: 0.875rem; color: var(--color-text-secondary); line-height: 1.6; margin-bottom: 8px; }
+.infoList { font-size: 0.875rem; color: var(--color-text-secondary); line-height: 1.8; padding-left: 20px; }
+.infoList li { margin-bottom: 4px; }
+.strategyCard { display: flex; gap: 14px; padding: 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-solid); background-color: var(--color-background); }
+.strategyIcon { font-size: 2rem; flex-shrink: 0; }
+.infoPill { display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 12px; margin: 6px 0; }
+.infoPillGreen { background-color: var(--color-success-light); color: var(--color-success); }
+.infoPillBlue { background-color: var(--color-primary-light); color: var(--color-primary); }
+.infoNote { font-size: 0.8125rem; color: var(--color-text-secondary); font-style: italic; }
 .summary { display: flex; gap: 8px; margin-bottom: 16px; }
 .summaryCard { flex: 1; padding: 10px; border-radius: var(--border-radius-sm); text-align: center; background-color: var(--color-danger-light); }
 .summaryLabel { font-size: 0.6875rem; color: var(--color-text-secondary); text-transform: uppercase; }
 .summaryValue { font-size: 0.9375rem; font-weight: 700; margin-top: 2px; }
 .strategyToggle { display: flex; gap: 0; margin-bottom: 12px; background-color: var(--color-background); border-radius: var(--border-radius-sm); padding: 3px; }
 .strategyBtn { flex: 1; padding: 10px; text-align: center; font-size: 0.8125rem; font-weight: 500; border-radius: var(--border-radius-sm); color: var(--color-text-secondary); cursor: pointer; background: none; border: none; }
-.strategyBtn.active { background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); color: var(--color-primary); font-weight: 600; box-shadow: var(--glass-shadow); }
+.strategyBtn.active { background-color: var(--color-surface-solid); color: var(--color-primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 .comparison { font-size: 0.8125rem; text-align: center; padding: 8px; margin-bottom: 16px; color: var(--color-success); background-color: var(--color-success-light); border-radius: var(--border-radius-sm); }
 .debtList { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-.debtCard { padding: 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); }
+.debtCard { padding: 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-solid); background-color: var(--color-surface-solid); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
 .debtHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
 .debtName { font-size: 0.9375rem; font-weight: 600; }
 .priorityBadge { font-size: 0.6875rem; padding: 2px 8px; border-radius: 10px; background-color: var(--color-warning-light); color: var(--color-warning); font-weight: 600; }
 .debtMeta { display: flex; gap: 16px; font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 6px; }
 .debtBalance { font-size: 1.125rem; font-weight: 700; color: var(--color-danger); margin-bottom: 6px; }
-.extraCalc { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); margin-bottom: 16px; }
+.extraCalc { padding: 16px; border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-md); background-color: var(--color-surface-solid); box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 16px; }
 .extraCalc h3 { font-size: 0.9375rem; margin-bottom: 10px; }
 .extraResult { font-size: 0.8125rem; color: var(--color-success); margin-top: 8px; }
-.addForm { padding: 16px; border: 1px solid var(--color-border); border-radius: var(--border-radius-md); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); margin-bottom: 16px; }
+.addForm { padding: 16px; border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-md); background-color: var(--color-surface-solid); box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 16px; }
 .addForm h3 { font-size: 0.9375rem; margin-bottom: 12px; }
 .formGrid { display: flex; flex-direction: column; gap: 10px; }
 .formRow { display: flex; gap: 10px; }
 .formRow > * { flex: 1; }
 .addBtn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1px dashed var(--color-primary); border-radius: var(--border-radius-sm); background: none; cursor: pointer; width: 100%; color: var(--color-primary); font-size: 0.875rem; margin-bottom: 16px; }
 .deleteBtn { font-size: 0.6875rem; color: var(--color-danger); background: none; border: none; cursor: pointer; }
+.debtFooter { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.strategyExplainer { font-size: 0.8125rem; color: var(--color-text-secondary); text-align: center; margin-bottom: 12px; padding: 0 8px; font-style: italic; }
+.progressBtn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1px solid var(--color-primary); border-radius: var(--border-radius-sm); background: none; cursor: pointer; width: 100%; color: var(--color-primary); font-size: 0.875rem; font-weight: 600; margin-bottom: 16px; }
+.progressSummary { display: flex; gap: 8px; margin-bottom: 16px; }
+.progressSummaryCard { flex: 1; padding: 10px; border-radius: var(--border-radius-sm); text-align: center; background-color: var(--color-background); }
+.progressSummaryLabel { font-size: 0.6875rem; color: var(--color-text-secondary); text-transform: uppercase; }
+.progressSummaryValue { font-size: 0.9375rem; font-weight: 700; margin-top: 2px; }
+.progressDebtRow { padding: 12px 0; border-bottom: 1px solid var(--color-border); }
+.progressDebtRow:last-child { border-bottom: none; }
+.progressDebtHeader { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+.progressDebtOrder { width: 24px; height: 24px; border-radius: 50%; background-color: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+.progressDebtInfo { flex: 1; min-width: 0; }
+.progressDebtName { font-size: 0.875rem; font-weight: 600; }
+.progressDebtMeta { font-size: 0.75rem; color: var(--color-text-secondary); }
+.progressDebtMonths { font-size: 0.875rem; font-weight: 700; color: var(--color-success); flex-shrink: 0; }
+.progressBar { height: 6px; background-color: var(--color-background); border-radius: 3px; overflow: hidden; margin: 6px 0; }
+.progressBarFill { height: 100%; border-radius: 3px; min-width: 4px; transition: width 0.3s ease; }
+.progressDebtReason { font-size: 0.75rem; color: var(--color-text-hint); font-style: italic; }
+.progressCompare { margin-top: 16px; padding: 12px; background-color: var(--color-background); border-radius: var(--border-radius-sm); }
+.progressCompareRow { display: flex; justify-content: space-between; font-size: 0.8125rem; padding: 4px 0; }
 .empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }

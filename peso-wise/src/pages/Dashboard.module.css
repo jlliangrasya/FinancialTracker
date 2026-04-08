@@ -306,6 +306,39 @@
 .goalName { font-size: 0.8125rem; font-weight: 600; margin-bottom: 6px; }
 .goalValues { font-size: 0.75rem; color: var(--color-text-secondary); margin-top: 4px; }
 
+.breakdownRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.breakdownLabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.breakdownValue {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.breakdownDivider {
+  height: 1px;
+  background-color: var(--color-border);
+  margin: 8px 0;
+}
+
+.breakdownTotal {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.breakdownTotalValue {
+  font-size: 1.0625rem;
+  font-weight: 800;
+}
+
 .emptyState {
   text-align: center;
   padding: 24px;

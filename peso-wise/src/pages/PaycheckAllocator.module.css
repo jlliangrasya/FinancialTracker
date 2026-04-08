@@ -53,6 +53,24 @@
   border-color: var(--color-primary);
 }
 
+.dateRange {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dateField {
+  flex: 1;
+}
+
+.dateLabel {
+  display: block;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
 .bucket {
   padding: 16px;
   border-radius: var(--border-radius-md);

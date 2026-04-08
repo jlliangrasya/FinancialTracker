@@ -5,6 +5,10 @@ import { getTransactions } from '../firebase/transactions'
 import { getActiveBudgetPeriod } from '../firebase/budgetPeriods'
 import { getBills, markBillPaid, markBillUnpaid } from '../firebase/bills'
 import { getBudgets } from '../firebase/budgets'
+import { getSavingsGoals } from '../firebase/savingsGoals'
+import { getUserSettings } from '../firebase/settings'
+import { getTransfers } from '../firebase/transfers'
+import { calculateBankBalance } from '../engine/bankBalance'
 import { useToast } from '../components/Toast'
 import ProgressBar from '../components/ProgressBar'
 import { formatCurrency } from '../utils/formatCurrency'
@@ -16,6 +20,9 @@ export default function BudgetTracker() {
   const [period, setPeriod] = useState(null)
   const [bills, setBills] = useState([])
   const [budgets, setBudgets] = useState([])
+  const [savingsGoals, setSavingsGoals] = useState([])
+  const [settings, setSettings] = useState(null)
+  const [transfers, setTransfers] = useState([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState('type') // 'type' | 'category'
   const [activeTab, setActiveTab] = useState('expenses')
@@ -30,16 +37,22 @@ export default function BudgetTracker() {
     if (!currentUser) return
     setLoading(true)
     try {
-      const [txns, ap, bl, bg] = await Promise.all([
+      const [txns, ap, bl, bg, sg, st, xfers] = await Promise.all([
         getTransactions(currentUser.uid),
         getActiveBudgetPeriod(currentUser.uid),
         getBills(currentUser.uid),
         getBudgets(currentUser.uid),
+        getSavingsGoals(currentUser.uid),
+        getUserSettings(currentUser.uid),
+        getTransfers(currentUser.uid),
       ])
       setTransactions(txns)
       setPeriod(ap)
       setBills(bl)
       setBudgets(bg || [])
+      setSavingsGoals(sg || [])
+      setSettings(st)
+      setTransfers(xfers || [])
     } catch (err) { console.error(err) }
     setLoading(false)
   }
@@ -84,13 +97,38 @@ export default function BudgetTracker() {
   // Per-type values
   const expensesBudget = period?.expensesBudget || 0
   const billsBudget = period?.billsBudget || 0
+  const savingsBudget = period?.savingsBudget || 0
   const expensesRemaining = expensesBudget - totalExpensesSpent
   const billsRemaining = billsBudget - billsTotal
 
+  // Resolve savedAmount: use bank balance if goal is linked
+  const banks = settings?.banks || []
+  function getEffectiveSaved(g) {
+    if (g.linkedBank && g.bank) {
+      const bankInfo = banks.find(b => b.name === g.bank)
+      if (bankInfo) return Math.max(0, calculateBankBalance(bankInfo.name, bankInfo.openingBalance, transactions, transfers))
+    }
+    return g.savedAmount || 0
+  }
+
+  // Savings calculations
+  const totalSaved = savingsGoals.reduce((s, g) => s + getEffectiveSaved(g), 0)
+  const totalSavingsTarget = savingsGoals.reduce((s, g) => s + (g.targetAmount || 0), 0)
+  const savingsGoalDetails = savingsGoals.map(g => {
+    const effectiveSaved = getEffectiveSaved(g)
+    const target = g.targetDate?.toDate ? g.targetDate.toDate() : new Date(g.targetDate)
+    const now = new Date()
+    const monthsLeft = Math.max(1, (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth()))
+    const remaining = Math.max(0, (g.targetAmount || 0) - effectiveSaved)
+    const monthlyNeeded = remaining / monthsLeft
+    const pct = g.targetAmount > 0 ? Math.min(effectiveSaved / g.targetAmount, 1) : 0
+    return { ...g, savedAmount: effectiveSaved, monthsLeft, remaining, monthlyNeeded, pct }
+  })
+  const totalMonthlyNeeded = savingsGoalDetails.reduce((s, g) => s + g.monthlyNeeded, 0)
+
   // Hero values depend on active tab in "By Type" view
-  const typeHeroAmount = activeTab === 'expenses' ? expensesBudget : billsBudget
-  const typeHeroSpent = activeTab === 'expenses' ? totalExpensesSpent : billsTotal
-  const typeHeroRemaining = activeTab === 'expenses' ? expensesRemaining : billsRemaining
+  const typeHeroAmount = activeTab === 'expenses' ? expensesBudget : activeTab === 'bills' ? billsBudget : savingsBudget
+  const typeHeroSpent = activeTab === 'expenses' ? totalExpensesSpent : activeTab === 'bills' ? billsTotal : 0
   const typePercentUsed = typeHeroAmount > 0 ? typeHeroSpent / typeHeroAmount : 0
   const typeStatus = typePercentUsed >= 1 ? 'Over budget!' : typePercentUsed >= 0.8 ? 'Running low' : 'On track'
   const typeStatusColor = typePercentUsed >= 1 ? 'var(--color-danger)' : typePercentUsed >= 0.8 ? 'var(--color-warning)' : 'var(--color-success)'
@@ -169,6 +207,9 @@ export default function BudgetTracker() {
             <button className={`${styles.tabBtn} ${activeTab === 'bills' ? styles.active : ''}`} onClick={() => setActiveTab('bills')}>
               Bills
             </button>
+            <button className={`${styles.tabBtn} ${activeTab === 'savings' ? styles.active : ''}`} onClick={() => setActiveTab('savings')}>
+              Savings
+            </button>
           </div>
 
           {!period ? (
@@ -184,13 +225,29 @@ export default function BudgetTracker() {
               <div className={styles.hero}>
                 <div className={styles.heroTopRow}>
                   <div className={styles.heroLabel}>
-                    {activeTab === 'expenses' ? 'Daily expenses budget' : 'Bills budget'}
+                    {activeTab === 'expenses' ? 'Daily expenses budget' : activeTab === 'bills' ? 'Bills budget' : 'Savings allocation'}
                   </div>
                   <button className={styles.editBudgetBtn} onClick={() => navigate('/paycheck-allocator?edit=1')}>
                     Edit Budget
                   </button>
                 </div>
-                {typeHeroAmount > 0 ? (
+                {activeTab === 'savings' ? (
+                  savingsBudget > 0 ? (
+                    <>
+                      <div className={styles.heroAmount}>{formatCurrency(savingsBudget)}</div>
+                      <div className={styles.heroSub}>
+                        allocated this period for savings
+                      </div>
+                      {totalMonthlyNeeded > 0 && (
+                        <div className={styles.heroSub} style={{ marginTop: 4, color: totalMonthlyNeeded > savingsBudget ? 'var(--color-warning)' : 'var(--color-success)' }}>
+                          Goals need {formatCurrency(totalMonthlyNeeded)}/month
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className={styles.heroSub} style={{ marginTop: 8 }}>No savings allocation set. Edit your budget to add one.</div>
+                  )
+                ) : typeHeroAmount > 0 ? (
                   <>
                     <div className={styles.heroAmount}>{formatCurrency(typeHeroAmount)}</div>
                     <ProgressBar value={typeHeroSpent} max={typeHeroAmount} showLabel={false} />
@@ -246,6 +303,41 @@ export default function BudgetTracker() {
                 </>
               )}
 
+              {activeTab === 'savings' && (
+                <>
+                  {savingsGoalDetails.length > 0 ? (
+                    <div className={styles.savingsGoalList}>
+                      {savingsGoalDetails.map(g => (
+                        <div key={g.id} className={styles.savingsGoalCard} onClick={() => navigate('/savings-goals')}>
+                          <div className={styles.savingsGoalHeader}>
+                            <div>
+                              <div className={styles.savingsGoalName}>{g.name}</div>
+                              {g.bank && <div className={styles.savingsGoalBank}>{g.bank}</div>}
+                            </div>
+                            <span className={`${styles.badge} ${g.pct >= 1 ? styles.paid : g.remaining <= 0 ? styles.paid : styles.upcoming}`}>
+                              {g.pct >= 1 ? 'Complete' : `${(g.pct * 100).toFixed(0)}%`}
+                            </span>
+                          </div>
+                          <ProgressBar value={g.savedAmount || 0} max={g.targetAmount || 1} showLabel={false} />
+                          <div className={styles.savingsGoalMeta}>
+                            <span>{formatCurrency(g.savedAmount || 0)} of {formatCurrency(g.targetAmount)}</span>
+                            <span>{formatCurrency(g.monthlyNeeded)}/mo needed</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className={styles.empty}>
+                      <p>No savings goals yet.</p>
+                      <p style={{ marginTop: 8, marginBottom: 20 }}>Create goals to track your savings progress.</p>
+                      <button className="btn-primary" onClick={() => navigate('/savings-goals')}>
+                        Add Savings Goal
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+
               <div style={{ height: 120 }} />
 
               <div className={styles.footer}>
@@ -268,7 +360,7 @@ export default function BudgetTracker() {
                         </span>
                       </div>
                     </>
-                  ) : (
+                  ) : activeTab === 'bills' ? (
                     <>
                       <div className={styles.footerRow}>
                         <span className={styles.footerLabel}>Bills budget</span>
@@ -287,6 +379,28 @@ export default function BudgetTracker() {
                         <span>Remaining</span>
                         <span style={{ color: billsRemaining < 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>
                           {formatCurrency(billsRemaining)}
+                        </span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className={styles.footerRow}>
+                        <span className={styles.footerLabel}>Savings allocation</span>
+                        <span className={styles.footerValue}>{formatCurrency(savingsBudget)}</span>
+                      </div>
+                      <div className={styles.footerRow}>
+                        <span className={styles.footerLabel}>Total saved (all goals)</span>
+                        <span className={styles.footerValue} style={{ color: 'var(--color-success)' }}>{formatCurrency(totalSaved)}</span>
+                      </div>
+                      <div className={styles.footerRow}>
+                        <span className={styles.footerLabel}>Still needed (all goals)</span>
+                        <span className={styles.footerValue}>{formatCurrency(totalSavingsTarget - totalSaved)}</span>
+                      </div>
+                      <div className={styles.footerDivider} />
+                      <div className={styles.footerRemaining}>
+                        <span>Monthly needed</span>
+                        <span style={{ color: totalMonthlyNeeded > savingsBudget ? 'var(--color-warning)' : 'var(--color-success)' }}>
+                          {formatCurrency(totalMonthlyNeeded)}
                         </span>
                       </div>
                     </>

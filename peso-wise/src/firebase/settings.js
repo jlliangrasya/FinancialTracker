@@ -1,5 +1,5 @@
 import { db } from './config'
-import { doc, getDoc, setDoc, updateDoc, collection, getDocs, query, where, limit, Timestamp } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc, collection, getDocs, Timestamp } from 'firebase/firestore'
 
 const COLLECTION = 'settings'
 

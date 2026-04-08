@@ -1,12 +1,9 @@
-/* ── Liquid Glass QuickAdd ── */
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: var(--overlay-bg);
-  backdrop-filter: blur(8px) brightness(0.95);
-  -webkit-backdrop-filter: blur(8px) brightness(0.95);
+  background-color: rgba(0, 0, 0, 0.3);
   z-index: 300;
-  animation: fadeIn 0.25s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 .modal {
@@ -16,44 +13,42 @@
   right: 0;
   max-height: 90vh;
   max-height: 90dvh;
+  background-color: var(--color-surface-solid);
   border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
   z-index: 301;
-  animation: sheetUp 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+  animation: sheetUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   overflow-y: auto;
   padding-bottom: env(safe-area-inset-bottom, 20px);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--color-border-solid);
+  will-change: transform;
+}
 
-  /* Liquid glass layers */
-  background:
-    linear-gradient(180deg, var(--lg-highlight) 0%, transparent 30%),
-    var(--lg-tint);
-  backdrop-filter: blur(50px) saturate(200%) brightness(1.05);
-  -webkit-backdrop-filter: blur(50px) saturate(200%) brightness(1.05);
-  border-top: 0.5px solid var(--lg-edge);
-  box-shadow:
-    0 -1px 0 var(--lg-edge-inner),
-    0 -8px 40px var(--lg-shadow);
+.handleArea {
+  padding: 8px 0 4px;
+  cursor: grab;
+  touch-action: none;
 }
 
 .handle {
   width: 36px;
   height: 5px;
-  background: var(--lg-handle);
+  background-color: var(--color-border-solid);
   border-radius: 3px;
-  margin: 8px auto 8px;
+  margin: 0 auto;
 }
 
 .content {
-  padding: 0 20px 20px;
+  padding: 8px 20px 20px;
 }
 
 .tabs {
   display: flex;
   gap: 0;
   margin-bottom: 20px;
-  background: var(--lg-pill-bg);
+  background: var(--color-background);
   border-radius: var(--border-radius-sm);
   padding: 3px;
-  border: 0.5px solid var(--lg-edge);
 }
 
 .tab {
@@ -71,11 +66,10 @@
 }
 
 .tab.active {
-  background: var(--lg-tab-active);
+  background-color: var(--color-surface-solid);
   color: var(--color-primary);
   font-weight: 600;
-  box-shadow: 0 1px 4px var(--lg-shadow);
-  border: 0.5px solid var(--lg-edge);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .amountInput {
@@ -137,13 +131,32 @@
   font-weight: 500;
 }
 
+.savingsNote {
+  font-size: 0.8125rem;
+  color: var(--color-success);
+  background-color: var(--color-success-light);
+  padding: 10px 12px;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 14px;
+  text-align: center;
+}
+
+.savingsHint {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-align: center;
+  padding: 12px;
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-sm);
+}
+
 .saveBtn {
   margin-top: 10px;
 }
 
 @keyframes sheetUp {
-  from { transform: translateY(100%); opacity: 0.5; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 @keyframes fadeIn {

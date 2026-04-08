@@ -22,11 +22,8 @@
   padding: 7px 14px;
   border-radius: var(--border-radius-xl);
   font-size: 0.8125rem;
-  border: 1px solid var(--color-border);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--color-border-solid);
+  background-color: var(--color-surface-solid);
   cursor: pointer;
   color: var(--color-text-secondary);
 }
@@ -75,11 +72,9 @@
 .hero {
   padding: 20px;
   border-radius: var(--border-radius-lg);
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-shadow);
-  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-solid);
+  border: 1px solid var(--color-border-solid);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   margin-bottom: 16px;
   text-align: center;
 }
@@ -229,11 +224,9 @@
   bottom: 64px;
   left: 0;
   right: 0;
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-shadow);
-  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface-solid);
+  border-top: 1px solid var(--color-border-solid);
+  box-shadow: 0 -4px 16px rgba(0,0,0,0.06);
   padding: 12px 16px;
   z-index: 50;
 }
@@ -323,11 +316,9 @@
 }
 
 .catRow {
-  background: var(--glass-bg);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  box-shadow: var(--glass-shadow);
-  border: 1px solid var(--color-border);
+  background-color: var(--color-surface-solid);
+  border: 1px solid var(--color-border-solid);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   border-radius: var(--border-radius-md);
   padding: 14px 16px;
 }
@@ -356,5 +347,49 @@
 
 .catSub {
   font-size: 0.75rem;
+  margin-top: 6px;
+}
+
+.savingsGoalList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.savingsGoalCard {
+  padding: 14px 16px;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--color-border-solid);
+  background-color: var(--color-surface-solid);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.savingsGoalCard:active { transform: scale(0.98); }
+
+.savingsGoalHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+.savingsGoalName {
+  font-size: 0.9375rem;
+  font-weight: 600;
+}
+
+.savingsGoalBank {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}
+
+.savingsGoalMeta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
   margin-top: 6px;
 }

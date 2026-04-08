@@ -290,6 +290,31 @@ export default function Settings() {
       </div>
 
       <div className={styles.section}>
+        <div className={styles.sectionTitle}>Savings</div>
+        <div className={styles.alertRow}>
+          <label>Auto-save percentage (%)</label>
+          <input
+            type="number"
+            value={settings?.savingsPercentage ?? ''}
+            onChange={async (e) => {
+              const val = Math.min(100, Math.max(0, Number(e.target.value) || 0))
+              setSettings(prev => ({ ...prev, savingsPercentage: val }))
+            }}
+            onBlur={async (e) => {
+              const val = Math.min(100, Math.max(0, Number(e.target.value) || 0))
+              await updateUserSettings(currentUser.uid, { savingsPercentage: val })
+              showToast('Savings percentage updated ✓')
+            }}
+            inputMode="decimal"
+            placeholder="e.g. 20"
+          />
+        </div>
+        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: 4 }}>
+          When you log income, we'll show how much to set aside for savings based on this percentage.
+        </p>
+      </div>
+
+      <div className={styles.section}>
         <div className={styles.sectionTitle}>Alerts</div>
         <div className={styles.alertRow}>
           <label>Low balance threshold (₱)</label>

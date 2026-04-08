@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { useToast } from './Toast'
 import { addTransaction } from '../firebase/transactions'
 import { addTransfer } from '../firebase/transfers'
+import { getUserSettings } from '../firebase/settings'
+import { getSavingsGoals, updateSavingsGoal } from '../firebase/savingsGoals'
+import { formatCurrency } from '../utils/formatCurrency'
 import {
   EXPENSE_CATEGORIES, EXPENSE_SUBCATEGORIES,
   INCOME_CATEGORIES, PAYMENT_METHODS
@@ -22,8 +25,64 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
   const [toBank, setToBank] = useState('')
   const [note, setNote] = useState('')
   const [saving, setSaving] = useState(false)
+  const [customIncomeCategories, setCustomIncomeCategories] = useState([])
+  const [customExpenseCategories, setCustomExpenseCategories] = useState([])
+  const [savingsPercentage, setSavingsPercentage] = useState(0)
+  const [savingsGoals, setSavingsGoals] = useState([])
+  const [selectedGoalId, setSelectedGoalId] = useState('')
   const { currentUser } = useAuth()
   const { showToast } = useToast()
+
+  useEffect(() => {
+    if (!currentUser) return
+    getUserSettings(currentUser.uid).then(s => {
+      if (s?.customIncomeCategories?.length) setCustomIncomeCategories(s.customIncomeCategories)
+      if (s?.customExpenseCategories?.length) setCustomExpenseCategories(s.customExpenseCategories)
+      if (s?.savingsPercentage) setSavingsPercentage(s.savingsPercentage)
+    }).catch(() => {})
+    getSavingsGoals(currentUser.uid).then(g => setSavingsGoals(g || [])).catch(() => {})
+  }, [currentUser])
+
+  const allIncomeCategories = [...INCOME_CATEGORIES, ...customIncomeCategories]
+  const allExpenseCategories = [...EXPENSE_CATEGORIES, ...customExpenseCategories]
+
+  const modalRef = useRef(null)
+  const dragStart = useRef(null)
+  const dragY = useRef(0)
+
+  const handleTouchStart = useCallback((e) => {
+    dragStart.current = e.touches[0].clientY
+    dragY.current = 0
+  }, [])
+
+  const handleTouchMove = useCallback((e) => {
+    if (dragStart.current === null) return
+    const diff = e.touches[0].clientY - dragStart.current
+    if (diff > 0) {
+      dragY.current = diff
+      if (modalRef.current) {
+        modalRef.current.style.transform = `translateY(${diff}px)`
+        modalRef.current.style.transition = 'none'
+      }
+    }
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    if (dragY.current > 120) {
+      if (modalRef.current) {
+        modalRef.current.style.transition = 'transform 0.25s ease'
+        modalRef.current.style.transform = 'translateY(100%)'
+      }
+      setTimeout(onClose, 250)
+    } else {
+      if (modalRef.current) {
+        modalRef.current.style.transition = 'transform 0.25s ease'
+        modalRef.current.style.transform = 'translateY(0)'
+      }
+    }
+    dragStart.current = null
+    dragY.current = 0
+  }, [onClose])
 
   if (!open) return null
 
@@ -40,6 +99,7 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
     setFromBank('')
     setToBank('')
     setNote('')
+    setSelectedGoalId('')
   }
 
   async function handleSave() {
@@ -55,6 +115,27 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
           date,
         })
         showToast('Transfer complete \u2713')
+      } else if (activeTab === 'savings') {
+        const goal = savingsGoals.find(g => g.id === selectedGoalId)
+        if (!goal) { showToast('Select a savings goal', 'error'); setSaving(false); return }
+        // Only manually update savedAmount if the goal is NOT linked to a bank
+        // (linked goals derive savedAmount from bank balance automatically)
+        if (!goal.linkedBank) {
+          await updateSavingsGoal(selectedGoalId, { savedAmount: (goal.savedAmount || 0) + Number(amount) })
+        }
+        await addTransaction(currentUser.uid, {
+          type: 'expense',
+          amount: Number(amount),
+          description: `Savings: ${goal.name}`,
+          category: 'Savings Contribution',
+          subCategory: goal.name,
+          bank: bank || goal.bank || bankNames[0] || '',
+          paymentMethod: '',
+          isIncome: false,
+          date,
+          periodId: null,
+        })
+        showToast(`${formatCurrency(Number(amount))} added to ${goal.name}${goal.linkedBank ? ' (bank balance will update)' : ''} \u2713`)
       } else {
         const isIncome = activeTab === 'income'
         await addTransaction(currentUser.uid, {
@@ -84,11 +165,18 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
   return (
     <>
       <div className={styles.overlay} onClick={onClose} />
-      <div className={styles.modal}>
-        <div className={styles.handle} />
+      <div className={styles.modal} ref={modalRef}>
+        <div
+          className={styles.handleArea}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+        >
+          <div className={styles.handle} />
+        </div>
         <div className={styles.content}>
           <div className={styles.tabs}>
-            {['expense', 'income', 'transfer'].map(tab => (
+            {['expense', 'income', 'savings', 'transfer'].map(tab => (
               <button
                 key={tab}
                 className={`${styles.tab} ${activeTab === tab ? styles.active : ''}`}
@@ -115,7 +203,7 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
                 <label className={styles.fieldLabel}>Category</label>
                 <select className="select-field" value={category} onChange={e => { setCategory(e.target.value); setSubCategory('') }}>
                   <option value="">Select category</option>
-                  {EXPENSE_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {allExpenseCategories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               {category && EXPENSE_SUBCATEGORIES[category] && (
@@ -163,7 +251,7 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
                 <label className={styles.fieldLabel}>Category</label>
                 <select className="select-field" value={category} onChange={e => setCategory(e.target.value)}>
                   <option value="">Select category</option>
-                  {INCOME_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                  {allIncomeCategories.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
               <div className={styles.field}>
@@ -181,6 +269,44 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
                 <label className={styles.fieldLabel}>Notes (optional)</label>
                 <input type="text" className="input-field" value={note} onChange={e => setNote(e.target.value)} />
               </div>
+              {savingsPercentage > 0 && Number(amount) > 0 && (
+                <div className={styles.savingsNote}>
+                  Set aside {savingsPercentage}% = <strong>{formatCurrency(Number(amount) * savingsPercentage / 100)}</strong> for savings
+                </div>
+              )}
+            </>
+          )}
+
+          {activeTab === 'savings' && (
+            <>
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>Savings Goal</label>
+                <select className="select-field" value={selectedGoalId} onChange={e => {
+                  setSelectedGoalId(e.target.value)
+                  const goal = savingsGoals.find(g => g.id === e.target.value)
+                  if (goal?.bank) setBank(goal.bank)
+                }}>
+                  <option value="">Select a goal</option>
+                  {savingsGoals.map(g => {
+                    const pct = g.targetAmount > 0 ? Math.min((g.savedAmount || 0) / g.targetAmount, 1) : 0
+                    return <option key={g.id} value={g.id}>{g.name} — {(pct * 100).toFixed(0)}% ({formatCurrency(g.savedAmount || 0)} of {formatCurrency(g.targetAmount)})</option>
+                  })}
+                </select>
+              </div>
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>Bank/Wallet</label>
+                <select className="select-field" value={bank} onChange={e => setBank(e.target.value)}>
+                  <option value="">Select</option>
+                  {bankNames.map(b => <option key={b} value={b}>{b}</option>)}
+                </select>
+              </div>
+              <div className={styles.field}>
+                <label className={styles.fieldLabel}>Date</label>
+                <input type="date" className="input-field" value={date} onChange={e => setDate(e.target.value)} />
+              </div>
+              {savingsGoals.length === 0 && (
+                <div className={styles.savingsHint}>No savings goals yet. Create one in the Savings Goals page first.</div>
+              )}
             </>
           )}
 
@@ -217,7 +343,7 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
           <button
             className={`btn-primary ${styles.saveBtn}`}
             onClick={handleSave}
-            disabled={saving || !amount || Number(amount) <= 0}
+            disabled={saving || !amount || Number(amount) <= 0 || (activeTab === 'savings' && !selectedGoalId)}
           >
             {saving ? 'Saving...' : 'Save'}
           </button>

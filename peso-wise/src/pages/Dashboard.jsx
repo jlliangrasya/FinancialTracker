@@ -95,6 +95,20 @@ export default function Dashboard() {
     [banks, transactions, transfers]
   )
 
+  // Resolve savedAmount for linked goals (bank balance = saved amount)
+  const bankBalanceMap = useMemo(() => {
+    const map = {}
+    bankBalances.forEach(b => { map[b.name] = b.balance })
+    return map
+  }, [bankBalances])
+
+  function getEffectiveSaved(g) {
+    if (g.linkedBank && g.bank && bankBalanceMap[g.bank] !== undefined) {
+      return Math.max(0, bankBalanceMap[g.bank])
+    }
+    return g.savedAmount || 0
+  }
+
   const monthTotals = useMemo(() => getMonthTotals(transactions, monthLabel), [transactions, monthLabel])
   const prevMonthLabel = getPreviousMonthLabel(monthLabel)
   const prevTotals = useMemo(() => getMonthTotals(transactions, prevMonthLabel), [transactions, prevMonthLabel])
@@ -311,6 +325,44 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {(() => {
+        const savingsPct = settings?.savingsPercentage || 0
+        const activeBillsTotal = bills.filter(b => b.isActive).reduce((s, b) => s + b.amount, 0)
+        const savingsDeduction = savingsPct > 0 ? monthTotals.income * savingsPct / 100 : 0
+        const availableMoney = monthTotals.income - savingsDeduction - activeBillsTotal
+        if (monthTotals.income > 0) {
+          return (
+            <div className={styles.section}>
+              <div className={styles.sectionTitle}>Money Breakdown</div>
+              <div className={styles.card} style={{ padding: 16 }}>
+                <div className={styles.breakdownRow}>
+                  <span className={styles.breakdownLabel}>Income this month</span>
+                  <span className={styles.breakdownValue}>{netCashHidden ? '••••••' : formatCurrency(monthTotals.income)}</span>
+                </div>
+                {savingsPct > 0 && (
+                  <div className={styles.breakdownRow}>
+                    <span className={styles.breakdownLabel}>Savings ({savingsPct}%)</span>
+                    <span className={styles.breakdownValue} style={{ color: 'var(--color-success)' }}>{netCashHidden ? '••••••' : `-${formatCurrency(savingsDeduction)}`}</span>
+                  </div>
+                )}
+                <div className={styles.breakdownRow}>
+                  <span className={styles.breakdownLabel}>Bills (active)</span>
+                  <span className={styles.breakdownValue} style={{ color: 'var(--color-warning)' }}>{netCashHidden ? '••••••' : `-${formatCurrency(activeBillsTotal)}`}</span>
+                </div>
+                <div className={styles.breakdownDivider} />
+                <div className={styles.breakdownRow}>
+                  <span className={styles.breakdownTotal}>Available to spend</span>
+                  <span className={styles.breakdownTotalValue} style={{ color: availableMoney >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                    {netCashHidden ? '••••••' : formatCurrency(availableMoney)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )
+        }
+        return null
+      })()}
+
       {insights.length > 0 && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>Insight of the Day</div>
@@ -332,12 +384,13 @@ export default function Dashboard() {
           </div>
           <div className={styles.goalsList}>
             {savingsGoals.map(g => {
-              const pct = g.targetAmount > 0 ? Math.min(g.savedAmount / g.targetAmount, 1) : 0
+              const effectiveSaved = getEffectiveSaved(g)
+              const pct = g.targetAmount > 0 ? Math.min(effectiveSaved / g.targetAmount, 1) : 0
               return (
                 <div key={g.id} className={styles.goalRow} onClick={() => navigate('/savings-goals')}>
-                  <div className={styles.goalName}>{g.name}</div>
-                  <ProgressBar value={g.savedAmount} max={g.targetAmount} showLabel={false} />
-                  <div className={styles.goalValues}>{formatCurrency(g.savedAmount)} of {formatCurrency(g.targetAmount)} · {(pct * 100).toFixed(0)}%</div>
+                  <div className={styles.goalName}>{g.name}{g.linkedBank ? ' (linked)' : ''}</div>
+                  <ProgressBar value={effectiveSaved} max={g.targetAmount} showLabel={false} />
+                  <div className={styles.goalValues}>{formatCurrency(effectiveSaved)} of {formatCurrency(g.targetAmount)} · {(pct * 100).toFixed(0)}%</div>
                 </div>
               )
             })}

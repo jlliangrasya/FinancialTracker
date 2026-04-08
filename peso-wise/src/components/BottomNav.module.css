@@ -1,4 +1,3 @@
-/* ── Liquid Glass Bottom Nav ── */
 .nav {
   position: fixed;
   bottom: 0;
@@ -7,20 +6,12 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  height: 72px;
+  height: 68px;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0);
-
-  /* Liquid glass layers */
-  background:
-    linear-gradient(180deg, var(--lg-highlight) 0%, transparent 50%),
-    var(--lg-tint);
-  backdrop-filter: blur(50px) saturate(200%) brightness(1.05);
-  -webkit-backdrop-filter: blur(50px) saturate(200%) brightness(1.05);
-  border-top: 0.5px solid var(--lg-edge);
-  box-shadow:
-    0 -1px 0 var(--lg-edge-inner),
-    0 -4px 24px var(--lg-shadow);
+  background-color: var(--color-surface-solid);
+  border-top: 1px solid var(--color-border-solid);
+  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.04);
 }
 
 .tab {
@@ -42,13 +33,8 @@
   letter-spacing: 0.02em;
 }
 
-.tab.active {
-  color: var(--color-primary);
-}
-
-.tab:active {
-  transform: scale(0.9);
-}
+.tab.active { color: var(--color-primary); }
+.tab:active { transform: scale(0.9); }
 
 .tab svg, .tab .icon {
   font-size: 1.375rem;
@@ -68,57 +54,41 @@
   font-weight: 300;
   border: none;
   cursor: pointer;
-  box-shadow:
-    0 4px 20px rgba(37, 99, 235, 0.4),
-    0 0 0 3px rgba(37, 99, 235, 0.1),
-    inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
   transform: translateY(-14px);
   transition: all var(--transition-spring);
 }
 
 .addBtn:active {
   transform: translateY(-10px) scale(0.92);
-  box-shadow:
-    0 2px 12px rgba(37, 99, 235, 0.3),
-    0 0 0 3px rgba(37, 99, 235, 0.08);
 }
 
-/* ── Liquid Glass Drawer ── */
 .drawer {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
+  background-color: var(--color-surface-solid);
   border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
   padding: 12px 20px 32px;
   z-index: 200;
-  animation: slideUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
-
-  background:
-    linear-gradient(180deg, var(--lg-highlight) 0%, transparent 40%),
-    var(--lg-tint);
-  backdrop-filter: blur(50px) saturate(200%) brightness(1.05);
-  -webkit-backdrop-filter: blur(50px) saturate(200%) brightness(1.05);
-  border-top: 0.5px solid var(--lg-edge);
-  box-shadow:
-    0 -1px 0 var(--lg-edge-inner),
-    0 -8px 40px var(--lg-shadow);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--color-border-solid);
+  animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .drawerOverlay {
   position: fixed;
   inset: 0;
-  background-color: var(--overlay-bg);
-  backdrop-filter: blur(8px) brightness(0.95);
-  -webkit-backdrop-filter: blur(8px) brightness(0.95);
+  background-color: rgba(0, 0, 0, 0.3);
   z-index: 199;
-  animation: fadeIn 0.25s ease;
+  animation: fadeIn 0.2s ease;
 }
 
 .drawerHandle {
   width: 36px;
   height: 5px;
-  background: var(--lg-handle);
+  background-color: var(--color-border-solid);
   border-radius: 3px;
   margin: 2px auto 20px;
 }
@@ -148,7 +118,7 @@
 
 .drawerItem:active {
   transform: scale(0.92);
-  background: var(--lg-item-active);
+  background: var(--color-background);
 }
 
 .drawerIcon {
@@ -159,10 +129,11 @@
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  /* Each icon gets its own subtle glass pill */
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border: 0.5px solid var(--lg-edge);
+}
+
+.drawerIconWrap {
+  position: relative;
+  display: inline-flex;
 }
 
 .iconWrap {
@@ -178,12 +149,7 @@
   height: 8px;
   border-radius: 50%;
   background: var(--color-danger);
-  box-shadow: 0 0 0 2px var(--lg-tint);
-}
-
-.drawerIconWrap {
-  position: relative;
-  display: inline-flex;
+  box-shadow: 0 0 0 2px var(--color-surface-solid);
 }
 
 .badge {
@@ -205,8 +171,8 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(100%); opacity: 0.5; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
 }
 
 @keyframes fadeIn {

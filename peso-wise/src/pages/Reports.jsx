@@ -6,9 +6,11 @@ import { getDebts } from '../firebase/debts'
 import { getInvestments } from '../firebase/investments'
 import { getUserSettings } from '../firebase/settings'
 import { getTransfers } from '../firebase/transfers'
+import { getCompletedBudgetPeriods } from '../firebase/budgetPeriods'
 import { getTotalBalance } from '../engine/bankBalance'
 import { formatCurrency } from '../utils/formatCurrency'
 import { getMonthLabel } from '../utils/dateHelpers'
+import ProgressBar from '../components/ProgressBar'
 import { Bar, Doughnut, Line } from 'react-chartjs-2'
 import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
@@ -27,6 +29,7 @@ export default function Reports() {
   const [investments, setInvestments] = useState([])
   const [settings, setSettings] = useState(null)
   const [transfers, setTransfers] = useState([])
+  const [completedPeriods, setCompletedPeriods] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState(new Date())
   const { currentUser } = useAuth()
@@ -35,12 +38,14 @@ export default function Reports() {
     async function load() {
       if (!currentUser) return; setLoading(true)
       try {
-        const [t, b, d, inv, s, xf] = await Promise.all([
+        const [t, b, d, inv, s, xf, cp] = await Promise.all([
           getTransactions(currentUser.uid), getBudgets(currentUser.uid),
           getDebts(currentUser.uid), getInvestments(currentUser.uid),
           getUserSettings(currentUser.uid), getTransfers(currentUser.uid),
+          getCompletedBudgetPeriods(currentUser.uid),
         ])
         setTransactions(t); setBudgets(b); setDebts(d); setInvestments(inv); setSettings(s); setTransfers(xf)
+        setCompletedPeriods(cp || [])
       } catch (err) { console.error(err) }
       setLoading(false)
     }
@@ -154,6 +159,68 @@ export default function Reports() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {completedPeriods.length > 0 && (
+        <>
+          <div className={styles.chartTitle} style={{ marginTop: 24, marginBottom: 12, fontSize: '1.0625rem', fontWeight: 700 }}>
+            Past Budget Periods
+          </div>
+          {completedPeriods.map(p => {
+            const s = p.summary
+            if (!s) return null
+            const start = new Date(s.startDate)
+            const end = new Date(s.endDate)
+            const expPct = s.expensesBudget > 0 ? Math.min(s.expensesSpent / s.expensesBudget, 1.5) : 0
+            const billPct = s.billsBudget > 0 ? Math.min(s.billsTotal / s.billsBudget, 1.5) : 0
+            const allOnBudget = s.expensesOnBudget && s.billsOnBudget
+            return (
+              <div key={p.id} className={styles.periodCard}>
+                <div className={styles.periodHeader}>
+                  <div className={styles.periodDates}>
+                    {start.toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} – {end.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                  </div>
+                  <span className={`${styles.periodBadge} ${allOnBudget ? styles.periodBadgeGood : styles.periodBadgeBad}`}>
+                    {allOnBudget ? 'On Budget' : 'Over Budget'}
+                  </span>
+                </div>
+
+                <div className={styles.periodRow}>
+                  <span className={styles.periodLabel}>Expenses</span>
+                  <span className={styles.periodValues}>
+                    <span style={{ color: s.expensesOnBudget ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                      {formatCurrency(s.expensesSpent)}
+                    </span>
+                    <span className={styles.periodLimit}> / {formatCurrency(s.expensesBudget)}</span>
+                  </span>
+                </div>
+                <ProgressBar value={s.expensesSpent} max={s.expensesBudget || 1} showLabel={false} />
+
+                <div className={styles.periodRow} style={{ marginTop: 8 }}>
+                  <span className={styles.periodLabel}>Bills</span>
+                  <span className={styles.periodValues}>
+                    <span style={{ color: s.billsOnBudget ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                      {formatCurrency(s.billsTotal)}
+                    </span>
+                    <span className={styles.periodLimit}> / {formatCurrency(s.billsBudget)}</span>
+                  </span>
+                </div>
+                <ProgressBar value={s.billsTotal} max={s.billsBudget || 1} showLabel={false} />
+
+                {s.savingsBudget > 0 && (
+                  <div className={styles.periodRow} style={{ marginTop: 8 }}>
+                    <span className={styles.periodLabel}>Savings allocated</span>
+                    <span style={{ color: 'var(--color-success)', fontWeight: 600, fontSize: '0.8125rem' }}>{formatCurrency(s.savingsBudget)}</span>
+                  </div>
+                )}
+
+                <div className={styles.periodTotal}>
+                  Total budget: {formatCurrency(s.totalBudget || (s.expensesBudget + s.billsBudget + s.savingsBudget))}
+                </div>
+              </div>
+            )
+          })}
+        </>
       )}
     </div>
   )

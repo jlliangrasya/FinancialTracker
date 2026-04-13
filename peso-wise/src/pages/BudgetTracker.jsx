@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getTransactions } from '../firebase/transactions'
-import { getActiveBudgetPeriod } from '../firebase/budgetPeriods'
+import { getActiveBudgetPeriod, completeBudgetPeriod } from '../firebase/budgetPeriods'
 import { getBills, markBillPaid, markBillUnpaid } from '../firebase/bills'
 import { getBudgets } from '../firebase/budgets'
 import { getSavingsGoals } from '../firebase/savingsGoals'
@@ -26,6 +26,7 @@ export default function BudgetTracker() {
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState('type') // 'type' | 'category'
   const [activeTab, setActiveTab] = useState('expenses')
+  const [expiredSummary, setExpiredSummary] = useState(null)
   const { currentUser } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
@@ -47,12 +48,55 @@ export default function BudgetTracker() {
         getTransfers(currentUser.uid),
       ])
       setTransactions(txns)
-      setPeriod(ap)
       setBills(bl)
       setBudgets(bg || [])
       setSavingsGoals(sg || [])
       setSettings(st)
       setTransfers(xfers || [])
+
+      // Auto-expire: if active period's endDate has passed, close it
+      if (ap) {
+        const endDate = ap.endDate?.toDate ? ap.endDate.toDate() : new Date(ap.endDate)
+        const startDate = ap.startDate?.toDate ? ap.startDate.toDate() : new Date(ap.startDate)
+        const now = new Date()
+        if (endDate < now) {
+          // Compute summary before closing
+          const periodTxnsList = txns.filter(t => {
+            const d = t.date?.toDate ? t.date.toDate() : new Date(t.date)
+            return d >= startDate && d <= endDate && !t.isIncome
+          })
+          const expensesSpent = periodTxnsList.reduce((s, t) => s + t.amount, 0)
+          const currentMs = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
+          const endMs = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`
+          const periodMonthStr = endMs
+          const paidBills = bl.filter(b => b.isActive && b.paidMonths && b.paidMonths.includes(periodMonthStr)).reduce((s, b) => s + b.amount, 0)
+          const unpaidBills = bl.filter(b => b.isActive && (!b.paidMonths || !b.paidMonths.includes(periodMonthStr))).reduce((s, b) => s + b.amount, 0)
+
+          const summary = {
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+            periodType: ap.periodType || 'monthly',
+            expensesBudget: ap.expensesBudget || 0,
+            billsBudget: ap.billsBudget || 0,
+            savingsBudget: ap.savingsBudget || 0,
+            totalBudget: ap.totalBudget || 0,
+            expensesSpent,
+            billsPaid: paidBills,
+            billsUnpaid: unpaidBills,
+            billsTotal: paidBills + unpaidBills,
+            expensesOnBudget: expensesSpent <= (ap.expensesBudget || 0),
+            billsOnBudget: (paidBills + unpaidBills) <= (ap.billsBudget || 0),
+          }
+
+          await completeBudgetPeriod(ap.id, summary)
+          setExpiredSummary({ ...summary, periodId: ap.id })
+          setPeriod(null) // Clear the active period
+        } else {
+          setPeriod(ap)
+        }
+      } else {
+        setPeriod(ap)
+      }
     } catch (err) { console.error(err) }
     setLoading(false)
   }
@@ -180,6 +224,101 @@ export default function BudgetTracker() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Budget Tracker</h1>
+
+      {/* Expired period summary modal */}
+      {expiredSummary && (
+        <div className={styles.expiredOverlay} onClick={() => setExpiredSummary(null)}>
+          <div className={styles.expiredModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.expiredHeader}>
+              <h2 className={styles.expiredTitle}>Budget Period Ended</h2>
+              <button className={styles.expiredClose} onClick={() => setExpiredSummary(null)}>✕</button>
+            </div>
+            <div className={styles.expiredBody}>
+              <div className={styles.expiredDates}>
+                {formatDate(expiredSummary.startDate)} – {formatDate(expiredSummary.endDate)}
+              </div>
+
+              <div className={styles.expiredSection}>
+                <div className={styles.expiredSectionTitle}>Daily Expenses</div>
+                <div className={styles.expiredRow}>
+                  <span>Budget</span>
+                  <span>{formatCurrency(expiredSummary.expensesBudget)}</span>
+                </div>
+                <div className={styles.expiredRow}>
+                  <span>Spent</span>
+                  <span style={{ color: 'var(--color-danger)' }}>{formatCurrency(expiredSummary.expensesSpent)}</span>
+                </div>
+                <ProgressBar value={expiredSummary.expensesSpent} max={expiredSummary.expensesBudget || 1} showLabel={false} />
+                <div className={`${styles.expiredVerdict} ${expiredSummary.expensesOnBudget ? styles.verdictGood : styles.verdictBad}`}>
+                  {expiredSummary.expensesOnBudget
+                    ? `On budget — ${formatCurrency(expiredSummary.expensesBudget - expiredSummary.expensesSpent)} under`
+                    : `Over budget by ${formatCurrency(expiredSummary.expensesSpent - expiredSummary.expensesBudget)}`
+                  }
+                </div>
+              </div>
+
+              <div className={styles.expiredSection}>
+                <div className={styles.expiredSectionTitle}>Bills</div>
+                <div className={styles.expiredRow}>
+                  <span>Budget</span>
+                  <span>{formatCurrency(expiredSummary.billsBudget)}</span>
+                </div>
+                <div className={styles.expiredRow}>
+                  <span>Total bills</span>
+                  <span>{formatCurrency(expiredSummary.billsTotal)}</span>
+                </div>
+                <div className={styles.expiredRow}>
+                  <span>Paid</span>
+                  <span style={{ color: 'var(--color-success)' }}>{formatCurrency(expiredSummary.billsPaid)}</span>
+                </div>
+                {expiredSummary.billsUnpaid > 0 && (
+                  <div className={styles.expiredRow}>
+                    <span>Unpaid</span>
+                    <span style={{ color: 'var(--color-warning)' }}>{formatCurrency(expiredSummary.billsUnpaid)}</span>
+                  </div>
+                )}
+                <div className={`${styles.expiredVerdict} ${expiredSummary.billsOnBudget ? styles.verdictGood : styles.verdictBad}`}>
+                  {expiredSummary.billsOnBudget ? 'Bills within budget' : 'Bills exceeded budget'}
+                </div>
+              </div>
+
+              {expiredSummary.savingsBudget > 0 && (
+                <div className={styles.expiredSection}>
+                  <div className={styles.expiredSectionTitle}>Savings</div>
+                  <div className={styles.expiredRow}>
+                    <span>Allocated</span>
+                    <span style={{ color: 'var(--color-success)' }}>{formatCurrency(expiredSummary.savingsBudget)}</span>
+                  </div>
+                </div>
+              )}
+
+              <div className={styles.expiredActions}>
+                <button className="btn-primary" onClick={() => {
+                  const params = new URLSearchParams({
+                    amount: String(expiredSummary.totalBudget || 0),
+                    carryBills: String(expiredSummary.billsBudget || 0),
+                    carrySavings: String(expiredSummary.savingsBudget || 0),
+                    carrySpending: String(expiredSummary.expensesBudget || 0),
+                  })
+                  setExpiredSummary(null)
+                  navigate(`/paycheck-allocator?${params.toString()}`)
+                }}>
+                  Start New Period (carry forward)
+                </button>
+                <button className="btn-secondary" style={{ marginTop: 8 }} onClick={() => {
+                  setExpiredSummary(null)
+                  navigate('/paycheck-allocator')
+                }}>
+                  Start Fresh
+                </button>
+                <button className={styles.expiredDismiss} onClick={() => setExpiredSummary(null)}>
+                  Dismiss
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* View toggle */}
       <div className={styles.modeToggle}>

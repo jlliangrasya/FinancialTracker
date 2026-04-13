@@ -350,6 +350,86 @@
   margin-top: 6px;
 }
 
+.expiredOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+}
+
+.expiredModal {
+  background-color: var(--color-surface-solid);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.expiredHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 12px;
+  border-bottom: 1px solid var(--color-border-solid);
+  position: sticky;
+  top: 0;
+  background-color: var(--color-surface-solid);
+  z-index: 1;
+}
+
+.expiredTitle { font-size: 1.125rem; font-weight: 700; margin: 0; }
+.expiredClose { background: none; border: none; font-size: 1.25rem; color: var(--color-text-secondary); cursor: pointer; padding: 4px 8px; }
+.expiredBody { padding: 16px 20px 32px; }
+.expiredDates { font-size: 0.8125rem; color: var(--color-text-secondary); text-align: center; margin-bottom: 16px; }
+
+.expiredSection {
+  margin-bottom: 16px;
+  padding: 12px;
+  background-color: var(--color-background);
+  border-radius: var(--border-radius-sm);
+}
+
+.expiredSectionTitle { font-size: 0.8125rem; font-weight: 700; margin-bottom: 8px; }
+
+.expiredRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8125rem;
+  padding: 3px 0;
+}
+
+.expiredVerdict {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: var(--border-radius-sm);
+  margin-top: 8px;
+  text-align: center;
+}
+
+.verdictGood { background-color: var(--color-success-light); color: var(--color-success); }
+.verdictBad { background-color: var(--color-danger-light); color: var(--color-danger); }
+
+.expiredActions {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-top: 16px;
+}
+
+.expiredDismiss {
+  background: none;
+  border: none;
+  color: var(--color-text-hint);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  padding: 12px;
+  text-align: center;
+  margin-top: 4px;
+}
+
 .savingsGoalList {
   display: flex;
   flex-direction: column;

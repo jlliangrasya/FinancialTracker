@@ -14,6 +14,10 @@ export default function PaycheckAllocator() {
   const [searchParams] = useSearchParams()
   const rawAmount = Number(searchParams.get('amount'))
   const editMode = searchParams.get('edit') === '1'
+  const carryBills = Number(searchParams.get('carryBills')) || 0
+  const carrySavings = Number(searchParams.get('carrySavings')) || 0
+  const carrySpending = Number(searchParams.get('carrySpending')) || 0
+  const isCarryForward = carryBills > 0 || carrySavings > 0 || carrySpending > 0
 
   const [totalBudget, setTotalBudget] = useState(rawAmount || 0)
   const [periodType, setPeriodType] = useState('monthly')
@@ -58,7 +62,11 @@ export default function PaycheckAllocator() {
         return
       }
 
-      if (rawAmount > 0) {
+      if (isCarryForward) {
+        setBillsAlloc(carryBills)
+        setSavingsAlloc(carrySavings)
+        setSpendingAlloc(carrySpending)
+      } else if (rawAmount > 0) {
         const currentMonth = getCurrentMonthString()
         const unpaidBills = bills.filter(b => b.isActive && (!b.paidMonths || !b.paidMonths.includes(currentMonth)))
         const defaults = calculateDefaultAllocation(rawAmount, unpaidBills, goals)
@@ -162,12 +170,12 @@ export default function PaycheckAllocator() {
     )
   }
 
-  const isFromIncome = rawAmount > 0 && !editMode
+  const isFromIncome = rawAmount > 0 && !editMode && !isCarryForward
 
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>
-        {isFromIncome ? 'You received' : editMode ? 'Edit Budget Period' : 'Set Budget Period'}
+        {isCarryForward ? 'New Period (Carry Forward)' : isFromIncome ? 'You received' : editMode ? 'Edit Budget Period' : 'Set Budget Period'}
       </h1>
 
       {isFromIncome ? (

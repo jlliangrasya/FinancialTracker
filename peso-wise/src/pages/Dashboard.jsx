@@ -8,7 +8,7 @@ import { getBudgets } from '../firebase/budgets'
 import { getBills } from '../firebase/bills'
 import { getSavingsGoals } from '../firebase/savingsGoals'
 import { getDebts } from '../firebase/debts'
-import { getActiveBudgetPeriod } from '../firebase/budgetPeriods'
+import { getActiveBudgetPeriod, getCompletedBudgetPeriods } from '../firebase/budgetPeriods'
 import { calculateAllBankBalances } from '../engine/bankBalance'
 import { calculateBudgetStatus } from '../engine/budgetStatus'
 import { calculateBurnRate, getBurnRateStatus } from '../engine/burnRate'
@@ -31,6 +31,7 @@ export default function Dashboard() {
   const [savingsGoals, setSavingsGoals] = useState([])
   const [debts, setDebts] = useState([])
   const [activePeriod, setActivePeriod] = useState(null)
+  const [lastPeriod, setLastPeriod] = useState(null)
   const [loading, setLoading] = useState(true)
   const [balancesHidden, setBalancesHidden] = useState(() => localStorage.getItem('pesowise_hide_balances') === 'true')
   const [netCashHidden, setNetCashHidden] = useState(() => localStorage.getItem('pesowise_hide_netcash') === 'true')
@@ -61,7 +62,7 @@ export default function Dashboard() {
     if (!currentUser) return
     setLoading(true)
     try {
-      const [s, txns, xfers, b, bl, sg, d, ap] = await Promise.all([
+      const [s, txns, xfers, b, bl, sg, d, ap, cp] = await Promise.all([
         getUserSettings(currentUser.uid),
         getTransactions(currentUser.uid),
         getTransfers(currentUser.uid),
@@ -70,6 +71,7 @@ export default function Dashboard() {
         getSavingsGoals(currentUser.uid),
         getDebts(currentUser.uid),
         getActiveBudgetPeriod(currentUser.uid),
+        getCompletedBudgetPeriods(currentUser.uid),
       ])
       setSettings(s)
       setTransactions(txns)
@@ -79,6 +81,7 @@ export default function Dashboard() {
       setSavingsGoals(sg)
       setDebts(d)
       setActivePeriod(ap)
+      setLastPeriod(cp && cp.length > 0 ? cp[0] : null)
     } catch (err) {
       console.error('Dashboard load error:', err)
     }
@@ -236,6 +239,55 @@ export default function Dashboard() {
           onClick={() => navigate('/burn-rate')}
         >
           🔥 Burning {formatCurrency(burnRate.dailyAverage)}/day — budget runs out in {burnRate.daysRemaining} days
+        </div>
+      )}
+
+      {lastPeriod?.summary && (
+        <div className={styles.section}>
+          <div className={styles.sectionTitle}>
+            Last Budget Period
+            <button className={styles.seeAll} onClick={() => navigate('/reports')}>View all</button>
+          </div>
+          <div className={styles.card} style={{ padding: 14 }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-hint)', marginBottom: 8 }}>
+              {new Date(lastPeriod.summary.startDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} – {new Date(lastPeriod.summary.endDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </div>
+            <div className={styles.breakdownRow}>
+              <span className={styles.breakdownLabel}>Expenses</span>
+              <span className={styles.breakdownValue} style={{ color: lastPeriod.summary.expensesOnBudget ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                {formatCurrency(lastPeriod.summary.expensesSpent)} / {formatCurrency(lastPeriod.summary.expensesBudget)}
+                {lastPeriod.summary.expensesOnBudget ? ' ✓' : ' ✕'}
+              </span>
+            </div>
+            <div className={styles.breakdownRow}>
+              <span className={styles.breakdownLabel}>Bills</span>
+              <span className={styles.breakdownValue} style={{ color: lastPeriod.summary.billsOnBudget ? 'var(--color-success)' : 'var(--color-danger)' }}>
+                {formatCurrency(lastPeriod.summary.billsTotal)} / {formatCurrency(lastPeriod.summary.billsBudget)}
+                {lastPeriod.summary.billsOnBudget ? ' ✓' : ' ✕'}
+              </span>
+            </div>
+            {lastPeriod.summary.savingsBudget > 0 && (
+              <div className={styles.breakdownRow}>
+                <span className={styles.breakdownLabel}>Savings allocated</span>
+                <span className={styles.breakdownValue} style={{ color: 'var(--color-success)' }}>
+                  {formatCurrency(lastPeriod.summary.savingsBudget)}
+                </span>
+              </div>
+            )}
+            <div className={styles.breakdownDivider} />
+            <div className={styles.breakdownRow}>
+              <span className={styles.breakdownTotal}>
+                {lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? 'Stayed on budget' : 'Went over budget'}
+              </span>
+              <span style={{
+                fontSize: '0.875rem',
+                fontWeight: 700,
+                color: lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? 'var(--color-success)' : 'var(--color-danger)',
+              }}>
+                {lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? '✓' : '✕'}
+              </span>
+            </div>
+          </div>
         </div>
       )}
 

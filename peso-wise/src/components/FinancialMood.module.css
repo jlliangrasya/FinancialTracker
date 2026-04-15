@@ -1,0 +1,37 @@
+.container {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.container.small .emoji svg {
+  width: 36px;
+  height: 36px;
+}
+
+.container.large .emoji svg {
+  width: 64px;
+  height: 64px;
+}
+
+.emoji {
+  flex-shrink: 0;
+  animation: floatGentle 3s ease-in-out infinite;
+}
+
+.label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.sublabel {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  margin-top: 2px;
+}
+
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}

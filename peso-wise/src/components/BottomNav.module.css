@@ -6,12 +6,12 @@
   display: flex;
   justify-content: space-around;
   align-items: center;
-  height: 68px;
+  height: 72px;
   z-index: 100;
   padding-bottom: env(safe-area-inset-bottom, 0);
   background-color: var(--color-surface-solid);
   border-top: 1px solid var(--color-border-solid);
-  box-shadow: 0 -1px 8px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.03);
 }
 
 .tab {
@@ -19,13 +19,13 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3px;
+  gap: 4px;
   padding: 4px 0;
   min-width: 56px;
-  min-height: 44px;
+  min-height: 48px;
   color: var(--color-text-hint);
   font-size: 0.6875rem;
-  font-weight: 500;
+  font-weight: 600;
   background: none;
   border: none;
   cursor: pointer;
@@ -36,31 +36,29 @@
 .tab.active { color: var(--color-primary); }
 .tab:active { transform: scale(0.9); }
 
-.tab svg, .tab .icon {
-  font-size: 1.375rem;
-  line-height: 1;
+.navIcon {
+  width: 22px;
+  height: 22px;
 }
 
 .addBtn {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
+  width: 54px;
+  height: 54px;
+  border-radius: var(--border-radius-lg);
   background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-dark) 100%);
   color: white;
-  font-size: 1.75rem;
-  font-weight: 300;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(37, 99, 235, 0.35);
-  transform: translateY(-14px);
+  box-shadow: 0 4px 18px rgba(91, 154, 139, 0.35);
+  transform: translateY(-16px);
   transition: all var(--transition-spring);
 }
 
 .addBtn:active {
-  transform: translateY(-10px) scale(0.92);
+  transform: translateY(-12px) scale(0.92);
 }
 
 .drawer {
@@ -70,9 +68,9 @@
   right: 0;
   background-color: var(--color-surface-solid);
   border-radius: var(--border-radius-xl) var(--border-radius-xl) 0 0;
-  padding: 12px 20px 32px;
+  padding: 12px 20px 36px;
   z-index: 200;
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
   border-top: 1px solid var(--color-border-solid);
   animation: slideUp 0.3s cubic-bezier(0.32, 0.72, 0, 1);
 }
@@ -80,38 +78,38 @@
 .drawerOverlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.2);
   z-index: 199;
   animation: fadeIn 0.2s ease;
 }
 
 .drawerHandle {
-  width: 36px;
+  width: 40px;
   height: 5px;
   background-color: var(--color-border-solid);
   border-radius: 3px;
-  margin: 2px auto 20px;
+  margin: 2px auto 22px;
 }
 
 .drawerGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 6px;
+  gap: 8px;
 }
 
 .drawerItem {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 14px 4px;
-  border-radius: var(--border-radius-md);
+  border-radius: var(--border-radius-lg);
   background: none;
   border: none;
   cursor: pointer;
   color: var(--color-text-primary);
   font-size: 0.6875rem;
-  font-weight: 500;
+  font-weight: 600;
   text-align: center;
   transition: all var(--transition-fast);
 }
@@ -122,13 +120,12 @@
 }
 
 .drawerIcon {
-  width: 48px;
-  height: 48px;
-  border-radius: 14px;
+  width: 50px;
+  height: 50px;
+  border-radius: var(--border-radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
 }
 
 .drawerIconWrap {
@@ -167,7 +164,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 1px 4px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 1px 4px rgba(212, 129, 122, 0.3);
 }
 
 @keyframes slideUp {

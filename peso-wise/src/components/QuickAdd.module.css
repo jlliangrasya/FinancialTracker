@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.2);
   z-index: 300;
   animation: fadeIn 0.2s ease;
 }
@@ -19,7 +19,7 @@
   animation: sheetUp 0.35s cubic-bezier(0.32, 0.72, 0, 1);
   overflow-y: auto;
   padding-bottom: env(safe-area-inset-bottom, 20px);
-  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.08);
   border-top: 1px solid var(--color-border-solid);
   will-change: transform;
 }
@@ -31,7 +31,7 @@
 }
 
 .handle {
-  width: 36px;
+  width: 40px;
   height: 5px;
   background-color: var(--color-border-solid);
   border-radius: 3px;
@@ -46,9 +46,13 @@
   display: flex;
   gap: 0;
   margin-bottom: 20px;
-  background: var(--color-background);
-  border-radius: var(--border-radius-sm);
-  padding: 3px;
+  background: var(--pastel-cream);
+  border-radius: var(--border-radius-lg);
+  padding: 4px;
+}
+
+[data-theme="dark"] .tabs {
+  background: rgba(245,239,230,0.06);
 }
 
 .tab {
@@ -56,8 +60,8 @@
   padding: 10px;
   text-align: center;
   font-size: 0.8125rem;
-  font-weight: 500;
-  border-radius: calc(var(--border-radius-sm) - 2px);
+  font-weight: 600;
+  border-radius: var(--border-radius-md);
   color: var(--color-text-secondary);
   cursor: pointer;
   background: none;
@@ -68,18 +72,18 @@
 .tab.active {
   background-color: var(--color-surface-solid);
   color: var(--color-primary);
-  font-weight: 600;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 .amountInput {
-  font-size: 2.25rem;
-  font-weight: 700;
+  font-size: 2.5rem;
+  font-weight: 800;
   text-align: center;
   border: none;
-  border-bottom: 2px solid var(--color-primary);
+  border-bottom: 3px solid var(--color-primary);
   width: 100%;
-  padding: 8px;
+  padding: 10px;
   margin-bottom: 20px;
   background: transparent;
   color: var(--color-text-primary);
@@ -104,7 +108,7 @@
   color: var(--color-text-secondary);
   margin-bottom: 6px;
   display: block;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .row {
@@ -125,29 +129,35 @@
 }
 
 .balanceCheck {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--color-warning);
   margin-top: 6px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .savingsNote {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: var(--color-success);
   background-color: var(--color-success-light);
-  padding: 10px 12px;
-  border-radius: var(--border-radius-sm);
+  padding: 12px 14px;
+  border-radius: var(--border-radius-lg);
   margin-bottom: 14px;
   text-align: center;
+  font-weight: 600;
 }
 
 .savingsHint {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: var(--color-text-secondary);
   text-align: center;
-  padding: 12px;
-  background-color: var(--color-background);
-  border-radius: var(--border-radius-sm);
+  padding: 14px;
+  background: var(--pastel-cream);
+  border-radius: var(--border-radius-lg);
+  font-weight: 500;
+}
+
+[data-theme="dark"] .savingsHint {
+  background: rgba(245,239,230,0.06);
 }
 
 .saveBtn {

@@ -20,7 +20,22 @@ import { getMonthLabel, getCurrentMonthString } from '../utils/dateHelpers'
 import BankCard from '../components/BankCard'
 import ProgressBar from '../components/ProgressBar'
 import InsightCard from '../components/InsightCard'
+import FinancialMood, { getFinancialMood } from '../components/FinancialMood'
+import { LeafDecor, PlantDecor } from '../components/Decorations'
 import styles from './Dashboard.module.css'
+
+function getGreeting() {
+  const hour = new Date().getHours()
+  if (hour < 12) return 'Good morning'
+  if (hour < 17) return 'Good afternoon'
+  return 'Good evening'
+}
+
+function getFirstName(user) {
+  if (!user) return ''
+  const display = user.displayName || user.email || ''
+  return display.split(' ')[0].split('@')[0]
+}
 
 export default function Dashboard() {
   const [settings, setSettings] = useState(null)
@@ -98,7 +113,6 @@ export default function Dashboard() {
     [banks, transactions, transfers]
   )
 
-  // Resolve savedAmount for linked goals (bank balance = saved amount)
   const bankBalanceMap = useMemo(() => {
     const map = {}
     bankBalances.forEach(b => { map[b.name] = b.balance })
@@ -118,8 +132,7 @@ export default function Dashboard() {
   const rollover = calculateRollover(prevTotals.income, prevTotals.expenses)
 
   const netCash = monthTotals.income - monthTotals.expenses
-  const netCashColor = netCash >= 0 ? 'var(--color-success)' : 'var(--color-danger)'
-  const netCashBg = netCash >= 0 ? 'var(--color-success-light)' : 'var(--color-danger-light)'
+  const netCashPositive = netCash >= 0
 
   const topBudgets = useMemo(() => {
     return budgets
@@ -183,73 +196,111 @@ export default function Dashboard() {
     [currentMonthTxns, prevMonthTxns, budgets, bills]
   )
 
+  const mood = getFinancialMood(healthScore.total)
+
   if (loading) {
     return (
       <div className={styles.container}>
         <div className={styles.headerBar}>
           <div className={styles.logoRow}>
-            <div className={styles.logoIcon}>P</div>
+            <div className={styles.logoIcon}>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L15 8H9L12 2Z" fill="white" opacity="0.9"/>
+                <circle cx="12" cy="15" r="6" fill="white" opacity="0.7"/>
+                <path d="M9 14h6M12 11v8" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.9"/>
+              </svg>
+            </div>
             <span className={styles.logoText}>Peso Wise</span>
           </div>
         </div>
         {[1,2,3,4].map(i => (
-          <div key={i} className="skeleton" style={{ height: 80, marginBottom: 16, borderRadius: 10 }} />
+          <div key={i} className="skeleton" style={{ height: 80, marginBottom: 16, borderRadius: 16 }} />
         ))}
       </div>
     )
   }
 
-  const scoreColor = getScoreColor(healthScore.total)
-  const scoreBg = scoreColor === 'success' ? 'var(--color-success)' : scoreColor === 'warning' ? 'var(--color-warning)' : 'var(--color-danger)'
-
   return (
     <div className={styles.container}>
+      {/* Decorative elements */}
+      <LeafDecor className={styles.leafDecor} />
+      <PlantDecor className={styles.plantDecor} />
+
+      {/* Header with greeting */}
       <div className={styles.headerBar}>
         <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>P</div>
+          <div className={styles.logoIcon}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2L15 8H9L12 2Z" fill="white" opacity="0.9"/>
+              <circle cx="12" cy="15" r="6" fill="white" opacity="0.7"/>
+              <path d="M9 14h6M12 11v8" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.9"/>
+            </svg>
+          </div>
           <span className={styles.logoText}>Peso Wise</span>
         </div>
         <span className={styles.monthLabel}>{monthLabel.replace('-', ' ')}</span>
       </div>
 
-      <div className={styles.netCashCard} style={{ backgroundColor: netCashBg }}>
+      {/* Greeting + mood card */}
+      <div className={styles.greetingCard}>
+        <div className={styles.greetingText}>
+          <div className={styles.greeting}>{getGreeting()}, {getFirstName(currentUser)}</div>
+          <div className={styles.greetingSub}>Here's how your finances are feeling today</div>
+        </div>
+        <FinancialMood mood={mood} showLabel={false} />
+      </div>
+
+      {/* Net cash hero — simple & readable */}
+      <div className={`${styles.netCashCard} ${netCashPositive ? styles.netPositive : styles.netNegative}`}>
         <div className={styles.netCashTopRow}>
-          <div className={styles.netCashLabel}>This month</div>
+          <div className={styles.netCashLabel}>
+            {netCashPositive ? 'You saved this month' : 'You overspent this month'}
+          </div>
           <button className={styles.eyeBtn} onClick={toggleNetCash} aria-label={netCashHidden ? 'Show amount' : 'Hide amount'}>
             {netCashHidden ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
             )}
           </button>
         </div>
-        <div className={styles.netCashAmount} style={{ color: netCashColor }}>
-          {netCashHidden ? '••••••' : formatCurrency(netCash)}
+        <div className={styles.netCashAmount}>
+          {netCashHidden ? '••••••' : formatCurrency(Math.abs(netCash))}
         </div>
         {rollover !== 0 && (
           <div className={styles.rollover}>
-            Leftover from {prevMonthLabel.replace('-', ' ')}: {netCashHidden ? '••••••' : formatCurrency(rollover)}
+            Leftover from {prevMonthLabel.replace('-', ' ')}: {netCashHidden ? '••••' : formatCurrency(rollover)}
           </div>
         )}
       </div>
 
+      {/* Burn rate — friendly language */}
       {burnRate && (
         <div
           className={`${styles.burnAlert} ${styles[getBurnRateStatus(burnRate.dailyAverage, burnRate.safeDailyTarget)]}`}
           onClick={() => navigate('/burn-rate')}
         >
-          🔥 Burning {formatCurrency(burnRate.dailyAverage)}/day — budget runs out in {burnRate.daysRemaining} days
+          <span className={styles.burnIcon}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+              <path d="M12 2C12 2 7 8 7 13C7 16.87 9.24 19 12 19C14.76 19 17 16.87 17 13C17 8 12 2 12 2Z" fill="currentColor" opacity="0.2"/>
+              <path d="M12 5C12 5 9 9 9 12C9 14.21 10.34 16 12 16C13.66 16 15 14.21 15 12C15 9 12 5 12 5Z" fill="currentColor" opacity="0.3"/>
+            </svg>
+          </span>
+          <span>
+            Spending {formatCurrency(burnRate.dailyAverage)}/day — budget lasts {burnRate.daysRemaining} more days
+          </span>
         </div>
       )}
 
+      {/* Last period summary */}
       {lastPeriod?.summary && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
             Last Budget Period
             <button className={styles.seeAll} onClick={() => navigate('/reports')}>View all</button>
           </div>
-          <div className={styles.card} style={{ padding: 14 }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-hint)', marginBottom: 8 }}>
+          <div className={styles.card} style={{ padding: 16 }}>
+            <div className={styles.periodDateLabel}>
               {new Date(lastPeriod.summary.startDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} – {new Date(lastPeriod.summary.endDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
             </div>
             <div className={styles.breakdownRow}>
@@ -268,7 +319,7 @@ export default function Dashboard() {
             </div>
             {lastPeriod.summary.savingsBudget > 0 && (
               <div className={styles.breakdownRow}>
-                <span className={styles.breakdownLabel}>Savings allocated</span>
+                <span className={styles.breakdownLabel}>Savings set aside</span>
                 <span className={styles.breakdownValue} style={{ color: 'var(--color-success)' }}>
                   {formatCurrency(lastPeriod.summary.savingsBudget)}
                 </span>
@@ -279,22 +330,19 @@ export default function Dashboard() {
               <span className={styles.breakdownTotal}>
                 {lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? 'Stayed on budget' : 'Went over budget'}
               </span>
-              <span style={{
-                fontSize: '0.875rem',
-                fontWeight: 700,
-                color: lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? 'var(--color-success)' : 'var(--color-danger)',
-              }}>
-                {lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? '✓' : '✕'}
+              <span className={`${styles.verdictBadge} ${lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? styles.verdictGood : styles.verdictBad}`}>
+                {lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? 'On track' : 'Over'}
               </span>
             </div>
           </div>
         </div>
       )}
 
+      {/* Bank balances */}
       <div className={styles.section}>
         <div className={styles.sectionTitle}>
           <span className={styles.sectionTitleLeft}>
-            Bank Balances
+            Your Accounts
             <button className={styles.eyeBtn} onClick={toggleBalances} aria-label={balancesHidden ? 'Show balances' : 'Hide balances'}>
               {balancesHidden ? (
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
@@ -317,11 +365,20 @@ export default function Dashboard() {
               hidden={balancesHidden}
             />
           )) : (
-            <div className={styles.emptyState}>No banks set up yet</div>
+            <div className={styles.emptyState}>
+              <div className={styles.emptyIcon}>
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-hint)" strokeWidth="1.5" strokeLinecap="round">
+                  <rect x="3" y="6" width="18" height="13" rx="2"/>
+                  <path d="M3 10h18"/>
+                </svg>
+              </div>
+              No accounts set up yet
+            </div>
           )}
         </div>
       </div>
 
+      {/* Budget status */}
       {topBudgets.length > 0 && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
@@ -329,22 +386,32 @@ export default function Dashboard() {
             <button className={styles.seeAll} onClick={() => navigate('/budget-tracker')}>See all</button>
           </div>
           <div className={styles.budgetList}>
-            {topBudgets.map(b => (
-              <div key={b.category} className={styles.budgetRow}>
-                <div className={styles.budgetHeader}>
-                  <span className={styles.budgetCategory}>{b.category}</span>
-                  <span className={styles.budgetValues}>{formatCurrency(b.spent)} of {formatCurrency(b.monthlyLimit)}</span>
+            {topBudgets.map(b => {
+              const pct = b.monthlyLimit > 0 ? Math.min(b.spent / b.monthlyLimit, 1) : 0
+              return (
+                <div key={b.category} className={styles.budgetRow}>
+                  <div className={styles.budgetHeader}>
+                    <span className={styles.budgetCategory}>{b.category}</span>
+                    <span className={styles.budgetValues}>
+                      {formatCurrency(b.spent)}
+                      <span className={styles.budgetLimit}> of {formatCurrency(b.monthlyLimit)}</span>
+                    </span>
+                  </div>
+                  <ProgressBar value={b.spent} max={b.monthlyLimit} showLabel={false} />
+                  <div className={styles.budgetHint}>
+                    {pct >= 1 ? 'Over budget' : `${formatCurrency(b.monthlyLimit - b.spent)} left to spend`}
+                  </div>
                 </div>
-                <ProgressBar value={b.spent} max={b.monthlyLimit} showLabel={false} />
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       )}
 
+      {/* Bills due soon */}
       <div className={styles.section}>
         <div className={styles.sectionTitle}>
-          Bills Due Soon
+          Bills Coming Up
           <button className={styles.seeAll} onClick={() => navigate('/bills')}>View all</button>
         </div>
         {upcomingBills.length > 0 ? (
@@ -353,9 +420,17 @@ export default function Dashboard() {
               const daysUntil = b.dueDay - new Date().getDate()
               return (
                 <div key={b.id} className={styles.billRow} onClick={() => navigate('/bills')}>
+                  <div className={styles.billIconCircle}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-warning)" strokeWidth="2" strokeLinecap="round">
+                      <rect x="5" y="4" width="14" height="17" rx="2"/>
+                      <path d="M9 9h6M9 13h4"/>
+                    </svg>
+                  </div>
                   <div className={styles.billInfo}>
                     <span className={styles.billName}>{b.name}</span>
-                    <span className={styles.billDue}>{daysUntil <= 0 ? 'Due today' : `Due in ${daysUntil} day${daysUntil > 1 ? 's' : ''}`}</span>
+                    <span className={styles.billDue}>
+                      {daysUntil <= 0 ? 'Due today!' : daysUntil === 1 ? 'Due tomorrow' : `Due in ${daysUntil} days`}
+                    </span>
                   </div>
                   <span className={styles.billAmount}>{formatCurrency(b.amount)}</span>
                 </div>
@@ -363,20 +438,31 @@ export default function Dashboard() {
             })}
           </div>
         ) : (
-          <div className={styles.emptyState}>No bills due in the next 7 days</div>
+          <div className={styles.emptyState}>
+            <div className={styles.emptyIcon}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-hint)" strokeWidth="1.5" strokeLinecap="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+            </div>
+            All clear! No bills due this week
+          </div>
         )}
       </div>
 
-      <div className={styles.healthMini} onClick={() => navigate('/health-score')}>
-        <div className={styles.healthScore} style={{ backgroundColor: scoreBg }}>
-          {healthScore.total}
-        </div>
-        <div>
-          <div className={styles.healthLabel}>Financial Health Score</div>
-          <div className={styles.healthDesc}>{healthScore.label} — {healthScore.total >= 71 ? 'keep it up!' : healthScore.total >= 41 ? 'room to improve' : 'needs attention'}</div>
+      {/* Health score — friendly */}
+      <div className={styles.healthCard} onClick={() => navigate('/health-score')}>
+        <FinancialMood mood={mood} size="normal" />
+        <div className={styles.healthScoreBubble} style={{
+          backgroundColor: mood === 'great' || mood === 'good' ? 'var(--pastel-mint)' :
+            mood === 'okay' ? 'var(--pastel-butter)' : 'var(--pastel-rose)',
+        }}>
+          <span className={styles.healthScoreNum}>{healthScore.total}</span>
+          <span className={styles.healthScoreMax}>/100</span>
         </div>
       </div>
 
+      {/* Money breakdown — easy to read */}
       {(() => {
         const savingsPct = settings?.savingsPercentage || 0
         const activeBillsTotal = bills.filter(b => b.isActive).reduce((s, b) => s + b.amount, 0)
@@ -385,25 +471,25 @@ export default function Dashboard() {
         if (monthTotals.income > 0) {
           return (
             <div className={styles.section}>
-              <div className={styles.sectionTitle}>Money Breakdown</div>
-              <div className={styles.card} style={{ padding: 16 }}>
+              <div className={styles.sectionTitle}>Your Money This Month</div>
+              <div className={styles.card} style={{ padding: 18 }}>
                 <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownLabel}>Income this month</span>
+                  <span className={styles.breakdownLabel}>Money came in</span>
                   <span className={styles.breakdownValue}>{netCashHidden ? '••••••' : formatCurrency(monthTotals.income)}</span>
                 </div>
                 {savingsPct > 0 && (
                   <div className={styles.breakdownRow}>
-                    <span className={styles.breakdownLabel}>Savings ({savingsPct}%)</span>
+                    <span className={styles.breakdownLabel}>Set aside for savings ({savingsPct}%)</span>
                     <span className={styles.breakdownValue} style={{ color: 'var(--color-success)' }}>{netCashHidden ? '••••••' : `-${formatCurrency(savingsDeduction)}`}</span>
                   </div>
                 )}
                 <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownLabel}>Bills (active)</span>
+                  <span className={styles.breakdownLabel}>Bills to pay</span>
                   <span className={styles.breakdownValue} style={{ color: 'var(--color-warning)' }}>{netCashHidden ? '••••••' : `-${formatCurrency(activeBillsTotal)}`}</span>
                 </div>
                 <div className={styles.breakdownDivider} />
                 <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownTotal}>Available to spend</span>
+                  <span className={styles.breakdownTotal}>You can spend</span>
                   <span className={styles.breakdownTotalValue} style={{ color: availableMoney >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
                     {netCashHidden ? '••••••' : formatCurrency(availableMoney)}
                   </span>
@@ -415,9 +501,18 @@ export default function Dashboard() {
         return null
       })()}
 
+      {/* Insight */}
       {insights.length > 0 && (
         <div className={styles.section}>
-          <div className={styles.sectionTitle}>Insight of the Day</div>
+          <div className={styles.sectionTitle}>
+            <span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" style={{ marginRight: 6, verticalAlign: -2 }}>
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+              </svg>
+              Tip for You
+            </span>
+          </div>
           <InsightCard
             type={insights[0].type}
             headline={insights[0].headline}
@@ -428,6 +523,7 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Savings goals */}
       {savingsGoals.length > 0 && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
@@ -440,9 +536,14 @@ export default function Dashboard() {
               const pct = g.targetAmount > 0 ? Math.min(effectiveSaved / g.targetAmount, 1) : 0
               return (
                 <div key={g.id} className={styles.goalRow} onClick={() => navigate('/savings-goals')}>
-                  <div className={styles.goalName}>{g.name}{g.linkedBank ? ' (linked)' : ''}</div>
+                  <div className={styles.goalHeader}>
+                    <span className={styles.goalName}>{g.name}{g.linkedBank ? ' (linked)' : ''}</span>
+                    <span className={styles.goalPct}>{(pct * 100).toFixed(0)}%</span>
+                  </div>
                   <ProgressBar value={effectiveSaved} max={g.targetAmount} showLabel={false} />
-                  <div className={styles.goalValues}>{formatCurrency(effectiveSaved)} of {formatCurrency(g.targetAmount)} · {(pct * 100).toFixed(0)}%</div>
+                  <div className={styles.goalValues}>
+                    {formatCurrency(effectiveSaved)} saved of {formatCurrency(g.targetAmount)}
+                  </div>
                 </div>
               )
             })}

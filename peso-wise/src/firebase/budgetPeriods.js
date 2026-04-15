@@ -20,7 +20,14 @@ export async function addBudgetPeriod(userId, data) {
 
 export async function updateBudgetPeriod(id, data) {
   const docRef = doc(db, COLLECTION, id)
-  await updateDoc(docRef, data)
+  const updates = { ...data }
+  if (updates.startDate && !(updates.startDate instanceof Timestamp)) {
+    updates.startDate = Timestamp.fromDate(new Date(updates.startDate))
+  }
+  if (updates.endDate && !(updates.endDate instanceof Timestamp)) {
+    updates.endDate = Timestamp.fromDate(new Date(updates.endDate))
+  }
+  await updateDoc(docRef, updates)
 }
 
 export async function completeBudgetPeriod(id, summary) {

@@ -5,40 +5,45 @@
 .label {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
-  margin-bottom: 5px;
+  font-size: 0.8125rem;
+  margin-bottom: 6px;
 }
 
 .labelLeft {
   color: var(--color-text-secondary);
+  font-weight: 500;
 }
 
 .labelRight {
-  font-weight: 600;
+  font-weight: 700;
 }
 
 .track {
   width: 100%;
-  height: 6px;
-  background-color: rgba(241, 245, 249, 0.8);
+  height: 8px;
+  background-color: var(--pastel-cream);
   border-radius: var(--border-radius-full);
   overflow: hidden;
+}
+
+[data-theme="dark"] .track {
+  background-color: rgba(245, 239, 230, 0.08);
 }
 
 .fill {
   height: 100%;
   border-radius: var(--border-radius-full);
-  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .fill.ok {
-  background: linear-gradient(90deg, #22C55E, var(--color-success));
+  background: linear-gradient(90deg, #A8D8A8, var(--color-success));
 }
 
 .fill.warning {
-  background: linear-gradient(90deg, #F97316, var(--color-warning));
+  background: linear-gradient(90deg, #F5D5C8, var(--color-warning));
 }
 
 .fill.over {
-  background: linear-gradient(90deg, #EF4444, var(--color-danger));
+  background: linear-gradient(90deg, #F0C0B8, var(--color-danger));
 }

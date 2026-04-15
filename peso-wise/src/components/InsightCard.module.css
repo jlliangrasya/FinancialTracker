@@ -1,6 +1,6 @@
 .card {
-  padding: 14px 16px;
-  border-radius: var(--border-radius-md);
+  padding: 16px 18px;
+  border-radius: var(--border-radius-lg);
   border-left: 4px solid;
   cursor: pointer;
   transition: transform var(--transition-fast);
@@ -9,27 +9,32 @@
 }
 
 .card:active { transform: scale(0.98); }
-.card.alert { border-left-color: var(--color-warning); background-color: var(--color-warning-light); }
-.card.win { border-left-color: var(--color-success); background-color: var(--color-success-light); }
-.card.info { border-left-color: var(--color-primary); background-color: var(--color-primary-light); }
-.card.warning { border-left-color: var(--color-danger); background-color: var(--color-danger-light); }
+.card.alert { border-left-color: var(--color-warning); background: var(--pastel-peach); }
+.card.win { border-left-color: var(--color-success); background: var(--pastel-mint); }
+.card.info { border-left-color: var(--color-primary); background: var(--color-primary-light); }
+.card.warning { border-left-color: var(--color-danger); background: var(--pastel-rose); }
+
+[data-theme="dark"] .card.alert { background: rgba(232, 168, 124, 0.1); }
+[data-theme="dark"] .card.win { background: rgba(125, 184, 125, 0.1); }
+[data-theme="dark"] .card.info { background: var(--color-primary-light); }
+[data-theme="dark"] .card.warning { background: rgba(212, 129, 122, 0.1); }
 
 .headline {
-  font-size: 0.875rem;
-  font-weight: 600;
+  font-size: 0.9375rem;
+  font-weight: 700;
   color: var(--color-text-primary);
   margin-bottom: 4px;
 }
 
 .detail {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: var(--color-text-secondary);
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
 .tip {
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   color: var(--color-primary);
   margin-top: 8px;
-  font-weight: 500;
+  font-weight: 700;
 }

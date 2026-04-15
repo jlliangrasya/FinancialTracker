@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getTransactions } from '../firebase/transactions'
-import { getActiveBudgetPeriod, completeBudgetPeriod } from '../firebase/budgetPeriods'
+import { getActiveBudgetPeriod, completeBudgetPeriod, updateBudgetPeriod } from '../firebase/budgetPeriods'
 import { getBills, markBillPaid, markBillUnpaid } from '../firebase/bills'
 import { getBudgets } from '../firebase/budgets'
 import { getSavingsGoals } from '../firebase/savingsGoals'
@@ -15,6 +15,12 @@ import { formatCurrency } from '../utils/formatCurrency'
 import { formatDate, getCurrentMonthString, differenceInDays } from '../utils/dateHelpers'
 import styles from './BudgetTracker.module.css'
 
+function toInputDate(d) {
+  if (!d) return ''
+  const date = d.toDate ? d.toDate() : new Date(d)
+  return date.toISOString().split('T')[0]
+}
+
 export default function BudgetTracker() {
   const [transactions, setTransactions] = useState([])
   const [period, setPeriod] = useState(null)
@@ -24,9 +30,13 @@ export default function BudgetTracker() {
   const [settings, setSettings] = useState(null)
   const [transfers, setTransfers] = useState([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState('type') // 'type' | 'category'
+  const [view, setView] = useState('type')
   const [activeTab, setActiveTab] = useState('expenses')
   const [expiredSummary, setExpiredSummary] = useState(null)
+  const [editingDates, setEditingDates] = useState(false)
+  const [editStart, setEditStart] = useState('')
+  const [editEnd, setEditEnd] = useState('')
+  const [savingDates, setSavingDates] = useState(false)
   const { currentUser } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
@@ -54,19 +64,16 @@ export default function BudgetTracker() {
       setSettings(st)
       setTransfers(xfers || [])
 
-      // Auto-expire: if active period's endDate has passed, close it
       if (ap) {
         const endDate = ap.endDate?.toDate ? ap.endDate.toDate() : new Date(ap.endDate)
         const startDate = ap.startDate?.toDate ? ap.startDate.toDate() : new Date(ap.startDate)
         const now = new Date()
         if (endDate < now) {
-          // Compute summary before closing
           const periodTxnsList = txns.filter(t => {
             const d = t.date?.toDate ? t.date.toDate() : new Date(t.date)
             return d >= startDate && d <= endDate && !t.isIncome
           })
           const expensesSpent = periodTxnsList.reduce((s, t) => s + t.amount, 0)
-          const currentMs = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`
           const endMs = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}`
           const periodMonthStr = endMs
           const paidBills = bl.filter(b => b.isActive && b.paidMonths && b.paidMonths.includes(periodMonthStr)).reduce((s, b) => s + b.amount, 0)
@@ -90,7 +97,7 @@ export default function BudgetTracker() {
 
           await completeBudgetPeriod(ap.id, summary)
           setExpiredSummary({ ...summary, periodId: ap.id })
-          setPeriod(null) // Clear the active period
+          setPeriod(null)
         } else {
           setPeriod(ap)
         }
@@ -104,6 +111,9 @@ export default function BudgetTracker() {
   const periodStart = period?.startDate?.toDate ? period.startDate.toDate() : period?.startDate ? new Date(period.startDate) : null
   const periodEnd = period?.endDate?.toDate ? period.endDate.toDate() : period?.endDate ? new Date(period.endDate) : null
   const daysLeft = periodEnd ? Math.max(0, differenceInDays(periodEnd, new Date())) : 0
+  const totalDays = periodStart && periodEnd ? Math.max(1, differenceInDays(periodEnd, periodStart)) : 1
+  const daysElapsed = totalDays - daysLeft
+  const timeProgress = Math.min(daysElapsed / totalDays, 1)
 
   const periodTxns = useMemo(() => {
     if (!periodStart || !periodEnd) return []
@@ -138,14 +148,12 @@ export default function BudgetTracker() {
   const billsUnpaid = periodBills.filter(b => !b.isPaid).reduce((s, b) => s + b.amount, 0)
   const billsTotal = billsPaid + billsUnpaid
 
-  // Per-type values
   const expensesBudget = period?.expensesBudget || 0
   const billsBudget = period?.billsBudget || 0
   const savingsBudget = period?.savingsBudget || 0
   const expensesRemaining = expensesBudget - totalExpensesSpent
   const billsRemaining = billsBudget - billsTotal
 
-  // Resolve savedAmount: use bank balance if goal is linked
   const banks = settings?.banks || []
   function getEffectiveSaved(g) {
     if (g.linkedBank && g.bank) {
@@ -155,7 +163,6 @@ export default function BudgetTracker() {
     return g.savedAmount || 0
   }
 
-  // Savings calculations
   const totalSaved = savingsGoals.reduce((s, g) => s + getEffectiveSaved(g), 0)
   const totalSavingsTarget = savingsGoals.reduce((s, g) => s + (g.targetAmount || 0), 0)
   const savingsGoalDetails = savingsGoals.map(g => {
@@ -170,14 +177,12 @@ export default function BudgetTracker() {
   })
   const totalMonthlyNeeded = savingsGoalDetails.reduce((s, g) => s + g.monthlyNeeded, 0)
 
-  // Hero values depend on active tab in "By Type" view
   const typeHeroAmount = activeTab === 'expenses' ? expensesBudget : activeTab === 'bills' ? billsBudget : savingsBudget
   const typeHeroSpent = activeTab === 'expenses' ? totalExpensesSpent : activeTab === 'bills' ? billsTotal : 0
   const typePercentUsed = typeHeroAmount > 0 ? typeHeroSpent / typeHeroAmount : 0
-  const typeStatus = typePercentUsed >= 1 ? 'Over budget!' : typePercentUsed >= 0.8 ? 'Running low' : 'On track'
+  const typeStatus = typePercentUsed >= 1 ? 'Over budget' : typePercentUsed >= 0.8 ? 'Almost there' : 'Looking good'
   const typeStatusColor = typePercentUsed >= 1 ? 'var(--color-danger)' : typePercentUsed >= 0.8 ? 'var(--color-warning)' : 'var(--color-success)'
 
-  // Category spending map (all transactions, not just period)
   const categorySpending = useMemo(() => {
     const map = {}
     periodTxns.forEach(t => {
@@ -186,7 +191,6 @@ export default function BudgetTracker() {
     return map
   }, [periodTxns])
 
-  // All categories that have either a budget or spending this period
   const categoryRows = useMemo(() => {
     const cats = new Set([
       ...budgets.map(b => b.category),
@@ -212,11 +216,40 @@ export default function BudgetTracker() {
     }
   }
 
+  function openDateEditor() {
+    setEditStart(toInputDate(period?.startDate))
+    setEditEnd(toInputDate(period?.endDate))
+    setEditingDates(true)
+  }
+
+  async function saveDateChanges() {
+    if (!period || !editStart || !editEnd) return
+    const newStart = new Date(editStart)
+    const newEnd = new Date(editEnd)
+    if (newEnd <= newStart) {
+      showToast('End date must be after start date', 'error')
+      return
+    }
+    setSavingDates(true)
+    try {
+      await updateBudgetPeriod(period.id, {
+        startDate: newStart,
+        endDate: newEnd,
+      })
+      showToast('Period dates updated')
+      setEditingDates(false)
+      await loadData()
+    } catch {
+      showToast('Failed to update dates', 'error')
+    }
+    setSavingDates(false)
+  }
+
   if (loading) {
     return (
       <div className={styles.container}>
         <h1 className={styles.title}>Budget Tracker</h1>
-        {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 10, marginBottom: 12 }} />)}
+        {[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 16, marginBottom: 12 }} />)}
       </div>
     )
   }
@@ -231,7 +264,9 @@ export default function BudgetTracker() {
           <div className={styles.expiredModal} onClick={e => e.stopPropagation()}>
             <div className={styles.expiredHeader}>
               <h2 className={styles.expiredTitle}>Budget Period Ended</h2>
-              <button className={styles.expiredClose} onClick={() => setExpiredSummary(null)}>✕</button>
+              <button className={styles.expiredClose} onClick={() => setExpiredSummary(null)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </div>
             <div className={styles.expiredBody}>
               <div className={styles.expiredDates}>
@@ -286,7 +321,7 @@ export default function BudgetTracker() {
                 <div className={styles.expiredSection}>
                   <div className={styles.expiredSectionTitle}>Savings</div>
                   <div className={styles.expiredRow}>
-                    <span>Allocated</span>
+                    <span>Set aside</span>
                     <span style={{ color: 'var(--color-success)' }}>{formatCurrency(expiredSummary.savingsBudget)}</span>
                   </div>
                 </div>
@@ -320,6 +355,37 @@ export default function BudgetTracker() {
         </div>
       )}
 
+      {/* Date editing modal */}
+      {editingDates && (
+        <div className={styles.expiredOverlay} onClick={() => setEditingDates(false)}>
+          <div className={styles.dateEditModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.expiredHeader}>
+              <h2 className={styles.expiredTitle}>Edit Period Dates</h2>
+              <button className={styles.expiredClose} onClick={() => setEditingDates(false)}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
+            </div>
+            <div className={styles.dateEditBody}>
+              <p className={styles.dateEditHint}>Adjust when this budget period starts and ends.</p>
+              <div className={styles.dateEditFields}>
+                <div className={styles.dateEditField}>
+                  <label className={styles.dateEditLabel}>Start date</label>
+                  <input type="date" className="input-field" value={editStart} onChange={e => setEditStart(e.target.value)} />
+                </div>
+                <div className={styles.dateEditField}>
+                  <label className={styles.dateEditLabel}>End date</label>
+                  <input type="date" className="input-field" value={editEnd} onChange={e => setEditEnd(e.target.value)} />
+                </div>
+              </div>
+              <button className="btn-primary" onClick={saveDateChanges} disabled={savingDates} style={{ marginTop: 16 }}>
+                {savingDates ? 'Saving...' : 'Save Changes'}
+              </button>
+              <button className={styles.expiredDismiss} onClick={() => setEditingDates(false)}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* View toggle */}
       <div className={styles.modeToggle}>
         <button className={`${styles.modeTab} ${view === 'type' ? styles.active : ''}`} onClick={() => setView('type')}>
@@ -334,8 +400,28 @@ export default function BudgetTracker() {
       {view === 'type' && (
         <>
           {periodStart && periodEnd && (
-            <div className={styles.dateRange}>
-              {formatDate(periodStart)} – {formatDate(periodEnd)} · {daysLeft} days left
+            <div className={styles.dateRangeCard}>
+              <div className={styles.dateRangeInfo}>
+                <div className={styles.dateRangeText}>
+                  {formatDate(periodStart)} – {formatDate(periodEnd)}
+                </div>
+                <div className={styles.dateRangeDays}>
+                  {daysLeft === 0 ? 'Last day!' : daysLeft === 1 ? '1 day left' : `${daysLeft} days left`}
+                </div>
+              </div>
+              <div className={styles.dateRangeActions}>
+                <button className={styles.dateEditBtn} onClick={openDateEditor} title="Edit dates">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                </button>
+              </div>
+              <div className={styles.timeProgressBar}>
+                <div className={styles.timeProgressFill} style={{ width: `${timeProgress * 100}%` }} />
+              </div>
             </div>
           )}
 
@@ -353,9 +439,15 @@ export default function BudgetTracker() {
 
           {!period ? (
             <div className={styles.empty}>
-              <p>No active budget period.</p>
-              <p style={{ marginTop: 8, marginBottom: 20 }}>Set a budget to track your expenses and bills.</p>
-              <button className="btn-primary" onClick={() => navigate('/paycheck-allocator')}>
+              <div className={styles.emptyIcon}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-hint)" strokeWidth="1.5" strokeLinecap="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              </div>
+              <p className={styles.emptyTitle}>No active budget period</p>
+              <p className={styles.emptyDesc}>Set a budget to start tracking your spending and bills.</p>
+              <button className="btn-primary" style={{ marginTop: 16 }} onClick={() => navigate('/paycheck-allocator')}>
                 Set Budget Period
               </button>
             </div>
@@ -364,10 +456,10 @@ export default function BudgetTracker() {
               <div className={styles.hero}>
                 <div className={styles.heroTopRow}>
                   <div className={styles.heroLabel}>
-                    {activeTab === 'expenses' ? 'Daily expenses budget' : activeTab === 'bills' ? 'Bills budget' : 'Savings allocation'}
+                    {activeTab === 'expenses' ? 'Spending budget' : activeTab === 'bills' ? 'Bills budget' : 'Savings allocation'}
                   </div>
                   <button className={styles.editBudgetBtn} onClick={() => navigate('/paycheck-allocator?edit=1')}>
-                    Edit Budget
+                    Edit
                   </button>
                 </div>
                 {activeTab === 'savings' ? (
@@ -375,16 +467,16 @@ export default function BudgetTracker() {
                     <>
                       <div className={styles.heroAmount}>{formatCurrency(savingsBudget)}</div>
                       <div className={styles.heroSub}>
-                        allocated this period for savings
+                        set aside this period for savings
                       </div>
                       {totalMonthlyNeeded > 0 && (
                         <div className={styles.heroSub} style={{ marginTop: 4, color: totalMonthlyNeeded > savingsBudget ? 'var(--color-warning)' : 'var(--color-success)' }}>
-                          Goals need {formatCurrency(totalMonthlyNeeded)}/month
+                          Your goals need {formatCurrency(totalMonthlyNeeded)}/month
                         </div>
                       )}
                     </>
                   ) : (
-                    <div className={styles.heroSub} style={{ marginTop: 8 }}>No savings allocation set. Edit your budget to add one.</div>
+                    <div className={styles.heroSub} style={{ marginTop: 8 }}>No savings set aside yet. Tap Edit to add one.</div>
                   )
                 ) : typeHeroAmount > 0 ? (
                   <>
@@ -393,9 +485,15 @@ export default function BudgetTracker() {
                     <div className={styles.heroSub}>
                       {formatCurrency(typeHeroSpent)} {activeTab === 'expenses' ? 'spent' : 'total'} — {(typePercentUsed * 100).toFixed(0)}% used
                     </div>
+                    <div className={styles.heroRemaining}>
+                      {typePercentUsed >= 1
+                        ? `Over by ${formatCurrency(typeHeroSpent - typeHeroAmount)}`
+                        : `${formatCurrency(typeHeroAmount - typeHeroSpent)} remaining`
+                      }
+                    </div>
                   </>
                 ) : (
-                  <div className={styles.heroSub} style={{ marginTop: 8 }}>No budget set for this type</div>
+                  <div className={styles.heroSub} style={{ marginTop: 8 }}>No budget set for this category</div>
                 )}
               </div>
 
@@ -405,7 +503,12 @@ export default function BudgetTracker() {
                     <div className={styles.txnList}>
                       {periodTxns.map(t => (
                         <div key={t.id} className={styles.txnRow}>
-                          <div className={styles.dot} style={{ backgroundColor: 'var(--color-primary)' }} />
+                          <div className={styles.txnIconCircle}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round">
+                              <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/>
+                              <polyline points="17 18 23 18 23 12"/>
+                            </svg>
+                          </div>
                           <div className={styles.txnInfo}>
                             <div className={styles.txnDesc}>{t.description || t.category}</div>
                             <div className={styles.txnMeta}>{t.category} · {formatDate(t.date)} · {t.bank}</div>
@@ -415,7 +518,15 @@ export default function BudgetTracker() {
                       ))}
                     </div>
                   ) : (
-                    <div className={styles.empty}>No expenses logged this period yet.</div>
+                    <div className={styles.empty}>
+                      <div className={styles.emptyIcon}>
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-hint)" strokeWidth="1.5" strokeLinecap="round">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                          <polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                      </div>
+                      No expenses logged yet this period
+                    </div>
                   )}
                 </>
               )}
@@ -432,7 +543,10 @@ export default function BudgetTracker() {
                             <div className={styles.billDue}>Due day {b.dueDay} · {b.bank}</div>
                           </div>
                           <div className={styles.billAmount}>{formatCurrency(b.amount)}</div>
-                          <input type="checkbox" className={styles.paidToggle} checked={b.isPaid} onChange={() => handleTogglePaid(b)} />
+                          <label className={styles.paidToggleLabel}>
+                            <input type="checkbox" className={styles.paidToggle} checked={b.isPaid} onChange={() => handleTogglePaid(b)} />
+                            <span className={styles.paidToggleSlider} />
+                          </label>
                         </div>
                       ))}
                     </div>
@@ -467,9 +581,15 @@ export default function BudgetTracker() {
                     </div>
                   ) : (
                     <div className={styles.empty}>
-                      <p>No savings goals yet.</p>
-                      <p style={{ marginTop: 8, marginBottom: 20 }}>Create goals to track your savings progress.</p>
-                      <button className="btn-primary" onClick={() => navigate('/savings-goals')}>
+                      <div className={styles.emptyIcon}>
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-hint)" strokeWidth="1.5" strokeLinecap="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <path d="M12 6v6l4 2"/>
+                        </svg>
+                      </div>
+                      <p className={styles.emptyTitle}>No savings goals yet</p>
+                      <p className={styles.emptyDesc}>Create goals to track your progress.</p>
+                      <button className="btn-primary" style={{ marginTop: 12 }} onClick={() => navigate('/savings-goals')}>
                         Add Savings Goal
                       </button>
                     </div>
@@ -484,16 +604,16 @@ export default function BudgetTracker() {
                   {activeTab === 'expenses' ? (
                     <>
                       <div className={styles.footerRow}>
-                        <span className={styles.footerLabel}>Expenses budget</span>
+                        <span className={styles.footerLabel}>Budget</span>
                         <span className={styles.footerValue}>{formatCurrency(expensesBudget)}</span>
                       </div>
                       <div className={styles.footerRow}>
-                        <span className={styles.footerLabel}>Spent</span>
+                        <span className={styles.footerLabel}>Spent so far</span>
                         <span className={styles.footerValue} style={{ color: 'var(--color-danger)' }}>-{formatCurrency(totalExpensesSpent)}</span>
                       </div>
                       <div className={styles.footerDivider} />
                       <div className={styles.footerRemaining}>
-                        <span>Remaining</span>
+                        <span>You can still spend</span>
                         <span style={{ color: expensesRemaining < 0 ? 'var(--color-danger)' : 'var(--color-success)' }}>
                           {formatCurrency(expensesRemaining)}
                         </span>
@@ -506,11 +626,11 @@ export default function BudgetTracker() {
                         <span className={styles.footerValue}>{formatCurrency(billsBudget)}</span>
                       </div>
                       <div className={styles.footerRow}>
-                        <span className={styles.footerLabel}>Paid</span>
+                        <span className={styles.footerLabel}>Already paid</span>
                         <span className={styles.footerValue} style={{ color: 'var(--color-success)' }}>-{formatCurrency(billsPaid)}</span>
                       </div>
                       <div className={styles.footerRow}>
-                        <span className={styles.footerLabel}>Unpaid</span>
+                        <span className={styles.footerLabel}>Still unpaid</span>
                         <span className={styles.footerValue} style={{ color: 'var(--color-warning)' }}>-{formatCurrency(billsUnpaid)}</span>
                       </div>
                       <div className={styles.footerDivider} />
@@ -528,11 +648,11 @@ export default function BudgetTracker() {
                         <span className={styles.footerValue}>{formatCurrency(savingsBudget)}</span>
                       </div>
                       <div className={styles.footerRow}>
-                        <span className={styles.footerLabel}>Total saved (all goals)</span>
+                        <span className={styles.footerLabel}>Total saved</span>
                         <span className={styles.footerValue} style={{ color: 'var(--color-success)' }}>{formatCurrency(totalSaved)}</span>
                       </div>
                       <div className={styles.footerRow}>
-                        <span className={styles.footerLabel}>Still needed (all goals)</span>
+                        <span className={styles.footerLabel}>Still needed</span>
                         <span className={styles.footerValue}>{formatCurrency(totalSavingsTarget - totalSaved)}</span>
                       </div>
                       <div className={styles.footerDivider} />
@@ -562,14 +682,19 @@ export default function BudgetTracker() {
         <>
           {categoryRows.length === 0 ? (
             <div className={styles.empty}>
-              <p>No spending or category budgets found.</p>
-              <p style={{ marginTop: 8 }}>Log expenses via the <strong>+</strong> button, or set budget limits per category in <strong>Settings → Monthly Budgets</strong>.</p>
+              <div className={styles.emptyIcon}>
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-hint)" strokeWidth="1.5" strokeLinecap="round">
+                  <path d="M18 20V10M12 20V4M6 20v-6"/>
+                </svg>
+              </div>
+              <p className={styles.emptyTitle}>No spending data yet</p>
+              <p className={styles.emptyDesc}>Log expenses via the + button, or set budget limits per category in Settings.</p>
             </div>
           ) : (
             <>
               {budgets.length === 0 && (
                 <div className={styles.catHint}>
-                  No limits set — showing spending only. Go to <strong>Settings → Monthly Budgets</strong> to set limits per category.
+                  No limits set — showing spending only. Go to Settings to set limits per category.
                 </div>
               )}
               <div className={styles.catList}>

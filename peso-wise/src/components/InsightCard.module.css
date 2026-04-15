@@ -9,15 +9,15 @@
 }
 
 .card:active { transform: scale(0.98); }
-.card.alert { border-left-color: var(--color-warning); background: var(--pastel-peach); }
-.card.win { border-left-color: var(--color-success); background: var(--pastel-mint); }
+.card.alert { border-left-color: var(--color-warning); background: var(--color-warning-light); }
+.card.win { border-left-color: var(--color-success); background: var(--color-success-light); }
 .card.info { border-left-color: var(--color-primary); background: var(--color-primary-light); }
-.card.warning { border-left-color: var(--color-danger); background: var(--pastel-rose); }
+.card.warning { border-left-color: var(--color-danger); background: var(--color-danger-light); }
 
-[data-theme="dark"] .card.alert { background: rgba(232, 168, 124, 0.1); }
-[data-theme="dark"] .card.win { background: rgba(125, 184, 125, 0.1); }
+[data-theme="dark"] .card.alert { background: rgba(196, 125, 46, 0.1); }
+[data-theme="dark"] .card.win { background: rgba(61, 139, 94, 0.1); }
 [data-theme="dark"] .card.info { background: var(--color-primary-light); }
-[data-theme="dark"] .card.warning { background: rgba(212, 129, 122, 0.1); }
+[data-theme="dark"] .card.warning { background: rgba(190, 74, 66, 0.1); }
 
 .headline {
   font-size: 0.9375rem;

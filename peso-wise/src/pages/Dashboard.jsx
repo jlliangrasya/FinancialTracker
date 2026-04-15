@@ -22,6 +22,7 @@ import ProgressBar from '../components/ProgressBar'
 import InsightCard from '../components/InsightCard'
 import FinancialMood, { getFinancialMood } from '../components/FinancialMood'
 import { LeafDecor, PlantDecor } from '../components/Decorations'
+import PesoWiseLogo from '../components/PesoWiseLogo'
 import styles from './Dashboard.module.css'
 
 function getGreeting() {
@@ -229,13 +230,7 @@ export default function Dashboard() {
       {/* Header with greeting */}
       <div className={styles.headerBar}>
         <div className={styles.logoRow}>
-          <div className={styles.logoIcon}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L15 8H9L12 2Z" fill="white" opacity="0.9"/>
-              <circle cx="12" cy="15" r="6" fill="white" opacity="0.7"/>
-              <path d="M9 14h6M12 11v8" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.9"/>
-            </svg>
-          </div>
+          <PesoWiseLogo size={38} />
           <span className={styles.logoText}>Peso Wise</span>
         </div>
         <span className={styles.monthLabel}>{monthLabel.replace('-', ' ')}</span>
@@ -292,7 +287,7 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Last period summary */}
+      {/* Last period summary — only show rows with actual data */}
       {lastPeriod?.summary && (
         <div className={styles.section}>
           <div className={styles.sectionTitle}>
@@ -303,20 +298,40 @@ export default function Dashboard() {
             <div className={styles.periodDateLabel}>
               {new Date(lastPeriod.summary.startDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric' })} – {new Date(lastPeriod.summary.endDate).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
             </div>
-            <div className={styles.breakdownRow}>
-              <span className={styles.breakdownLabel}>Expenses</span>
-              <span className={styles.breakdownValue} style={{ color: lastPeriod.summary.expensesOnBudget ? 'var(--color-success)' : 'var(--color-danger)' }}>
-                {formatCurrency(lastPeriod.summary.expensesSpent)} / {formatCurrency(lastPeriod.summary.expensesBudget)}
-                {lastPeriod.summary.expensesOnBudget ? ' ✓' : ' ✕'}
-              </span>
-            </div>
-            <div className={styles.breakdownRow}>
-              <span className={styles.breakdownLabel}>Bills</span>
-              <span className={styles.breakdownValue} style={{ color: lastPeriod.summary.billsOnBudget ? 'var(--color-success)' : 'var(--color-danger)' }}>
-                {formatCurrency(lastPeriod.summary.billsTotal)} / {formatCurrency(lastPeriod.summary.billsBudget)}
-                {lastPeriod.summary.billsOnBudget ? ' ✓' : ' ✕'}
-              </span>
-            </div>
+
+            {/* Only show expenses if there was a budget or spending */}
+            {(lastPeriod.summary.expensesBudget > 0 || lastPeriod.summary.expensesSpent > 0) && (
+              <div className={styles.breakdownRow}>
+                <span className={styles.breakdownLabel}>
+                  Spent {formatCurrency(lastPeriod.summary.expensesSpent)}
+                  {lastPeriod.summary.expensesBudget > 0 && ` of ${formatCurrency(lastPeriod.summary.expensesBudget)}`}
+                </span>
+                <span className={styles.verdictBadge} style={{
+                  backgroundColor: lastPeriod.summary.expensesOnBudget ? 'var(--color-success-light)' : 'var(--color-danger-light)',
+                  color: lastPeriod.summary.expensesOnBudget ? 'var(--color-success)' : 'var(--color-danger)',
+                }}>
+                  {lastPeriod.summary.expensesOnBudget ? 'On budget' : 'Over'}
+                </span>
+              </div>
+            )}
+
+            {/* Only show bills if there was a bills budget or any bill activity */}
+            {(lastPeriod.summary.billsBudget > 0 || lastPeriod.summary.billsTotal > 0) && (
+              <div className={styles.breakdownRow}>
+                <span className={styles.breakdownLabel}>
+                  Bills {formatCurrency(lastPeriod.summary.billsTotal)}
+                  {lastPeriod.summary.billsBudget > 0 && ` of ${formatCurrency(lastPeriod.summary.billsBudget)}`}
+                </span>
+                <span className={styles.verdictBadge} style={{
+                  backgroundColor: lastPeriod.summary.billsOnBudget ? 'var(--color-success-light)' : 'var(--color-danger-light)',
+                  color: lastPeriod.summary.billsOnBudget ? 'var(--color-success)' : 'var(--color-danger)',
+                }}>
+                  {lastPeriod.summary.billsOnBudget ? 'On budget' : 'Over'}
+                </span>
+              </div>
+            )}
+
+            {/* Only show savings if there was an allocation */}
             {lastPeriod.summary.savingsBudget > 0 && (
               <div className={styles.breakdownRow}>
                 <span className={styles.breakdownLabel}>Savings set aside</span>
@@ -325,13 +340,18 @@ export default function Dashboard() {
                 </span>
               </div>
             )}
+
+            {/* Simple overall verdict */}
             <div className={styles.breakdownDivider} />
             <div className={styles.breakdownRow}>
               <span className={styles.breakdownTotal}>
-                {lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? 'Stayed on budget' : 'Went over budget'}
-              </span>
-              <span className={`${styles.verdictBadge} ${lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? styles.verdictGood : styles.verdictBad}`}>
-                {lastPeriod.summary.expensesOnBudget && lastPeriod.summary.billsOnBudget ? 'On track' : 'Over'}
+                {(() => {
+                  const hadExpenses = lastPeriod.summary.expensesBudget > 0 || lastPeriod.summary.expensesSpent > 0
+                  const hadBills = lastPeriod.summary.billsBudget > 0 || lastPeriod.summary.billsTotal > 0
+                  const expensesOk = !hadExpenses || lastPeriod.summary.expensesOnBudget
+                  const billsOk = !hadBills || lastPeriod.summary.billsOnBudget
+                  return expensesOk && billsOk ? 'Stayed on budget' : 'Went over budget'
+                })()}
               </span>
             </div>
           </div>
@@ -454,8 +474,8 @@ export default function Dashboard() {
       <div className={styles.healthCard} onClick={() => navigate('/health-score')}>
         <FinancialMood mood={mood} size="normal" />
         <div className={styles.healthScoreBubble} style={{
-          backgroundColor: mood === 'great' || mood === 'good' ? 'var(--pastel-mint)' :
-            mood === 'okay' ? 'var(--pastel-butter)' : 'var(--pastel-rose)',
+          backgroundColor: mood === 'great' || mood === 'good' ? 'var(--accent-teal)' :
+            mood === 'okay' ? 'var(--color-warning-light)' : 'var(--color-danger-light)',
         }}>
           <span className={styles.healthScoreNum}>{healthScore.total}</span>
           <span className={styles.healthScoreMax}>/100</span>

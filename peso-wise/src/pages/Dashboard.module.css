@@ -8,25 +8,25 @@
   position: relative;
 }
 
-/* Decorative SVGs */
+/* Decorative SVGs — visible but not distracting */
 .leafDecor {
   position: absolute;
-  top: -20px;
-  right: -30px;
-  width: 100px;
-  height: 100px;
-  opacity: 0.4;
+  top: -10px;
+  right: -15px;
+  width: 130px;
+  height: 130px;
+  opacity: 0.7;
   pointer-events: none;
   z-index: 0;
 }
 
 .plantDecor {
   position: absolute;
-  top: 280px;
-  left: -40px;
-  width: 80px;
-  height: 110px;
-  opacity: 0.3;
+  top: 320px;
+  left: -20px;
+  width: 100px;
+  height: 140px;
+  opacity: 0.6;
   pointer-events: none;
   z-index: 0;
 }
@@ -60,7 +60,7 @@
   color: white;
   font-weight: 700;
   font-size: 1rem;
-  box-shadow: 0 3px 12px rgba(91, 154, 139, 0.25);
+  box-shadow: 0 3px 12px rgba(74, 124, 111, 0.25);
   flex-shrink: 0;
 }
 
@@ -92,7 +92,7 @@
   justify-content: space-between;
   padding: 20px;
   border-radius: var(--border-radius-xl);
-  background: linear-gradient(135deg, var(--pastel-mint) 0%, var(--pastel-cream) 100%);
+  background: linear-gradient(135deg, var(--accent-teal) 0%, var(--accent-fog) 100%);
   margin-bottom: 16px;
   position: relative;
   z-index: 1;
@@ -100,7 +100,7 @@
 }
 
 [data-theme="dark"] .greetingCard {
-  background: linear-gradient(135deg, rgba(91,154,139,0.15) 0%, rgba(245,239,230,0.08) 100%);
+  background: linear-gradient(135deg, rgba(74,124,111,0.18) 0%, rgba(112,142,160,0.1) 100%);
 }
 
 .greetingText {
@@ -134,19 +134,19 @@
 }
 
 .netPositive {
-  background: linear-gradient(135deg, var(--pastel-mint) 0%, var(--pastel-sage) 100%);
+  background: linear-gradient(135deg, var(--accent-teal) 0%, var(--color-success-light) 100%);
 }
 
 .netNegative {
-  background: linear-gradient(135deg, var(--pastel-rose) 0%, var(--pastel-peach) 100%);
+  background: linear-gradient(135deg, var(--color-danger-light) 0%, var(--accent-warm) 100%);
 }
 
 [data-theme="dark"] .netPositive {
-  background: linear-gradient(135deg, rgba(125,184,125,0.15) 0%, rgba(212,228,212,0.1) 100%);
+  background: linear-gradient(135deg, rgba(61,139,94,0.15) 0%, rgba(74,124,111,0.1) 100%);
 }
 
 [data-theme="dark"] .netNegative {
-  background: linear-gradient(135deg, rgba(212,129,122,0.15) 0%, rgba(245,213,200,0.1) 100%);
+  background: linear-gradient(135deg, rgba(190,74,66,0.15) 0%, rgba(190,74,66,0.08) 100%);
 }
 
 .netCashCard::before {
@@ -349,15 +349,11 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--pastel-peach);
+  background: var(--color-warning-light);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-}
-
-[data-theme="dark"] .billIconCircle {
-  background: rgba(232, 168, 124, 0.15);
 }
 
 .billInfo { display: flex; flex-direction: column; min-width: 0; flex: 1; }

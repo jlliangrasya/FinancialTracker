@@ -5,18 +5,18 @@ import { getAllUsers } from '../firebase/settings'
 import styles from './BottomNav.module.css'
 
 const DRAWER_ITEMS = [
-  { label: 'Transactions', icon: 'transactions', path: '/transactions', bg: 'var(--pastel-sky)' },
-  { label: 'Bills', icon: 'bills', path: '/bills', bg: 'var(--pastel-peach)' },
-  { label: 'Savings', icon: 'savings', path: '/savings-goals', bg: 'var(--pastel-mint)' },
-  { label: 'Invest', icon: 'invest', path: '/investments', bg: 'var(--pastel-lavender)' },
-  { label: 'Debt', icon: 'debt', path: '/debt-planner', bg: 'var(--pastel-rose)' },
-  { label: 'Health', icon: 'health', path: '/health-score', bg: 'var(--pastel-mint)' },
-  { label: 'Insights', icon: 'insights', path: '/insights', bg: 'var(--pastel-butter)' },
-  { label: 'Reports', icon: 'reports', path: '/reports', bg: 'var(--pastel-lavender)' },
-  { label: 'Settings', icon: 'settings', path: '/settings', bg: 'var(--pastel-cream)' },
+  { label: 'Transactions', icon: 'transactions', path: '/transactions', bg: 'var(--accent-ice)' },
+  { label: 'Bills', icon: 'bills', path: '/bills', bg: 'var(--color-warning-light)' },
+  { label: 'Savings', icon: 'savings', path: '/savings-goals', bg: 'var(--accent-teal)' },
+  { label: 'Invest', icon: 'invest', path: '/investments', bg: 'var(--accent-slate)' },
+  { label: 'Debt', icon: 'debt', path: '/debt-planner', bg: 'var(--color-danger-light)' },
+  { label: 'Health', icon: 'health', path: '/health-score', bg: 'var(--color-success-light)' },
+  { label: 'Insights', icon: 'insights', path: '/insights', bg: 'var(--accent-sand)' },
+  { label: 'Reports', icon: 'reports', path: '/reports', bg: 'var(--accent-ice)' },
+  { label: 'Settings', icon: 'settings', path: '/settings', bg: 'var(--accent-fog)' },
 ]
 
-const ADMIN_ITEM = { label: 'Admin', icon: 'admin', path: '/admin', bg: 'var(--pastel-lavender)' }
+const ADMIN_ITEM = { label: 'Admin', icon: 'admin', path: '/admin', bg: 'var(--accent-slate)' }
 
 function DrawerIcon({ icon }) {
   const props = { width: 22, height: 22, viewBox: "0 0 24 24", fill: "none", stroke: "var(--color-text-primary)", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round" }

@@ -1,4 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
-  <rect width="192" height="192" rx="24" fill="#1565C0"/>
-  <text x="96" y="128" font-family="Arial, sans-serif" font-size="120" font-weight="bold" fill="white" text-anchor="middle">P</text>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- Leaf motif -->
+  <path d="M352 112C352 112 416 208 384 304C352 400 272 416 224 384C176 352 160 272 192 192C224 112 352 112 352 112Z" fill="white" opacity="0.1"/>
+  <path d="M320 144C320 144 368 224 344 296C320 368 264 384 224 352C184 320 176 264 200 208C224 152 320 144 320 144Z" fill="white" opacity="0.07"/>
+
+  <!-- ₱ symbol -->
+  <text x="256" y="358" font-family="Arial, sans-serif" font-size="288" font-weight="800" fill="white" text-anchor="middle" letter-spacing="-8">₱</text>
+
+  <!-- Growth arrow -->
+  <path d="M368 144L400 112L432 144" stroke="white" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity="0.7"/>
+  <line x1="400" y1="112" x2="400" y2="192" stroke="white" stroke-width="18" stroke-linecap="round" opacity="0.7"/>
+
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4A7C6F"/>
+      <stop offset="100%" stop-color="#3B655A"/>
+    </linearGradient>
+  </defs>
 </svg>

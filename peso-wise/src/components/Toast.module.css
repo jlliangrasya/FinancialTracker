@@ -24,18 +24,18 @@
 }
 
 .success {
-  background: rgba(125, 184, 125, 0.92);
-  box-shadow: 0 4px 16px rgba(125, 184, 125, 0.3);
+  background: rgba(61, 139, 94, 0.92);
+  box-shadow: 0 4px 16px rgba(61, 139, 94, 0.3);
 }
 
 .error {
-  background: rgba(212, 129, 122, 0.92);
-  box-shadow: 0 4px 16px rgba(212, 129, 122, 0.3);
+  background: rgba(190, 74, 66, 0.92);
+  box-shadow: 0 4px 16px rgba(190, 74, 66, 0.3);
 }
 
 .info {
-  background: rgba(91, 154, 139, 0.92);
-  box-shadow: 0 4px 16px rgba(91, 154, 139, 0.3);
+  background: rgba(74, 124, 111, 0.92);
+  box-shadow: 0 4px 16px rgba(74, 124, 111, 0.3);
 }
 
 @keyframes toastIn {

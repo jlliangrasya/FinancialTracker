@@ -72,7 +72,7 @@
 
 .timeProgressBar {
   height: 4px;
-  background: var(--pastel-cream);
+  background: var(--accent-fog);
   border-radius: var(--border-radius-full);
   overflow: hidden;
 }
@@ -131,7 +131,7 @@
   display: flex;
   gap: 0;
   margin-bottom: 16px;
-  background: var(--pastel-cream);
+  background: var(--accent-fog);
   border-radius: var(--border-radius-lg);
   padding: 4px;
 }
@@ -165,14 +165,14 @@
 .hero {
   padding: 22px;
   border-radius: var(--border-radius-xl);
-  background: linear-gradient(135deg, var(--pastel-mint) 0%, var(--pastel-cream) 100%);
+  background: linear-gradient(135deg, var(--accent-teal) 0%, var(--accent-fog) 100%);
   margin-bottom: 16px;
   text-align: center;
   position: relative;
 }
 
 [data-theme="dark"] .hero {
-  background: linear-gradient(135deg, rgba(91,154,139,0.12) 0%, rgba(245,239,230,0.06) 100%);
+  background: linear-gradient(135deg, rgba(74,124,111,0.15) 0%, rgba(224, 228, 230, 0.08) 100%);
 }
 
 .heroTopRow {
@@ -325,10 +325,10 @@
 
 .badge.overdue { background-color: var(--color-danger-light); color: var(--color-danger); }
 .badge.dueSoon { background-color: var(--color-warning-light); color: var(--color-warning); }
-.badge.upcoming { background: var(--pastel-cream); color: var(--color-text-secondary); }
+.badge.upcoming { background: var(--accent-fog); color: var(--color-text-secondary); }
 .badge.paid { background-color: var(--color-success-light); color: var(--color-success); }
 
-[data-theme="dark"] .badge.upcoming { background: rgba(245,239,230,0.08); }
+[data-theme="dark"] .badge.upcoming { background: rgba(224, 228, 230, 0.1); }
 
 .billInfo { flex: 1; }
 .billName { font-size: 0.9375rem; font-weight: 600; }
@@ -468,7 +468,7 @@
 .catHint {
   font-size: 0.875rem;
   color: var(--color-text-secondary);
-  background: var(--pastel-cream);
+  background: var(--accent-fog);
   border-radius: var(--border-radius-lg);
   padding: 12px 14px;
   margin-bottom: 16px;
@@ -476,7 +476,7 @@
 }
 
 [data-theme="dark"] .catHint {
-  background: rgba(245,239,230,0.06);
+  background: rgba(224, 228, 230, 0.08);
 }
 
 /* Category list */
@@ -577,12 +577,12 @@
 .expiredSection {
   margin-bottom: 16px;
   padding: 14px;
-  background: var(--pastel-cream);
+  background: var(--accent-fog);
   border-radius: var(--border-radius-lg);
 }
 
 [data-theme="dark"] .expiredSection {
-  background: rgba(245,239,230,0.06);
+  background: rgba(224, 228, 230, 0.08);
 }
 
 .expiredSectionTitle { font-size: 0.875rem; font-weight: 700; margin-bottom: 8px; }

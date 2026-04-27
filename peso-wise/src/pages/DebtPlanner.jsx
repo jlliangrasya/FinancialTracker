@@ -5,6 +5,8 @@ import { useToast } from '../components/Toast'
 import { calculateDebtPayoff, compareStrategies } from '../engine/debtPlanner'
 import { formatCurrency } from '../utils/formatCurrency'
 import ProgressBar from '../components/ProgressBar'
+import VerseCard from '../components/VerseCard'
+import { PAGE_VERSES } from '../utils/verses'
 import styles from './DebtPlanner.module.css'
 
 const DEBT_TYPES = ['Credit Card', 'Personal Loan', 'Home Loan', 'Car Loan', 'Other']
@@ -73,6 +75,7 @@ export default function DebtPlanner() {
         <h1 className={styles.title}>Debt Payoff Planner</h1>
         <button className={styles.infoBtn} onClick={() => setShowInfo(true)} aria-label="How it works">?</button>
       </div>
+      <VerseCard quote={PAGE_VERSES.debtPlanner.quote} reference={PAGE_VERSES.debtPlanner.reference} context="bills" />
 
       {showInfo && (
         <div className={styles.infoOverlay} onClick={() => setShowInfo(false)}>

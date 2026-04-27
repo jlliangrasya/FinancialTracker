@@ -70,7 +70,12 @@ function scoreDebtToIncome(transactions, debts, monthLabel) {
 function scoreEmergencyFund(transactions, savingsGoals, monthLabel) {
   const monthTxns = getMonthTransactions(transactions, monthLabel)
   const monthlyExpenses = monthTxns.filter(t => !t.isIncome).reduce((s, t) => s + t.amount, 0)
-  const totalSaved = (savingsGoals || []).reduce((s, g) => s + (g.savedAmount || 0), 0)
+  // Prefer the dedicated Emergency Fund goal; fall back to all savings combined
+  const goals = savingsGoals || []
+  const efGoal = goals.find(g => g.name?.toLowerCase().includes('emergency'))
+  const totalSaved = efGoal
+    ? (efGoal.savedAmount || 0)
+    : goals.reduce((s, g) => s + (g.savedAmount || 0), 0)
   if (monthlyExpenses === 0) return totalSaved > 0 ? 20 : 10
   const monthsCovered = totalSaved / monthlyExpenses
   if (monthsCovered >= 3) return 20

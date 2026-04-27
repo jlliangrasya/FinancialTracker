@@ -146,6 +146,17 @@
   font-weight: 600;
 }
 
+.billSelectedNote {
+  font-size: 0.8125rem;
+  color: var(--color-warning);
+  background-color: var(--color-warning-light);
+  padding: 8px 12px;
+  border-radius: var(--border-radius-sm);
+  margin-top: 6px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
 .savingsHint {
   font-size: 0.875rem;
   color: var(--color-text-secondary);

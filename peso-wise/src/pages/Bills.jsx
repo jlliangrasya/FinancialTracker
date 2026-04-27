@@ -6,6 +6,8 @@ import { useToast } from '../components/Toast'
 import { formatCurrency } from '../utils/formatCurrency'
 import { getCurrentMonthString } from '../utils/dateHelpers'
 import { BILL_FREQUENCIES } from '../utils/categories'
+import VerseCard from '../components/VerseCard'
+import { getBillsVerse } from '../utils/verses'
 import styles from './Bills.module.css'
 
 export default function Bills() {
@@ -40,12 +42,15 @@ export default function Bills() {
     const today = new Date()
     return bills.filter(b => b.isActive).map(b => {
       const isPaid = b.paidMonths && b.paidMonths.includes(currentMonthStr)
+      const paymentEntry = (b.paymentHistory || []).find(p => p.month === currentMonthStr)
+      const paidAt = paymentEntry?.paidAt?.toDate ? paymentEntry.paidAt.toDate() : paymentEntry?.paidAt ? new Date(paymentEntry.paidAt) : null
+      const paidAmount = paymentEntry?.amount ?? null
       const daysUntilDue = b.dueDay - today.getDate()
       let status = 'upcoming'
       if (isPaid) status = 'paid'
       else if (daysUntilDue < 0) status = 'overdue'
       else if (daysUntilDue <= 7) status = 'dueSoon'
-      return { ...b, isPaid, daysUntilDue, status }
+      return { ...b, isPaid, daysUntilDue, status, paidAt, paidAmount }
     }).sort((a, b) => {
       const order = { overdue: 0, dueSoon: 1, upcoming: 2, paid: 3 }
       return order[a.status] - order[b.status]
@@ -76,7 +81,7 @@ export default function Bills() {
   async function handleTogglePaid(bill) {
     try {
       if (bill.isPaid) await markBillUnpaid(bill.id, currentMonthStr)
-      else await markBillPaid(bill.id, currentMonthStr)
+      else await markBillPaid(bill.id, currentMonthStr, bill.amount)
       await loadData()
     } catch (err) { showToast('Failed to update', 'error') }
   }
@@ -102,6 +107,7 @@ export default function Bills() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Bills & Subscriptions</h1>
+      {(() => { const v = getBillsVerse(); return <VerseCard quote={v.quote} reference={v.reference} context="bills" /> })()}
 
       <div className={styles.summary}>
         <div className={styles.summaryCard} style={{ backgroundColor: 'var(--color-primary-light)' }}>
@@ -116,6 +122,15 @@ export default function Bills() {
           <div className={styles.summaryLabel}>Unpaid</div>
           <div className={styles.summaryValue} style={{ color: 'var(--color-warning)' }}>{formatCurrency(unpaidTotal)}</div>
         </div>
+      </div>
+
+      <div className={styles.variableBillsNote}>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 1 }}>
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>
+        </svg>
+        <span>
+          No need to add <strong>Electricity, Water, Internet,</strong> and <strong>Mobile Load</strong> here — these change every month. Just log them directly in <strong>Quick Add → Bills & Utilities</strong> and they'll be tracked automatically.
+        </span>
       </div>
 
       <button className={styles.addBillBtn} onClick={() => setShowForm(!showForm)}>
@@ -157,6 +172,14 @@ export default function Bills() {
                 <div className={styles.billMeta}>
                   Day {b.dueDay} · {b.frequency} · {b.bank}
                 </div>
+                {b.isPaid && b.paidAt && (
+                  <div className={styles.paidOn}>
+                    Paid {b.paidAt.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    {b.paidAmount !== null && b.paidAmount !== b.amount && (
+                      <span> · {formatCurrency(b.paidAmount)}</span>
+                    )}
+                  </div>
+                )}
               </div>
               <div className={styles.billRight}>
                 <div className={styles.billAmount}>{formatCurrency(b.amount)}</div>

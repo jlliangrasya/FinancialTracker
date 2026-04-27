@@ -25,7 +25,22 @@ export default function Onboarding() {
   const navigate = useNavigate()
 
   function getColor(name) {
-    const colors = { Cash: '#6D4C41', GCash: '#2E7D32', EastWest: '#1565C0', Maribank: '#E65100', PNB: '#C62828' }
+    const colors = {
+      'Cash':             '#6D4C41',
+      'BDO Unibank':      '#003087',
+      'BPI':              '#c0392b',
+      'Metrobank':        '#FFD700',
+      'UnionBank':        '#e67e22',
+      'Landbank':         '#27ae60',
+      'EastWest':         '#1565C0',
+      'Security Bank':    '#d4a017',
+      'PNB':              '#C62828',
+      'Maya':             '#00b894',
+      'GoTyme':           '#e84393',
+      'UNO Digital Bank': '#6c3483',
+      'GCash':            '#1e88e5',
+      'Maribank':         '#E65100',
+    }
     return colors[name] || '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
   }
 

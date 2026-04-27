@@ -37,6 +37,34 @@
   margin-bottom: 28px;
 }
 
+.pinQuote {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  max-width: 280px;
+  text-align: center;
+  margin-bottom: 28px;
+  padding: 14px 18px;
+  border-radius: var(--border-radius-lg);
+  background: linear-gradient(135deg, rgba(74,124,111,0.1) 0%, rgba(112,142,160,0.07) 100%);
+  border: 1px solid rgba(74,124,111,0.18);
+}
+
+.pinQuoteText {
+  font-size: 0.8125rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  line-height: 1.55;
+}
+
+.pinQuoteRef {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 0.01em;
+}
+
 .dots {
   display: flex;
   gap: 16px;

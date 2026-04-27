@@ -4,6 +4,8 @@ import { getInvestments, addInvestment, updateInvestment, deleteInvestment } fro
 import { useToast } from '../components/Toast'
 import { formatCurrency } from '../utils/formatCurrency'
 import { INVESTMENT_TYPES } from '../utils/categories'
+import VerseCard from '../components/VerseCard'
+import { PAGE_VERSES } from '../utils/verses'
 import styles from './Investments.module.css'
 
 export default function Investments() {
@@ -76,6 +78,7 @@ export default function Investments() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Investments</h1>
+      <VerseCard quote={PAGE_VERSES.investments.quote} reference={PAGE_VERSES.investments.reference} context="savings" />
       <div className={styles.summary}>
         <div className={styles.summaryCard} style={{ backgroundColor: 'var(--color-primary-light)' }}>
           <div className={styles.summaryLabel}>Invested</div>

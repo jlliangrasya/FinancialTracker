@@ -7,6 +7,8 @@ import { formatCurrency } from '../utils/formatCurrency'
 import { formatDate, isToday, isYesterday, getMonthLabel, getCurrentMonthString } from '../utils/dateHelpers'
 import { getBills } from '../firebase/bills'
 import { EXPENSE_CATEGORIES } from '../utils/categories'
+import VerseCard from '../components/VerseCard'
+import { PAGE_VERSES } from '../utils/verses'
 import styles from './Transactions.module.css'
 
 const CATEGORY_COLORS = {}
@@ -199,6 +201,7 @@ export default function Transactions() {
           </div>
         </div>
       </div>
+      <VerseCard quote={PAGE_VERSES.transactions.quote} reference={PAGE_VERSES.transactions.reference} context="default" />
 
       <div className={styles.filters}>
         <select value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>

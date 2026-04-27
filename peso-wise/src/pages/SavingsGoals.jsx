@@ -8,7 +8,9 @@ import { calculateBankBalance } from '../engine/bankBalance'
 import { useToast } from '../components/Toast'
 import ProgressBar from '../components/ProgressBar'
 import { formatCurrency } from '../utils/formatCurrency'
-import { formatDate, addMonths } from '../utils/dateHelpers'
+import { formatDate } from '../utils/dateHelpers'
+import VerseCard from '../components/VerseCard'
+import { getSavingsVerse } from '../utils/verses'
 import styles from './SavingsGoals.module.css'
 
 export default function SavingsGoals() {
@@ -23,6 +25,8 @@ export default function SavingsGoals() {
   const [goalBank, setGoalBank] = useState('')
   const [linkedBank, setLinkedBank] = useState(false)
   const [updateAmounts, setUpdateAmounts] = useState({})
+  const [efBank, setEfBank] = useState('')
+  const [efLinked, setEfLinked] = useState(false)
   const [saving, setSaving] = useState(false)
   const [transactions, setTransactions] = useState([])
   const [transfers, setTransfers] = useState([])
@@ -66,20 +70,66 @@ export default function SavingsGoals() {
 
   const bankNames = (settings?.banks || []).map(b => b.name)
 
+  // Suggested emergency fund = 3× average monthly expenses over last 3 months
+  const suggestedEFTarget = useMemo(() => {
+    if (!transactions.length) return 0
+    const now = new Date()
+    let total = 0
+    let months = 0
+    for (let i = 0; i < 3; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1)
+      const monthStr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()] + '-' + d.getFullYear()
+      const spent = transactions
+        .filter(t => {
+          if (t.isIncome) return false
+          const td = t.date?.toDate ? t.date.toDate() : new Date(t.date)
+          const tStr = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][td.getMonth()] + '-' + td.getFullYear()
+          return tStr === monthStr
+        })
+        .reduce((s, t) => s + t.amount, 0)
+      if (spent > 0) { total += spent; months++ }
+    }
+    if (!months) return 0
+    return Math.ceil((total / months) * 3)
+  }, [transactions])
+
+  const hasEmergencyFund = goals.some(g => g.name?.toLowerCase().includes('emergency'))
+
   async function handleAdd(e) {
     e.preventDefault()
-    if (!name || !targetAmount) return
+    if (!name) return
     setSaving(true)
     try {
       await addSavingsGoal(currentUser.uid, {
-        name, targetAmount: Number(targetAmount), targetDate: targetDate || new Date().toISOString(),
-        savedAmount: Number(savedAmount) || 0, bank: goalBank || bankNames[0] || '',
+        name,
+        targetAmount: targetAmount ? Number(targetAmount) : null,
+        targetDate: targetDate || null,
+        savedAmount: Number(savedAmount) || 0,
+        bank: goalBank || bankNames[0] || '',
         linkedBank: linkedBank && !!goalBank,
       })
       showToast('Goal added ✓')
       setName(''); setTargetAmount(''); setTargetDate(''); setSavedAmount(''); setLinkedBank(false); setShowForm(false)
       await loadData()
     } catch (err) { showToast('Failed to add goal', 'error') }
+    setSaving(false)
+  }
+
+  async function handleCreateEmergencyFund() {
+    setSaving(true)
+    try {
+      await addSavingsGoal(currentUser.uid, {
+        name: 'Emergency Fund',
+        targetAmount: null,
+        targetDate: null,
+        savedAmount: 0,
+        bank: efBank || '',
+        linkedBank: efLinked && !!efBank,
+      })
+      showToast('Emergency Fund created ✓')
+      setEfBank(''); setEfLinked(false)
+      await loadData()
+    } catch (err) { showToast('Failed to create', 'error') }
     setSaving(false)
   }
 
@@ -107,6 +157,41 @@ export default function SavingsGoals() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Savings Goals</h1>
+      {(() => { const v = getSavingsVerse(); return <VerseCard quote={v.quote} reference={v.reference} context="savings" /> })()}
+      {/* Emergency Fund prompt if not yet created */}
+      {!hasEmergencyFund && (
+        <div className={styles.efBanner}>
+          <div className={styles.efBannerText}>
+            <span className={styles.efBannerIcon}>🛡️</span>
+            <div>
+              <div className={styles.efBannerTitle}>No Emergency Fund yet</div>
+              <div className={styles.efBannerSub}>
+                Aim for 3 months of expenses.
+                {suggestedEFTarget > 0 && <> Suggested: <strong>{formatCurrency(suggestedEFTarget)}</strong></>}
+              </div>
+            </div>
+          </div>
+          <div className={styles.efBannerActions}>
+            <div className={styles.efBankField}>
+              <span className={styles.efBankLabel}>Link to bank <span className={styles.efOptional}>(optional)</span></span>
+              <select className={styles.efSelect} value={efBank} onChange={e => { setEfBank(e.target.value); setEfLinked(false) }}>
+                <option value="">None</option>
+                {bankNames.map(b => <option key={b} value={b}>{b}</option>)}
+              </select>
+            </div>
+            {efBank && (
+              <label className={styles.efLinkToggle}>
+                <input type="checkbox" checked={efLinked} onChange={e => setEfLinked(e.target.checked)} />
+                <span>Auto-sync balance</span>
+              </label>
+            )}
+            <button className={styles.efCreateBtn} onClick={handleCreateEmergencyFund} disabled={saving}>
+              {saving ? '...' : 'Create'}
+            </button>
+          </div>
+        </div>
+      )}
+
       <button className={styles.addBtn} onClick={() => setShowForm(!showForm)}>+ Add goal</button>
       {showForm && (
         <form className={styles.addForm} onSubmit={handleAdd}>
@@ -114,8 +199,11 @@ export default function SavingsGoals() {
           <div className={styles.formGrid}>
             <input type="text" className="input-field" placeholder="Goal name" value={name} onChange={e => setName(e.target.value)} required />
             <div className={styles.formRow}>
-              <input type="number" className="input-field" placeholder="Target amount" value={targetAmount} onChange={e => setTargetAmount(e.target.value)} inputMode="decimal" required />
-              <input type="date" className="input-field" value={targetDate} onChange={e => setTargetDate(e.target.value)} />
+              <input type="number" className="input-field" placeholder="Target amount (optional)" value={targetAmount} onChange={e => setTargetAmount(e.target.value)} inputMode="decimal" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
+                <input type="date" className="input-field" value={targetDate} onChange={e => setTargetDate(e.target.value)} />
+                <span style={{ fontSize: '0.7rem', color: 'var(--color-text-hint)', paddingLeft: 2 }}>Deadline (optional)</span>
+              </div>
             </div>
             <div className={styles.formRow}>
               {!linkedBank && (
@@ -129,7 +217,7 @@ export default function SavingsGoals() {
             {goalBank && (
               <label className={styles.linkToggle}>
                 <input type="checkbox" checked={linkedBank} onChange={e => setLinkedBank(e.target.checked)} />
-                <span>Link to bank balance</span>
+                <span>Link to bank balance (auto-sync)</span>
                 <span className={styles.linkHint}>
                   {linkedBank ? 'Saved amount = bank balance (auto-synced)' : 'Bank is just a label'}
                 </span>
@@ -139,60 +227,82 @@ export default function SavingsGoals() {
           </div>
         </form>
       )}
+
       {goals.length > 0 ? goals.map(g => {
         const effectiveSaved = getEffectiveSaved(g)
-        const pct = g.targetAmount > 0 ? Math.min(effectiveSaved / g.targetAmount, 1) : 0
-        const remaining = Math.max(0, g.targetAmount - effectiveSaved)
-        const target = g.targetDate?.toDate ? g.targetDate.toDate() : new Date(g.targetDate)
-        const now = new Date()
-        const monthsLeft = Math.max(1, (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth()))
-        const monthlyNeeded = remaining / monthsLeft
-        const isOnTrack = effectiveSaved >= (g.targetAmount * ((now - new Date(now.getFullYear(), 0, 1)) / (target - new Date(now.getFullYear(), 0, 1))))
+        const hasTarget = g.targetAmount > 0
+        const hasDeadline = !!g.targetDate
+        const pct = hasTarget ? Math.min(effectiveSaved / g.targetAmount, 1) : null
+        const isEF = g.name?.toLowerCase().includes('emergency')
+        const createdAt = g.createdAt?.toDate ? g.createdAt.toDate() : g.createdAt ? new Date(g.createdAt) : null
+
+        // Monthly needed — only if both target and deadline exist
+        let monthlyNeeded = null
+        if (hasTarget && hasDeadline) {
+          const target = g.targetDate?.toDate ? g.targetDate.toDate() : new Date(g.targetDate)
+          const now = new Date()
+          const monthsLeft = Math.max(1, (target.getFullYear() - now.getFullYear()) * 12 + (target.getMonth() - now.getMonth()))
+          monthlyNeeded = Math.max(0, g.targetAmount - effectiveSaved) / monthsLeft
+        }
+
+        // On-track only computable when both target and deadline exist
+        let onTrackStatus = null
+        if (hasTarget && hasDeadline) {
+          const target = g.targetDate?.toDate ? g.targetDate.toDate() : new Date(g.targetDate)
+          const now = new Date()
+          const isOnTrack = effectiveSaved >= (g.targetAmount * ((now - new Date(now.getFullYear(), 0, 1)) / (target - new Date(now.getFullYear(), 0, 1))))
+          onTrackStatus = pct >= 1 ? 'complete' : isOnTrack ? 'ontrack' : 'behind'
+        }
+
         return (
-          <div key={g.id} className={styles.goalCard}>
+          <div key={g.id} className={`${styles.goalCard} ${isEF ? styles.efCard : ''}`}>
             <div className={styles.goalHeader}>
               <div>
-                <div className={styles.goalName}>{g.name}</div>
+                <div className={styles.goalName}>
+                  {isEF && <span style={{ marginRight: 6 }}>🛡️</span>}{g.name}
+                </div>
                 <div className={styles.goalBank}>
                   {g.bank}{g.linkedBank ? ' (linked)' : ''}
                 </div>
               </div>
               <div className={styles.actions}>
                 {g.linkedBank && (
-                  <button
-                    className={styles.actionBtn}
-                    onClick={async () => {
-                      await updateSavingsGoal(g.id, { linkedBank: false })
-                      showToast('Bank unlinked — switch to manual tracking')
-                      await loadData()
-                    }}
-                  >Unlink</button>
+                  <button className={styles.actionBtn} onClick={async () => { await updateSavingsGoal(g.id, { linkedBank: false }); showToast('Bank unlinked'); await loadData() }}>Unlink</button>
                 )}
                 {!g.linkedBank && g.bank && (
-                  <button
-                    className={styles.actionBtn}
-                    onClick={async () => {
-                      await updateSavingsGoal(g.id, { linkedBank: true })
-                      showToast('Bank linked — saved amount auto-syncs with balance')
-                      await loadData()
-                    }}
-                  >Link</button>
+                  <button className={styles.actionBtn} onClick={async () => { await updateSavingsGoal(g.id, { linkedBank: true }); showToast('Bank linked — auto-syncs with balance'); await loadData() }}>Link</button>
                 )}
                 <button className={`${styles.actionBtn} ${styles.delete}`} onClick={() => handleDelete(g.id)}>Delete</button>
               </div>
             </div>
-            <ProgressBar value={effectiveSaved} max={g.targetAmount} showLabel={false} />
-            <div className={styles.goalValues}>{formatCurrency(effectiveSaved)} of {formatCurrency(g.targetAmount)}</div>
-            {g.linkedBank && (
-              <div className={styles.linkedNote}>Auto-synced from {g.bank} balance</div>
-            )}
-            <div className={styles.goalMeta}>
-              <span>Target: {formatDate(g.targetDate)}</span>
-              <span>{formatCurrency(monthlyNeeded)}/month needed</span>
+
+            {hasTarget
+              ? <ProgressBar value={effectiveSaved} max={g.targetAmount} showLabel={false} />
+              : <div className={styles.noTargetBar} />
+            }
+
+            <div className={styles.goalValues}>
+              {formatCurrency(effectiveSaved)} saved
+              {hasTarget && <span style={{ color: 'var(--color-text-hint)' }}> of {formatCurrency(g.targetAmount)}</span>}
+              {isEF && !hasTarget && suggestedEFTarget > 0 && (
+                <span className={styles.efSuggested}> · suggested {formatCurrency(suggestedEFTarget)}</span>
+              )}
             </div>
-            <span className={`${styles.goalStatus} ${pct >= 1 ? styles.onTrack : isOnTrack ? styles.onTrack : styles.behind}`}>
-              {pct >= 1 ? 'Complete ✓' : isOnTrack ? 'On track ✓' : 'Behind ⚠'}
-            </span>
+
+            {g.linkedBank && <div className={styles.linkedNote}>Auto-synced from {g.bank} balance</div>}
+
+            <div className={styles.goalMeta}>
+              {hasDeadline && <span>Deadline: {formatDate(g.targetDate)}</span>}
+              {monthlyNeeded !== null && <span>{formatCurrency(monthlyNeeded)}/month needed</span>}
+              {createdAt && <span>Started {createdAt.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}</span>}
+            </div>
+
+            {onTrackStatus && (
+              <span className={`${styles.goalStatus} ${onTrackStatus === 'behind' ? styles.behind : styles.onTrack}`}>
+                {onTrackStatus === 'complete' ? 'Complete ✓' : onTrackStatus === 'ontrack' ? 'On track ✓' : 'Behind ⚠'}
+              </span>
+            )}
+
             {!g.linkedBank && (
               <div className={styles.updateRow}>
                 <input type="number" className="input-field" placeholder="New saved amount" value={updateAmounts[g.id] || ''} onChange={e => setUpdateAmounts(prev => ({ ...prev, [g.id]: e.target.value }))} inputMode="decimal" />
@@ -202,7 +312,7 @@ export default function SavingsGoals() {
           </div>
         )
       }) : (
-        <div className={styles.empty}><div className={styles.emptyIcon}>🎯</div><p>You have no savings goals yet. Add your first one to start tracking.</p></div>
+        <div className={styles.empty}><div className={styles.emptyIcon}>🎯</div><p>No savings goals yet. Create your Emergency Fund above or add a custom goal.</p></div>
       )}
     </div>
   )

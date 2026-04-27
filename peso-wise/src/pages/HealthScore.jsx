@@ -8,6 +8,8 @@ import { getSavingsGoals } from '../firebase/savingsGoals'
 import { calculateHealthScore, getScoreColor } from '../engine/healthScore'
 import { getMonthLabel } from '../utils/dateHelpers'
 import ProgressBar from '../components/ProgressBar'
+import VerseCard from '../components/VerseCard'
+import { PAGE_VERSES } from '../utils/verses'
 import styles from './HealthScore.module.css'
 
 export default function HealthScore() {
@@ -70,6 +72,7 @@ export default function HealthScore() {
         <h1 className={styles.title}>Financial Health Score</h1>
         <button className={styles.infoBtn} onClick={() => setShowInfo(!showInfo)} aria-label="Score guide">?</button>
       </div>
+      <VerseCard quote={PAGE_VERSES.healthScore.quote} reference={PAGE_VERSES.healthScore.reference} context="savings" />
       <div className={styles.gauge}>
         <div className={styles.scoreCircle} style={{ borderColor: color }}>
           <div className={styles.scoreNumber} style={{ color }}>{score.total}</div>

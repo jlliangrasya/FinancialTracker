@@ -9,6 +9,8 @@ import { Bar } from 'react-chartjs-2'
 import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend
 } from 'chart.js'
+import VerseCard from '../components/VerseCard'
+import { PAGE_VERSES } from '../utils/verses'
 import styles from './BurnRate.module.css'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
@@ -114,6 +116,7 @@ export default function BurnRate() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Burn Rate</h1>
+      <VerseCard quote={PAGE_VERSES.burnRate.quote} reference={PAGE_VERSES.burnRate.reference} context="default" />
 
       <div className={styles.bigStat}>
         <div className={styles.bigStatLabel}>Current burn rate</div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { usePin } from '../auth/PinContext'
 import { getPinKey } from '../utils/hashPin'
+import { PIN_QUOTE } from '../utils/verses'
 import styles from './PinEntry.module.css'
 
 export default function PinEntry() {
@@ -127,6 +128,11 @@ export default function PinEntry() {
       <div className={styles.avatar}>{initials}</div>
       <h1 className={styles.greeting}>Welcome back, {firstName}</h1>
       <p className={styles.subtitle}>Enter your 4-digit PIN</p>
+
+      <div className={styles.pinQuote}>
+        <span className={styles.pinQuoteText}>"{PIN_QUOTE.quote}"</span>
+        <span className={styles.pinQuoteRef}>{PIN_QUOTE.reference}</span>
+      </div>
 
       <div className={`${styles.dots} ${shaking ? 'shake' : ''}`}>
         {[0,1,2,3].map(i => (

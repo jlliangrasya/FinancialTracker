@@ -1,7 +1,7 @@
 import { db } from './config'
 import {
   collection, addDoc, updateDoc, deleteDoc, doc,
-  query, where, getDocs, Timestamp, arrayUnion, arrayRemove
+  query, where, getDocs, getDoc, Timestamp, arrayUnion, arrayRemove
 } from 'firebase/firestore'
 
 const COLLECTION = 'bills'
@@ -25,15 +25,23 @@ export async function deleteBill(id) {
   await deleteDoc(doc(db, COLLECTION, id))
 }
 
-export async function markBillPaid(id, monthString) {
+export async function markBillPaid(id, monthString, amount = null) {
+  const snap = await getDoc(doc(db, COLLECTION, id))
+  const existing = snap.data()?.paymentHistory || []
+  const filtered = existing.filter(p => p.month !== monthString)
+  const entry = { month: monthString, paidAt: Timestamp.now(), ...(amount !== null ? { amount } : {}) }
   await updateDoc(doc(db, COLLECTION, id), {
-    paidMonths: arrayUnion(monthString)
+    paidMonths: arrayUnion(monthString),
+    paymentHistory: [...filtered, entry],
   })
 }
 
 export async function markBillUnpaid(id, monthString) {
+  const snap = await getDoc(doc(db, COLLECTION, id))
+  const existing = snap.data()?.paymentHistory || []
   await updateDoc(doc(db, COLLECTION, id), {
-    paidMonths: arrayRemove(monthString)
+    paidMonths: arrayRemove(monthString),
+    paymentHistory: existing.filter(p => p.month !== monthString),
   })
 }
 

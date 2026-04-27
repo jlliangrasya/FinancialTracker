@@ -8,8 +8,8 @@ export const EXPENSE_CATEGORIES = [
   'Food & Dining', 'Transportation', 'Housing & Rent',
   'Bills & Utilities', 'Healthcare', 'Personal Care',
   'Shopping & Clothing', 'Entertainment', 'Education',
-  'Subscriptions', 'Family & Support', 'Savings Contribution',
-  'Investment Contribution', 'Miscellaneous'
+  'Subscriptions', 'Family & Support', 'Tithe & Offering',
+  'Savings Contribution', 'Investment Contribution', 'Miscellaneous'
 ]
 
 export const EXPENSE_SUBCATEGORIES = {
@@ -42,4 +42,19 @@ export const BILL_FREQUENCIES = [
   'Monthly', 'Quarterly', 'Semi-Annual', 'Annual', 'One-time'
 ]
 
-export const DEFAULT_BANKS = ['Cash', 'GCash', 'EastWest', 'Maribank', 'PNB']
+export const DEFAULT_BANKS = [
+  'Cash',
+  'BDO Unibank',
+  'BPI',
+  'Metrobank',
+  'UnionBank',
+  'Landbank',
+  'EastWest',
+  'Security Bank',
+  'PNB',
+  'Maya',
+  'GoTyme',
+  'UNO Digital Bank',
+  'GCash',
+  'Maribank',
+]

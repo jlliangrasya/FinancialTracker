@@ -13,6 +13,8 @@ import { useToast } from '../components/Toast'
 import ProgressBar from '../components/ProgressBar'
 import { formatCurrency } from '../utils/formatCurrency'
 import { formatDate, getCurrentMonthString, differenceInDays } from '../utils/dateHelpers'
+import VerseCard from '../components/VerseCard'
+import { PAGE_VERSES } from '../utils/verses'
 import styles from './BudgetTracker.module.css'
 
 function toInputDate(d) {
@@ -257,6 +259,7 @@ export default function BudgetTracker() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Budget Tracker</h1>
+      <VerseCard quote={PAGE_VERSES.budgetTracker.quote} reference={PAGE_VERSES.budgetTracker.reference} context="default" />
 
       {/* Expired period summary modal */}
       {expiredSummary && (

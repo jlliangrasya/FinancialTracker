@@ -23,7 +23,10 @@ import InsightCard from '../components/InsightCard'
 import FinancialMood, { getFinancialMood } from '../components/FinancialMood'
 import { LeafDecor, PlantDecor } from '../components/Decorations'
 import PesoWiseLogo from '../components/PesoWiseLogo'
+import VerseCard from '../components/VerseCard'
+import { getDashboardVerse } from '../utils/verses'
 import styles from './Dashboard.module.css'
+
 
 function getGreeting() {
   const hour = new Date().getHours()
@@ -192,6 +195,17 @@ export default function Dashboard() {
     })
   }, [transactions, prevMonthLabel])
 
+  const spendingByCategory = useMemo(() => {
+    const map = {}
+    currentMonthTxns.forEach(t => {
+      if (t.isIncome) return
+      const cat = t.category || 'Miscellaneous'
+      map[cat] = (map[cat] || 0) + t.amount
+    })
+    const entries = Object.entries(map).sort((a, b) => b[1] - a[1])
+    return entries
+  }, [currentMonthTxns])
+
   const insights = useMemo(
     () => generateInsights(currentMonthTxns, prevMonthTxns, budgets, bills),
     [currentMonthTxns, prevMonthTxns, budgets, bills]
@@ -235,6 +249,9 @@ export default function Dashboard() {
         </div>
         <span className={styles.monthLabel}>{monthLabel.replace('-', ' ')}</span>
       </div>
+
+      {/* Daily verse */}
+      {(() => { const v = getDashboardVerse(); return <VerseCard quote={v.quote} reference={v.reference} context="default" /> })()}
 
       {/* Greeting + mood card */}
       <div className={styles.greetingCard}>
@@ -482,44 +499,168 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Money breakdown — easy to read */}
+      {/* Income allocation breakdown */}
       {(() => {
-        const savingsPct = settings?.savingsPercentage || 0
-        const activeBillsTotal = bills.filter(b => b.isActive).reduce((s, b) => s + b.amount, 0)
-        const savingsDeduction = savingsPct > 0 ? monthTotals.income * savingsPct / 100 : 0
-        const availableMoney = monthTotals.income - savingsDeduction - activeBillsTotal
-        if (monthTotals.income > 0) {
-          return (
-            <div className={styles.section}>
-              <div className={styles.sectionTitle}>Your Money This Month</div>
-              <div className={styles.card} style={{ padding: 18 }}>
-                <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownLabel}>Money came in</span>
-                  <span className={styles.breakdownValue}>{netCashHidden ? '••••••' : formatCurrency(monthTotals.income)}</span>
-                </div>
-                {savingsPct > 0 && (
-                  <div className={styles.breakdownRow}>
-                    <span className={styles.breakdownLabel}>Set aside for savings ({savingsPct}%)</span>
-                    <span className={styles.breakdownValue} style={{ color: 'var(--color-success)' }}>{netCashHidden ? '••••••' : `-${formatCurrency(savingsDeduction)}`}</span>
-                  </div>
-                )}
-                <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownLabel}>Bills to pay</span>
-                  <span className={styles.breakdownValue} style={{ color: 'var(--color-warning)' }}>{netCashHidden ? '••••••' : `-${formatCurrency(activeBillsTotal)}`}</span>
-                </div>
-                <div className={styles.breakdownDivider} />
-                <div className={styles.breakdownRow}>
-                  <span className={styles.breakdownTotal}>You can spend</span>
-                  <span className={styles.breakdownTotalValue} style={{ color: availableMoney >= 0 ? 'var(--color-success)' : 'var(--color-danger)' }}>
-                    {netCashHidden ? '••••••' : formatCurrency(availableMoney)}
-                  </span>
-                </div>
-              </div>
+        if (monthTotals.income <= 0) return null
+        const allocs = settings?.incomeAllocation || (
+          settings?.savingsPercentage > 0
+            ? [{ label: 'Savings', percentage: settings.savingsPercentage }]
+            : []
+        )
+        const activeAllocs = allocs.filter(a => a.percentage > 0)
+        const totalPct = activeAllocs.reduce((s, a) => s + a.percentage, 0)
+        const unallocatedPct = Math.max(0, 100 - totalPct)
+        const allocColors = [
+          'var(--color-success)', 'var(--color-primary)', 'var(--color-warning)',
+          '#b87cbf', '#5b9bd5', '#e07b54', '#6bbf8e',
+        ]
+        return (
+          <div className={styles.section}>
+            <div className={styles.sectionTitle}>
+              Income Allocation
+              <button className={styles.seeAll} onClick={() => navigate('/settings')}>Edit</button>
             </div>
-          )
-        }
-        return null
+            <div className={styles.card} style={{ padding: 18 }}>
+              <div className={styles.breakdownRow}>
+                <span className={styles.breakdownLabel}>Total income</span>
+                <span className={styles.breakdownValue}>{netCashHidden ? '••••••' : formatCurrency(monthTotals.income)}</span>
+              </div>
+              {activeAllocs.length === 0 && (
+                <div style={{ fontSize: '0.8125rem', color: 'var(--color-text-hint)', padding: '8px 0' }}>
+                  No allocations set — tap Edit to set up your budget percentages.
+                </div>
+              )}
+              {activeAllocs.map((a, i) => {
+                const amt = monthTotals.income * a.percentage / 100
+                return (
+                  <div key={a.label} className={styles.allocBreakdownRow}>
+                    <span className={styles.allocDot} style={{ backgroundColor: allocColors[i % allocColors.length] }} />
+                    <span className={styles.allocBreakdownLabel}>{a.label}</span>
+                    <span className={styles.allocBreakdownPct} style={{ color: allocColors[i % allocColors.length] }}>{a.percentage}%</span>
+                    <span className={styles.breakdownValue}>{netCashHidden ? '••••' : formatCurrency(amt)}</span>
+                  </div>
+                )
+              })}
+              {activeAllocs.length > 0 && unallocatedPct > 0 && (
+                <div className={styles.allocBreakdownRow}>
+                  <span className={styles.allocDot} style={{ backgroundColor: 'var(--color-border-solid)' }} />
+                  <span className={styles.allocBreakdownLabel} style={{ color: 'var(--color-text-hint)' }}>Unallocated</span>
+                  <span className={styles.allocBreakdownPct} style={{ color: 'var(--color-text-hint)' }}>{unallocatedPct}%</span>
+                  <span className={styles.breakdownValue} style={{ color: 'var(--color-text-hint)' }}>{netCashHidden ? '••••' : formatCurrency(monthTotals.income * unallocatedPct / 100)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )
       })()}
+
+      {/* Spending by category pie chart */}
+      {spendingByCategory.length > 0 && (
+        <div className={styles.section}>
+          <div className={styles.sectionTitle}>
+            Spending by Category
+            <button className={styles.seeAll} onClick={() => navigate('/reports')}>Full report</button>
+          </div>
+          <div className={styles.card} style={{ padding: '18px 8px' }}>
+            {(() => {
+              const PIE_COLORS = [
+                '#4a7c6f','#708e9f','#e07b54','#e8c547','#6bbf8e',
+                '#b87cbf','#5b9bd5','#e87272','#7dbfa5','#f0a05a',
+                '#9b8dcc','#6db8c6','#d98a8a','#88b04b','#c88b5a',
+              ]
+              const total = spendingByCategory.reduce((s, [, amt]) => s + amt, 0)
+
+              // Generous viewBox so labels never clip — pie sits in the center
+              // with 110px of breathing room on each side for labels
+              const VW = 500
+              const VH = 420
+              const CX = VW / 2
+              const CY = VH / 2
+              const R = 90         // pie outer radius
+              const INNER = 50     // donut hole
+              const ELBOW_R = 112  // where the angled line kinks
+              const TICK = 22      // length of horizontal tick
+              const MIN_LABEL_PCT = 0.04
+
+              let cursor = -Math.PI / 2
+              const slices = spendingByCategory.map(([cat, amt], i) => {
+                const pct = amt / total
+                const angle = pct * 2 * Math.PI
+                const start = cursor
+                const end = cursor + angle
+                cursor = end
+                const mid = start + angle / 2
+
+                const x1 = CX + R * Math.cos(start), y1 = CY + R * Math.sin(start)
+                const x2 = CX + R * Math.cos(end),   y2 = CY + R * Math.sin(end)
+                const ix1 = CX + INNER * Math.cos(end),   iy1 = CY + INNER * Math.sin(end)
+                const ix2 = CX + INNER * Math.cos(start), iy2 = CY + INNER * Math.sin(start)
+                const large = angle > Math.PI ? 1 : 0
+                const path = `M${x1},${y1} A${R},${R},0,${large},1,${x2},${y2} L${ix1},${iy1} A${INNER},${INNER},0,${large},0,${ix2},${iy2} Z`
+
+                const isRight = Math.cos(mid) >= 0
+                // line starts just outside the arc
+                const lx1 = CX + (R + 3) * Math.cos(mid)
+                const ly1 = CY + (R + 3) * Math.sin(mid)
+                // elbow point
+                const lx2 = CX + ELBOW_R * Math.cos(mid)
+                const ly2 = CY + ELBOW_R * Math.sin(mid)
+                // end of horizontal tick
+                const lx3 = lx2 + (isRight ? TICK : -TICK)
+                const ly3 = ly2
+                // text starts just past tick end
+                const tx = lx3 + (isRight ? 3 : -3)
+                const anchor = isRight ? 'start' : 'end'
+
+                return {
+                  cat, amt, pct, mid, isRight, angle,
+                  color: PIE_COLORS[i % PIE_COLORS.length],
+                  path, lx1, ly1, lx2, ly2, lx3, ly3, tx, ty: ly3, anchor,
+                }
+              })
+
+              return (
+                <svg
+                  viewBox={`0 0 ${VW} ${VH}`}
+                  width="100%"
+                  style={{ display: 'block' }}
+                >
+                  {/* Slices */}
+                  {slices.map(s => (
+                    <path key={s.cat} d={s.path} fill={s.color} stroke="#fff" strokeWidth="2" />
+                  ))}
+
+                  {/* Leader lines + labels */}
+                  {slices.map(s => {
+                    if (s.pct < MIN_LABEL_PCT) return null
+                    const short = s.cat.length > 14 ? s.cat.slice(0, 13) + '…' : s.cat
+                    const pctLabel = (s.pct * 100).toFixed(1) + '%'
+                    const amtLabel = formatCurrency(s.amt)
+                    return (
+                      <g key={`lbl-${s.cat}`}>
+                        <polyline
+                          points={`${s.lx1},${s.ly1} ${s.lx2},${s.ly2} ${s.lx3},${s.ly3}`}
+                          fill="none"
+                          stroke={s.color}
+                          strokeWidth="1.4"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                        <text x={s.tx} y={s.ty - 4} textAnchor={s.anchor} fontSize="11" fontWeight="700" fill={s.color}>
+                          {short}
+                        </text>
+                        <text x={s.tx} y={s.ty + 9} textAnchor={s.anchor} fontSize="10" fontWeight="500" fill={s.color} opacity="0.8">
+                          {pctLabel} · {amtLabel}
+                        </text>
+                      </g>
+                    )
+                  })}
+                </svg>
+              )
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Insight */}
       {insights.length > 0 && (

@@ -27,3 +27,23 @@
 .linkedNote { font-size: 0.75rem; color: var(--color-primary); margin-top: 4px; font-style: italic; }
 .empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }
 .emptyIcon { font-size: 3rem; margin-bottom: 12px; }
+
+.efBanner { display: flex; flex-direction: column; gap: 0; padding: 14px 16px; border-radius: var(--border-radius-lg); background: linear-gradient(135deg, rgba(74,124,111,0.1) 0%, rgba(107,191,142,0.08) 100%); border: 1px solid rgba(74,124,111,0.25); margin-bottom: 14px; }
+.efBannerText { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
+.efBannerIcon { font-size: 1.5rem; flex-shrink: 0; }
+.efBannerTitle { font-size: 0.9375rem; font-weight: 700; color: var(--color-text-primary); }
+.efBannerSub { font-size: 0.8125rem; color: var(--color-text-secondary); margin-top: 2px; }
+
+.efBannerActions { display: flex; align-items: flex-end; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.efBankField { display: flex; flex-direction: column; gap: 3px; }
+.efBankLabel { font-size: 0.7rem; font-weight: 600; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; }
+.efOptional { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--color-text-hint); }
+.efSelect { padding: 5px 8px; border: 1.5px solid var(--color-border-solid); border-radius: var(--border-radius-sm); font-size: 0.8125rem; background: var(--color-surface-solid); color: var(--color-text-primary); min-height: 34px; }
+.efLinkToggle { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; padding-bottom: 6px; }
+.efLinkToggle input { width: 15px; height: 15px; accent-color: var(--color-primary); flex-shrink: 0; }
+.efCreateBtn { padding: 6px 14px; background: var(--color-primary); color: #fff; border: none; border-radius: var(--border-radius-sm); font-size: 0.8125rem; font-weight: 700; cursor: pointer; min-height: 34px; white-space: nowrap; transition: opacity 0.15s; }
+.efCreateBtn:active { opacity: 0.85; }
+.efCreateBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+.efCard { border-color: rgba(74,124,111,0.3); background: linear-gradient(135deg, rgba(74,124,111,0.05) 0%, transparent 100%); }
+.efSuggested { font-size: 0.8125rem; color: var(--color-primary); font-weight: 600; }
+.noTargetBar { height: 6px; border-radius: 3px; background: var(--color-border); margin: 8px 0; }

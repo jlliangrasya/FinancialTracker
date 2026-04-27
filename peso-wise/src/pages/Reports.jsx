@@ -16,6 +16,8 @@ import {
   Chart as ChartJS, CategoryScale, LinearScale, BarElement, ArcElement,
   PointElement, LineElement, Title, Tooltip, Legend, Filler
 } from 'chart.js'
+import VerseCard from '../components/VerseCard'
+import { PAGE_VERSES } from '../utils/verses'
 import styles from './Reports.module.css'
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, PointElement, LineElement, Title, Tooltip, Legend, Filler)
@@ -107,6 +109,7 @@ export default function Reports() {
   return (
     <div className={styles.container}>
       <h1 className={styles.title}>Reports & Charts</h1>
+      <VerseCard quote={PAGE_VERSES.reports.quote} reference={PAGE_VERSES.reports.reference} context="bills" />
       <div className={styles.monthSelector}>
         <button className={styles.monthBtn} onClick={prevMonth}>◀</button>
         <span className={styles.monthLabel}>{MONTHS[selectedDate.getMonth()]} {selectedDate.getFullYear()}</span>

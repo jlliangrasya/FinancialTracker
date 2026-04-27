@@ -75,6 +75,7 @@
 .billInfo { flex: 1; min-width: 0; }
 .billName { font-size: 0.875rem; font-weight: 600; }
 .billMeta { font-size: 0.75rem; color: var(--color-text-secondary); }
+.paidOn { font-size: 0.75rem; color: var(--color-success); font-weight: 600; margin-top: 2px; }
 
 .billRight {
   display: flex;
@@ -123,6 +124,26 @@
 
 .formRow > * {
   flex: 1;
+}
+
+.variableBillsNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--border-radius-md);
+  background: rgba(91,155,213,0.08);
+  border-left: 3px solid rgba(91,155,213,0.4);
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  color: var(--color-text-secondary);
+}
+
+.variableBillsNote svg {
+  color: #5b9bd5;
+  margin-top: 1px;
 }
 
 .addBillBtn {

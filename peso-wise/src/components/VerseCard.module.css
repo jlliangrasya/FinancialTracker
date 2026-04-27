@@ -1,0 +1,74 @@
+.card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 6px;
+  padding: 8px 12px;
+  border-radius: var(--border-radius-md);
+  margin-bottom: 14px;
+}
+
+/* Default — earthy teal */
+.card.default {
+  background: rgba(74,124,111,0.08);
+  border-left: 3px solid rgba(74,124,111,0.35);
+}
+
+[data-theme="dark"] .card.default {
+  background: rgba(74,124,111,0.13);
+  border-left-color: rgba(74,124,111,0.45);
+}
+
+/* Savings — warm gold */
+.card.savings {
+  background: rgba(232,197,71,0.09);
+  border-left: 3px solid rgba(232,197,71,0.45);
+}
+
+[data-theme="dark"] .card.savings {
+  background: rgba(232,197,71,0.12);
+  border-left-color: rgba(232,197,71,0.55);
+}
+
+/* Bills — soft blue */
+.card.bills {
+  background: rgba(91,155,213,0.08);
+  border-left: 3px solid rgba(91,155,213,0.35);
+}
+
+[data-theme="dark"] .card.bills {
+  background: rgba(91,155,213,0.13);
+  border-left-color: rgba(91,155,213,0.45);
+}
+
+.quoteIcon {
+  color: var(--color-primary);
+  opacity: 0.45;
+  flex-shrink: 0;
+  position: relative;
+  top: 1px;
+}
+
+.card.savings .quoteIcon { color: #c49a1a; }
+.card.bills .quoteIcon   { color: #5b9bd5; }
+
+.quote {
+  font-size: 0.78rem;
+  font-style: italic;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+
+.reference {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.card.savings .reference { color: #b8860b; }
+[data-theme="dark"] .card.savings .reference { color: #e8c547; }
+
+.card.bills .reference { color: #4a80b0; }
+[data-theme="dark"] .card.bills .reference { color: #7db8e8; }

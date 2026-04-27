@@ -29,6 +29,8 @@ export default function Settings() {
   const [budgets, setBudgets] = useState([])
   const [newBudgetCat, setNewBudgetCat] = useState('')
   const [newBudgetLimit, setNewBudgetLimit] = useState('')
+  const [newAllocLabel, setNewAllocLabel] = useState('')
+  const [newAllocPct, setNewAllocPct] = useState('')
   const { currentUser, logout, updateDisplayName, isAdmin } = useAuth()
   const { resetPinVerified } = usePin()
   const { showToast } = useToast()
@@ -168,6 +170,48 @@ export default function Settings() {
     await loadData()
   }
 
+  function getAllocations() {
+    return settings?.incomeAllocation || [
+      { label: 'Savings', percentage: settings?.savingsPercentage || 0 },
+      { label: 'Daily Expenses', percentage: 0 },
+      { label: 'Bills', percentage: 0 },
+      { label: 'Tithe & Offering', percentage: 0 },
+    ]
+  }
+
+  async function handleAllocationChange(index, field, value) {
+    const allocs = getAllocations().map((a, i) =>
+      i === index ? { ...a, [field]: field === 'percentage' ? Math.min(100, Math.max(0, Number(value) || 0)) : value } : a
+    )
+    setSettings(prev => ({ ...prev, incomeAllocation: allocs }))
+  }
+
+  async function handleAllocationBlur(index, value) {
+    const allocs = getAllocations().map((a, i) =>
+      i === index ? { ...a, percentage: Math.min(100, Math.max(0, Number(value) || 0)) } : a
+    )
+    await updateUserSettings(currentUser.uid, { incomeAllocation: allocs })
+    showToast('Allocation updated ✓')
+  }
+
+  async function handleDeleteAllocation(index) {
+    const allocs = getAllocations().filter((_, i) => i !== index)
+    setSettings(prev => ({ ...prev, incomeAllocation: allocs }))
+    await updateUserSettings(currentUser.uid, { incomeAllocation: allocs })
+    showToast('Allocation removed ✓')
+  }
+
+  async function handleAddAllocation() {
+    if (!newAllocLabel.trim()) return
+    const pct = Math.min(100, Math.max(0, Number(newAllocPct) || 0))
+    const allocs = [...getAllocations(), { label: newAllocLabel.trim(), percentage: pct }]
+    setSettings(prev => ({ ...prev, incomeAllocation: allocs }))
+    await updateUserSettings(currentUser.uid, { incomeAllocation: allocs })
+    setNewAllocLabel('')
+    setNewAllocPct('')
+    showToast('Allocation added ✓')
+  }
+
   async function handleInstall() {
     if (!installPrompt) return
     installPrompt.prompt()
@@ -290,28 +334,61 @@ export default function Settings() {
       </div>
 
       <div className={styles.section}>
-        <div className={styles.sectionTitle}>Savings</div>
-        <div className={styles.alertRow}>
-          <label>Auto-save percentage (%)</label>
-          <input
-            type="number"
-            value={settings?.savingsPercentage ?? ''}
-            onChange={async (e) => {
-              const val = Math.min(100, Math.max(0, Number(e.target.value) || 0))
-              setSettings(prev => ({ ...prev, savingsPercentage: val }))
-            }}
-            onBlur={async (e) => {
-              const val = Math.min(100, Math.max(0, Number(e.target.value) || 0))
-              await updateUserSettings(currentUser.uid, { savingsPercentage: val })
-              showToast('Savings percentage updated ✓')
-            }}
-            inputMode="decimal"
-            placeholder="e.g. 20"
-          />
-        </div>
-        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: 4 }}>
-          When you log income, we'll show how much to set aside for savings based on this percentage.
+        <div className={styles.sectionTitle}>Income Allocation</div>
+        <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)', marginBottom: 12, lineHeight: 1.5 }}>
+          Set what percentage of each income goes to each bucket. When income is logged, the dashboard will show you the allocated amounts.
         </p>
+        {(() => {
+          const allocs = getAllocations()
+          const total = allocs.reduce((s, a) => s + (a.percentage || 0), 0)
+          return (
+            <>
+              {allocs.map((a, i) => (
+                <div key={i} className={styles.allocRow}>
+                  <span className={styles.allocLabel}>{a.label}</span>
+                  <div className={styles.allocInputWrap}>
+                    <input
+                      type="number"
+                      className={styles.allocInput}
+                      value={a.percentage || ''}
+                      onChange={e => handleAllocationChange(i, 'percentage', e.target.value)}
+                      onBlur={e => handleAllocationBlur(i, e.target.value)}
+                      inputMode="decimal"
+                      placeholder="0"
+                      min="0"
+                      max="100"
+                    />
+                    <span className={styles.allocPctSign}>%</span>
+                  </div>
+                  <button className={styles.deleteBudgetBtn} onClick={() => handleDeleteAllocation(i)}>✕</button>
+                </div>
+              ))}
+              <div className={`${styles.allocTotal} ${total > 100 ? styles.allocOver : ''}`}>
+                Total: {total}% {total > 100 ? '— over 100%!' : total === 100 ? '— fully allocated ✓' : `— ${100 - total}% unallocated`}
+              </div>
+              <div className={styles.addRow} style={{ marginTop: 12 }}>
+                <input
+                  type="text"
+                  className="input-field"
+                  placeholder="Label (e.g. Investments)"
+                  value={newAllocLabel}
+                  onChange={e => setNewAllocLabel(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <input
+                  type="number"
+                  className="input-field"
+                  placeholder="%"
+                  value={newAllocPct}
+                  onChange={e => setNewAllocPct(e.target.value)}
+                  inputMode="decimal"
+                  style={{ width: 64 }}
+                />
+                <button className="btn-primary" style={{ width: 'auto', padding: '8px 16px' }} onClick={handleAddAllocation}>Add</button>
+              </div>
+            </>
+          )
+        })()}
       </div>
 
       <div className={styles.section}>

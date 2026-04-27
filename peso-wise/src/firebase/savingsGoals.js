@@ -10,7 +10,7 @@ export async function addSavingsGoal(userId, data) {
   const docRef = await addDoc(collection(db, COLLECTION), {
     ...data,
     userId,
-    targetDate: Timestamp.fromDate(new Date(data.targetDate)),
+    targetDate: data.targetDate ? Timestamp.fromDate(new Date(data.targetDate)) : null,
     savedAmount: data.savedAmount || 0,
     createdAt: Timestamp.now(),
   })

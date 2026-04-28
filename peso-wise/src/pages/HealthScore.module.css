@@ -15,6 +15,34 @@
 .chartSection { margin-top: 16px; }
 .chartTitle { font-size: 0.9375rem; font-weight: 600; margin-bottom: 12px; }
 
+.pillarClickable { cursor: pointer; border-radius: var(--border-radius-sm); padding: 4px 6px; margin: -4px -6px; transition: background 0.15s; }
+.pillarClickable:active { background-color: var(--color-background); }
+.pillarHint { color: var(--color-primary); font-size: 0.75rem; }
+
+.infoOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-end; }
+.infoModal { background-color: var(--color-surface-solid); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; width: 100%; max-height: 85vh; overflow-y: auto; }
+.infoHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 12px; border-bottom: 1px solid var(--color-border-solid); position: sticky; top: 0; background-color: var(--color-surface-solid); z-index: 1; }
+.infoClose { background: none; border: none; font-size: 1.25rem; color: var(--color-text-secondary); cursor: pointer; padding: 4px 8px; }
+
+.efModalBody { padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 16px; }
+.efDesc { font-size: 0.875rem; color: var(--color-text-secondary); line-height: 1.6; margin: 0; }
+.efCalcCard { background-color: var(--color-background); border-radius: var(--border-radius-md); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.efCalcTitle { font-size: 0.8125rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+.efCalcRow { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: var(--color-text-secondary); }
+.efCalcRow strong { color: var(--color-text-primary); }
+.efCalcRowAlt { padding-top: 10px; border-top: 1px solid var(--color-border-solid); color: var(--color-success); }
+.efCalcRowAlt strong { color: var(--color-success); }
+
+.efProgressSection { display: flex; flex-direction: column; gap: 8px; }
+.efProgressHeader { display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--color-text-secondary); }
+.efProgressHeader strong { color: var(--color-text-primary); }
+.efProgressTrack { height: 14px; background-color: var(--color-background); border-radius: 7px; overflow: hidden; }
+.efProgressFill { height: 100%; border-radius: 7px; transition: width 0.6s ease; }
+.efProgressLabels { display: flex; justify-content: space-between; font-size: 0.6875rem; color: var(--color-text-secondary); position: relative; }
+.efMilestone { position: absolute; transform: translateX(-50%); }
+.efCoverage { font-size: 0.875rem; font-weight: 600; color: var(--color-text-primary); text-align: center; padding: 8px; background-color: var(--color-background); border-radius: var(--border-radius-sm); }
+.efGoalNote { font-size: 0.8125rem; color: var(--color-text-secondary); background-color: var(--color-primary-light); color: var(--color-primary); padding: 10px 14px; border-radius: var(--border-radius-sm); }
+
 .infoSection { margin-top: 8px; display: flex; flex-direction: column; gap: 14px; }
 .infoTitle { font-size: 1rem; font-weight: 700; margin-bottom: 4px; color: var(--color-text-primary); }
 .infoCard { background-color: var(--color-surface-solid); border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-md); padding: 14px 16px; }

@@ -20,6 +20,7 @@ export default function HealthScore() {
   const [savingsGoals, setSavingsGoals] = useState([])
   const [loading, setLoading] = useState(true)
   const [showInfo, setShowInfo] = useState(false)
+  const [showEFModal, setShowEFModal] = useState(false)
   const { currentUser } = useAuth()
   const monthLabel = getMonthLabel()
 
@@ -56,6 +57,21 @@ export default function HealthScore() {
   }
 
   const weakest = Object.entries(score.pillars).reduce((min, [k, v]) => v < min.v ? { k, v } : min, { k: '', v: 21 })
+
+  // Emergency fund calculations
+  const efMonthTxns = useMemo(() => {
+    return transactions.filter(t => {
+      const date = t.date?.toDate ? t.date.toDate() : new Date(t.date)
+      const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+      return (months[date.getMonth()] + '-' + date.getFullYear()) === monthLabel
+    })
+  }, [transactions, monthLabel])
+  const efMonthlyExpenses = efMonthTxns.filter(t => !t.isIncome).reduce((s, t) => s + t.amount, 0)
+  const efGoal = savingsGoals.find(g => g.name?.toLowerCase().includes('emergency'))
+  const efSaved = efGoal ? (efGoal.savedAmount || 0) : savingsGoals.reduce((s, g) => s + (g.savedAmount || 0), 0)
+  const efTarget3 = efMonthlyExpenses * 3
+  const efTarget6 = efMonthlyExpenses * 6
+  const efMonthsCovered = efTarget3 > 0 ? efSaved / efMonthlyExpenses : 0
   const tips = {
     savingsRate: 'Try to save at least 20% of your income each month.',
     budgetAdherence: 'Review categories where you overspend and adjust limits.',
@@ -84,13 +100,89 @@ export default function HealthScore() {
       </div>
       <div className={styles.pillars}>
         {Object.entries(score.pillars).map(([key, val]) => (
-          <div key={key} className={styles.pillar}>
+          <div
+            key={key}
+            className={`${styles.pillar} ${key === 'emergencyFund' ? styles.pillarClickable : ''}`}
+            onClick={key === 'emergencyFund' ? () => setShowEFModal(true) : undefined}
+          >
             <span className={styles.pillarName}>{pillarNames[key]}</span>
             <div className={styles.pillarBar}><ProgressBar value={val} max={20} showLabel={false} /></div>
-            <span className={styles.pillarScore}>{val}/20</span>
+            <span className={styles.pillarScore}>
+              {val}/20
+              {key === 'emergencyFund' && <span className={styles.pillarHint}> ℹ</span>}
+            </span>
           </div>
         ))}
       </div>
+
+      {showEFModal && (
+        <div className={styles.infoOverlay} onClick={() => setShowEFModal(false)}>
+          <div className={styles.infoModal} onClick={e => e.stopPropagation()}>
+            <div className={styles.infoHeader}>
+              <h2 className={styles.infoTitle}>🛡️ Emergency Fund</h2>
+              <button className={styles.infoClose} onClick={() => setShowEFModal(false)}>✕</button>
+            </div>
+            <div className={styles.efModalBody}>
+              <p className={styles.efDesc}>
+                An emergency fund is money set aside to cover unexpected expenses — job loss, medical bills, or urgent repairs — without going into debt.
+              </p>
+
+              <div className={styles.efCalcCard}>
+                <div className={styles.efCalcTitle}>How your target was calculated</div>
+                <div className={styles.efCalcRow}>
+                  <span>Monthly expenses ({monthLabel})</span>
+                  <strong>₱{efMonthlyExpenses.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</strong>
+                </div>
+                <div className={styles.efCalcRow}>
+                  <span>× 3 months (minimum target)</span>
+                  <strong>₱{efTarget3.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</strong>
+                </div>
+                <div className={`${styles.efCalcRow} ${styles.efCalcRowAlt}`}>
+                  <span>× 6 months (ideal target)</span>
+                  <strong>₱{efTarget6.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</strong>
+                </div>
+              </div>
+
+              <div className={styles.efProgressSection}>
+                <div className={styles.efProgressHeader}>
+                  <span>Current savings</span>
+                  <span><strong>₱{efSaved.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</strong> / ₱{efTarget3.toLocaleString('en-PH', { minimumFractionDigits: 2 })}</span>
+                </div>
+                <div className={styles.efProgressTrack}>
+                  <div
+                    className={styles.efProgressFill}
+                    style={{
+                      width: `${Math.min(100, efTarget3 > 0 ? (efSaved / efTarget3) * 100 : 0)}%`,
+                      backgroundColor: efMonthsCovered >= 3 ? 'var(--color-success)' : efMonthsCovered >= 1 ? 'var(--color-warning)' : 'var(--color-danger)'
+                    }}
+                  />
+                </div>
+                <div className={styles.efProgressLabels}>
+                  <span>₱0</span>
+                  <span className={styles.efMilestone} style={{ left: '50%' }}>1.5 mo</span>
+                  <span>3 months</span>
+                </div>
+                <div className={styles.efCoverage}>
+                  {efMonthlyExpenses > 0
+                    ? `You can cover ${efMonthsCovered.toFixed(1)} month${efMonthsCovered !== 1 ? 's' : ''} of expenses`
+                    : 'No expense data for this month yet'}
+                </div>
+              </div>
+
+              {efGoal && (
+                <div className={styles.efGoalNote}>
+                  Linked to savings goal: <strong>{efGoal.name}</strong>
+                </div>
+              )}
+              {!efGoal && savingsGoals.length > 0 && (
+                <div className={styles.efGoalNote}>
+                  Tip: Create a savings goal named "Emergency Fund" to track it separately.
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {showInfo && (
         <div className={styles.infoSection}>

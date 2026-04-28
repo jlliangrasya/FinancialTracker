@@ -4,6 +4,7 @@ import { usePin } from './PinContext'
 import { getPinKey } from '../utils/hashPin'
 import { useState, useEffect } from 'react'
 import { getUserSettings } from '../firebase/settings'
+import { PAYMENT_GATE_ENABLED } from '../config'
 
 export default function ProtectedRoute({ children }) {
   const { currentUser, loading: authLoading, userProfile } = useAuth()
@@ -60,7 +61,7 @@ export default function ProtectedRoute({ children }) {
 
   // Only enforce approval AFTER setup is complete
   const accountStatus = userProfile?.status
-  if (settings?.onboardingCompleted && accountStatus === 'pending') {
+  if (PAYMENT_GATE_ENABLED && settings?.onboardingCompleted && accountStatus === 'pending') {
     return <Navigate to="/pending-approval" replace />
   }
   if (accountStatus === 'rejected') {

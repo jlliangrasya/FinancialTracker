@@ -28,6 +28,182 @@ import { getDashboardVerse } from '../utils/verses'
 import styles from './Dashboard.module.css'
 
 
+const PIE_COLORS = [
+  '#4a7c6f','#708e9f','#e07b54','#e8c547','#6bbf8e',
+  '#b87cbf','#5b9bd5','#e87272','#7dbfa5','#f0a05a',
+  '#9b8dcc','#6db8c6','#d98a8a','#88b04b','#c88b5a',
+]
+
+function buildSlices(data, total, CX, CY, R, INNER, ELBOW_R, TICK) {
+  let cursor = -Math.PI / 2
+  return data.map(([cat, amt], i) => {
+    const pct = amt / total
+    const angle = pct * 2 * Math.PI
+    const start = cursor
+    const end = cursor + angle
+    cursor = end
+    const mid = start + angle / 2
+
+    const x1 = CX + R * Math.cos(start), y1 = CY + R * Math.sin(start)
+    const x2 = CX + R * Math.cos(end),   y2 = CY + R * Math.sin(end)
+    const ix1 = CX + INNER * Math.cos(end),   iy1 = CY + INNER * Math.sin(end)
+    const ix2 = CX + INNER * Math.cos(start), iy2 = CY + INNER * Math.sin(start)
+    const large = angle > Math.PI ? 1 : 0
+    const path = `M${x1},${y1} A${R},${R},0,${large},1,${x2},${y2} L${ix1},${iy1} A${INNER},${INNER},0,${large},0,${ix2},${iy2} Z`
+
+    const isRight = Math.cos(mid) >= 0
+    const lx1 = CX + (R + 4) * Math.cos(mid)
+    const ly1 = CY + (R + 4) * Math.sin(mid)
+    const lx2 = CX + ELBOW_R * Math.cos(mid)
+    const ly2 = CY + ELBOW_R * Math.sin(mid)
+    const lx3 = lx2 + (isRight ? TICK : -TICK)
+    const ly3 = ly2
+    const tx = lx3 + (isRight ? 4 : -4)
+    const anchor = isRight ? 'start' : 'end'
+
+    return {
+      cat, amt, pct, mid, isRight, angle, i,
+      color: PIE_COLORS[i % PIE_COLORS.length],
+      path, lx1, ly1, lx2, ly2, lx3, ly3, tx, ty: ly3, anchor,
+    }
+  })
+}
+
+function SpendingPieChart({ data, onFullReport }) {
+  const [active, setActive] = useState(null) // index of zoomed slice, or null
+  const total = data.reduce((s, [, amt]) => s + amt, 0)
+
+  // Layout constants
+  const VW = 500, VH = 440
+  const CX = VW / 2, CY = VH / 2
+  const R = 95, INNER = 52, ELBOW_R = 118, TICK = 24
+  const MIN_LABEL_PCT = 0.04
+  const ZOOM = 10 // how many px a selected slice pops out
+
+  const slices = useMemo(
+    () => buildSlices(data, total, CX, CY, R, INNER, ELBOW_R, TICK),
+    [data, total]
+  )
+
+  function handleSliceClick(idx) {
+    setActive(prev => (prev === idx ? null : idx))
+  }
+
+  const activeSlice = active !== null ? slices[active] : null
+
+  return (
+    <div className={styles.section}>
+      <div className={styles.sectionTitle}>
+        Spending by Category
+        <button className={styles.seeAll} onClick={onFullReport}>Full report</button>
+      </div>
+      <div className={styles.card} style={{ padding: '12px 4px 4px' }}>
+        {/* Active slice detail banner */}
+        {activeSlice && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            padding: '8px 16px 4px',
+            animation: 'fadeIn 0.15s ease',
+          }}>
+            <span style={{
+              width: 12, height: 12, borderRadius: '50%',
+              backgroundColor: activeSlice.color, flexShrink: 0,
+            }} />
+            <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: activeSlice.color, flex: 1 }}>
+              {activeSlice.cat}
+            </span>
+            <span style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--color-text-primary)' }}>
+              {formatCurrency(activeSlice.amt)}
+            </span>
+            <span style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+              {(activeSlice.pct * 100).toFixed(1)}%
+            </span>
+            <button
+              onClick={() => setActive(null)}
+              style={{ background: 'none', border: 'none', color: 'var(--color-text-hint)', fontSize: '1rem', lineHeight: 1, padding: 2, cursor: 'pointer' }}
+              aria-label="Deselect"
+            >✕</button>
+          </div>
+        )}
+
+        <svg
+          viewBox={`0 0 ${VW} ${VH}`}
+          width="100%"
+          style={{ display: 'block' }}
+          aria-label="Spending by category pie chart"
+        >
+          {/* Slices */}
+          {slices.map((s, idx) => {
+            const isActive = active === idx
+            const dimmed = active !== null && !isActive
+            // pop selected slice outward along its mid-angle
+            const dx = isActive ? ZOOM * Math.cos(s.mid) : 0
+            const dy = isActive ? ZOOM * Math.sin(s.mid) : 0
+            return (
+              <path
+                key={s.cat}
+                d={s.path}
+                fill={s.color}
+                stroke="#fff"
+                strokeWidth={isActive ? 3 : 2}
+                opacity={dimmed ? 0.35 : 1}
+                transform={`translate(${dx},${dy})`}
+                style={{ cursor: 'pointer', transition: 'opacity 0.2s, transform 0.2s' }}
+                onClick={() => handleSliceClick(idx)}
+              />
+            )
+          })}
+
+          {/* Leader lines + labels — hide dimmed ones */}
+          {slices.map((s, idx) => {
+            if (s.pct < MIN_LABEL_PCT) return null
+            const isActive = active === idx
+            const dimmed = active !== null && !isActive
+            if (dimmed) return null
+            const dx = isActive ? ZOOM * Math.cos(s.mid) : 0
+            const dy = isActive ? ZOOM * Math.sin(s.mid) : 0
+            const short = s.cat.length > 14 ? s.cat.slice(0, 13) + '…' : s.cat
+            const pctLabel = (s.pct * 100).toFixed(1) + '%'
+            const amtLabel = formatCurrency(s.amt)
+            return (
+              <g key={`lbl-${s.cat}`} style={{ cursor: 'pointer' }} onClick={() => handleSliceClick(idx)}>
+                <polyline
+                  points={`${s.lx1 + dx},${s.ly1 + dy} ${s.lx2 + dx},${s.ly2 + dy} ${s.lx3 + dx},${s.ly3 + dy}`}
+                  fill="none"
+                  stroke={s.color}
+                  strokeWidth={isActive ? 1.8 : 1.4}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <text x={s.tx + dx} y={s.ty + dy - 5} textAnchor={s.anchor} fontSize={isActive ? 12 : 11} fontWeight="700" fill={s.color}>
+                  {short}
+                </text>
+                <text x={s.tx + dx} y={s.ty + dy + 9} textAnchor={s.anchor} fontSize={isActive ? 11 : 10} fontWeight="500" fill={s.color} opacity="0.85">
+                  {pctLabel} · {amtLabel}
+                </text>
+              </g>
+            )
+          })}
+
+          {/* Centre total when nothing selected */}
+          {active === null && (
+            <>
+              <text x={CX} y={CY - 6} textAnchor="middle" fontSize="11" fill="var(--color-text-hint)" fontWeight="500">Total</text>
+              <text x={CX} y={CY + 12} textAnchor="middle" fontSize="13" fill="var(--color-text-primary)" fontWeight="700">
+                {formatCurrency(total)}
+              </text>
+            </>
+          )}
+        </svg>
+
+        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-hint)', paddingBottom: 10 }}>
+          Tap a slice to zoom in
+        </p>
+      </div>
+    </div>
+  )
+}
+
 function getGreeting() {
   const hour = new Date().getHours()
   if (hour < 12) return 'Good morning'
@@ -218,13 +394,7 @@ export default function Dashboard() {
       <div className={styles.container}>
         <div className={styles.headerBar}>
           <div className={styles.logoRow}>
-            <div className={styles.logoIcon}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                <path d="M12 2L15 8H9L12 2Z" fill="white" opacity="0.9"/>
-                <circle cx="12" cy="15" r="6" fill="white" opacity="0.7"/>
-                <path d="M9 14h6M12 11v8" stroke="white" strokeWidth="1.5" strokeLinecap="round" opacity="0.9"/>
-              </svg>
-            </div>
+            <PesoWiseLogo size={38} />
             <span className={styles.logoText}>Peso Wise</span>
           </div>
         </div>
@@ -556,110 +726,7 @@ export default function Dashboard() {
 
       {/* Spending by category pie chart */}
       {spendingByCategory.length > 0 && (
-        <div className={styles.section}>
-          <div className={styles.sectionTitle}>
-            Spending by Category
-            <button className={styles.seeAll} onClick={() => navigate('/reports')}>Full report</button>
-          </div>
-          <div className={styles.card} style={{ padding: '18px 8px' }}>
-            {(() => {
-              const PIE_COLORS = [
-                '#4a7c6f','#708e9f','#e07b54','#e8c547','#6bbf8e',
-                '#b87cbf','#5b9bd5','#e87272','#7dbfa5','#f0a05a',
-                '#9b8dcc','#6db8c6','#d98a8a','#88b04b','#c88b5a',
-              ]
-              const total = spendingByCategory.reduce((s, [, amt]) => s + amt, 0)
-
-              // Generous viewBox so labels never clip — pie sits in the center
-              // with 110px of breathing room on each side for labels
-              const VW = 500
-              const VH = 420
-              const CX = VW / 2
-              const CY = VH / 2
-              const R = 90         // pie outer radius
-              const INNER = 50     // donut hole
-              const ELBOW_R = 112  // where the angled line kinks
-              const TICK = 22      // length of horizontal tick
-              const MIN_LABEL_PCT = 0.04
-
-              let cursor = -Math.PI / 2
-              const slices = spendingByCategory.map(([cat, amt], i) => {
-                const pct = amt / total
-                const angle = pct * 2 * Math.PI
-                const start = cursor
-                const end = cursor + angle
-                cursor = end
-                const mid = start + angle / 2
-
-                const x1 = CX + R * Math.cos(start), y1 = CY + R * Math.sin(start)
-                const x2 = CX + R * Math.cos(end),   y2 = CY + R * Math.sin(end)
-                const ix1 = CX + INNER * Math.cos(end),   iy1 = CY + INNER * Math.sin(end)
-                const ix2 = CX + INNER * Math.cos(start), iy2 = CY + INNER * Math.sin(start)
-                const large = angle > Math.PI ? 1 : 0
-                const path = `M${x1},${y1} A${R},${R},0,${large},1,${x2},${y2} L${ix1},${iy1} A${INNER},${INNER},0,${large},0,${ix2},${iy2} Z`
-
-                const isRight = Math.cos(mid) >= 0
-                // line starts just outside the arc
-                const lx1 = CX + (R + 3) * Math.cos(mid)
-                const ly1 = CY + (R + 3) * Math.sin(mid)
-                // elbow point
-                const lx2 = CX + ELBOW_R * Math.cos(mid)
-                const ly2 = CY + ELBOW_R * Math.sin(mid)
-                // end of horizontal tick
-                const lx3 = lx2 + (isRight ? TICK : -TICK)
-                const ly3 = ly2
-                // text starts just past tick end
-                const tx = lx3 + (isRight ? 3 : -3)
-                const anchor = isRight ? 'start' : 'end'
-
-                return {
-                  cat, amt, pct, mid, isRight, angle,
-                  color: PIE_COLORS[i % PIE_COLORS.length],
-                  path, lx1, ly1, lx2, ly2, lx3, ly3, tx, ty: ly3, anchor,
-                }
-              })
-
-              return (
-                <svg
-                  viewBox={`0 0 ${VW} ${VH}`}
-                  width="100%"
-                  style={{ display: 'block' }}
-                >
-                  {/* Slices */}
-                  {slices.map(s => (
-                    <path key={s.cat} d={s.path} fill={s.color} stroke="#fff" strokeWidth="2" />
-                  ))}
-
-                  {/* Leader lines + labels */}
-                  {slices.map(s => {
-                    if (s.pct < MIN_LABEL_PCT) return null
-                    const short = s.cat.length > 14 ? s.cat.slice(0, 13) + '…' : s.cat
-                    const pctLabel = (s.pct * 100).toFixed(1) + '%'
-                    const amtLabel = formatCurrency(s.amt)
-                    return (
-                      <g key={`lbl-${s.cat}`}>
-                        <polyline
-                          points={`${s.lx1},${s.ly1} ${s.lx2},${s.ly2} ${s.lx3},${s.ly3}`}
-                          fill="none"
-                          stroke={s.color}
-                          strokeWidth="1.4"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                        <text x={s.tx} y={s.ty - 4} textAnchor={s.anchor} fontSize="11" fontWeight="700" fill={s.color}>
-                          {short}
-                        </text>
-                        <text x={s.tx} y={s.ty + 9} textAnchor={s.anchor} fontSize="10" fontWeight="500" fill={s.color} opacity="0.8">
-                          {pctLabel} · {amtLabel}
-                        </text>
-                      </g>
-                    )
-                  })}
-                </svg>
-              )
-            })()}
-          </div>
-        </div>
+        <SpendingPieChart data={spendingByCategory} onFullReport={() => navigate('/reports')} />
       )}
 
       {/* Insight */}

@@ -9,20 +9,6 @@
   margin: 0 auto;
 }
 
-.logo {
-  width: 64px;
-  height: 64px;
-  background-color: var(--color-primary);
-  border-radius: var(--border-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 16px;
-}
-
 .title {
   font-size: 1.5rem;
   font-weight: 700;

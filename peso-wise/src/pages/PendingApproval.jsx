@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { updatePaymentRef, getUserSettings } from '../firebase/settings'
+import PesoWiseLogo from '../components/PesoWiseLogo'
 import styles from './PendingApproval.module.css'
 
 export default function PendingApproval() {
@@ -67,7 +68,7 @@ export default function PendingApproval() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.logo}>P</div>
+      <PesoWiseLogo size={64} style={{ marginBottom: 16, borderRadius: 14, boxShadow: '0 6px 20px rgba(74,124,111,0.25)' }} />
       <h1 className={styles.title}>Account Pending</h1>
 
       {!submitted ? (

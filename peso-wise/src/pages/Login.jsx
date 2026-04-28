@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getUserSettings, createUserSettings } from '../firebase/settings'
 import { getPinKey } from '../utils/hashPin'
+import PesoWiseLogo from '../components/PesoWiseLogo'
+import { PAYMENT_GATE_ENABLED } from '../config'
 import styles from './Login.module.css'
 
 export default function Login() {
@@ -27,7 +29,7 @@ export default function Login() {
       navigate('/pin-setup')
     } else if (!settings.onboardingCompleted) {
       navigate('/onboarding')
-    } else if (settings.status === 'pending') {
+    } else if (PAYMENT_GATE_ENABLED && settings.status === 'pending') {
       navigate('/pending-approval')
     } else if (settings.status === 'rejected') {
       navigate('/rejected')
@@ -91,7 +93,7 @@ export default function Login() {
 
   return (
     <div className={styles.container}>
-      <div className={styles.logo}>P</div>
+      <PesoWiseLogo size={72} style={{ marginBottom: 20, borderRadius: 16, boxShadow: '0 8px 24px rgba(74,124,111,0.25)' }} />
       <h1 className={styles.title}>Welcome to Peso Wise</h1>
       <p className={styles.subtitle}>Your personal finance tracker</p>
 

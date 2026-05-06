@@ -1,4 +1,4 @@
-.container { padding: 16px; padding-bottom: 80px; max-width: 480px; margin: 0 auto; }
+.container { padding: var(--container-padding-x, 16px); padding-bottom: var(--container-padding-bottom, 88px); max-width: var(--container-max-width, 480px); margin: 0 auto; width: 100%; }
 .title { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
 .goalCard { padding: 16px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border); background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur); box-shadow: var(--glass-shadow); margin-bottom: 12px; }
 .goalHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }

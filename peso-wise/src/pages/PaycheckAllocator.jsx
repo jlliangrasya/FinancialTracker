@@ -1,14 +1,34 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getBills } from '../firebase/bills'
 import { getSavingsGoals } from '../firebase/savingsGoals'
 import { addBudgetPeriod, updateBudgetPeriod, getActiveBudgetPeriod } from '../firebase/budgetPeriods'
+import { getUserSettings } from '../firebase/settings'
 import { useToast } from '../components/Toast'
 import { calculateDefaultAllocation, validateAllocation } from '../engine/paycheckAllocator'
 import { formatCurrency } from '../utils/formatCurrency'
 import { getCurrentMonthString } from '../utils/dateHelpers'
 import styles from './PaycheckAllocator.module.css'
+
+const BUCKET_COLORS = [
+  'var(--color-warning)',
+  'var(--color-success)',
+  'var(--color-primary)',
+  '#a78bfa',
+  '#f97316',
+  '#06b6d4',
+  '#ec4899',
+]
+
+const DEFAULT_BUCKETS = [
+  { label: 'Bills' },
+  { label: 'Savings' },
+  { label: 'Daily Expenses' },
+]
+
+function isBillsLabel(label) { return (label || '').toLowerCase().includes('bill') }
+function isSavingsLabel(label) { return (label || '').toLowerCase().includes('saving') }
 
 export default function PaycheckAllocator() {
   const [searchParams] = useSearchParams()
@@ -23,9 +43,8 @@ export default function PaycheckAllocator() {
   const [periodType, setPeriodType] = useState('monthly')
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
-  const [billsAlloc, setBillsAlloc] = useState(0)
-  const [savingsAlloc, setSavingsAlloc] = useState(0)
-  const [spendingAlloc, setSpendingAlloc] = useState(0)
+  const [allocations, setAllocations] = useState([])
+  const [settingsAllocation, setSettingsAllocation] = useState([])
   const [billsData, setBillsData] = useState([])
   const [goalsData, setGoalsData] = useState([])
   const [existingPeriodId, setExistingPeriodId] = useState(null)
@@ -37,15 +56,26 @@ export default function PaycheckAllocator() {
 
   const incomeAmount = totalBudget
 
+  function allocsFromSettings(settingsAlloc, amount) {
+    return settingsAlloc.map(a => ({
+      label: a.label,
+      amount: Math.round(amount * (a.percentage || 0) / 100 * 100) / 100,
+    }))
+  }
+
   useEffect(() => {
     async function load() {
       if (!currentUser) return
-      const [bills, goals] = await Promise.all([
+      const [bills, goals, settings] = await Promise.all([
         getBills(currentUser.uid),
         getSavingsGoals(currentUser.uid),
+        getUserSettings(currentUser.uid),
       ])
       setBillsData(bills)
       setGoalsData(goals)
+
+      const settingsAlloc = settings?.incomeAllocation || []
+      setSettingsAllocation(settingsAlloc)
 
       if (editMode) {
         const period = await getActiveBudgetPeriod(currentUser.uid)
@@ -53,62 +83,87 @@ export default function PaycheckAllocator() {
           setExistingPeriodId(period.id)
           const total = (period.expensesBudget || 0) + (period.billsBudget || 0) + (period.savingsBudget || 0)
           setTotalBudget(total)
-          setBillsAlloc(period.billsBudget || 0)
-          setSavingsAlloc(period.savingsBudget || 0)
-          setSpendingAlloc(period.expensesBudget || 0)
           if (period.periodType) setPeriodType(period.periodType)
+
+          if (settingsAlloc.length > 0) {
+            // Re-distribute saved totals across settings categories proportionally
+            const billsTotal = period.billsBudget || 0
+            const savingsTotal = period.savingsBudget || 0
+            const spendingTotal = period.expensesBudget || 0
+            setAllocations(settingsAlloc.map(a => {
+              const label = a.label || ''
+              if (isBillsLabel(label)) return { label, amount: billsTotal }
+              if (isSavingsLabel(label)) return { label, amount: savingsTotal }
+              return { label, amount: spendingTotal }
+            }))
+          } else {
+            setAllocations([
+              { label: 'Bills', amount: period.billsBudget || 0 },
+              { label: 'Savings', amount: period.savingsBudget || 0 },
+              { label: 'Daily Expenses', amount: period.expensesBudget || 0 },
+            ])
+          }
         }
         setLoadingPeriod(false)
         return
       }
 
       if (isCarryForward) {
-        setBillsAlloc(carryBills)
-        setSavingsAlloc(carrySavings)
-        setSpendingAlloc(carrySpending)
+        const buckets = settingsAlloc.length > 0 ? settingsAlloc : DEFAULT_BUCKETS
+        setAllocations(buckets.map(a => {
+          const label = a.label || ''
+          if (isBillsLabel(label)) return { label, amount: carryBills }
+          if (isSavingsLabel(label)) return { label, amount: carrySavings }
+          return { label, amount: carrySpending }
+        }))
       } else if (rawAmount > 0) {
-        const currentMonth = getCurrentMonthString()
-        const unpaidBills = bills.filter(b => b.isActive && (!b.paidMonths || !b.paidMonths.includes(currentMonth)))
-        const defaults = calculateDefaultAllocation(rawAmount, unpaidBills, goals)
-        setBillsAlloc(defaults.bills)
-        setSavingsAlloc(defaults.savings)
-        setSpendingAlloc(defaults.spending)
+        if (settingsAlloc.length > 0) {
+          setAllocations(allocsFromSettings(settingsAlloc, rawAmount))
+        } else {
+          const currentMonth = getCurrentMonthString()
+          const unpaidBills = bills.filter(b => b.isActive && (!b.paidMonths || !b.paidMonths.includes(currentMonth)))
+          const defaults = calculateDefaultAllocation(rawAmount, unpaidBills, goals)
+          setAllocations([
+            { label: 'Bills', amount: defaults.bills },
+            { label: 'Savings', amount: defaults.savings },
+            { label: 'Daily Expenses', amount: defaults.spending },
+          ])
+        }
+      } else {
+        const buckets = settingsAlloc.length > 0 ? settingsAlloc : DEFAULT_BUCKETS
+        setAllocations(buckets.map(a => ({ label: a.label, amount: 0 })))
       }
     }
     load()
   }, [currentUser, rawAmount, editMode])
 
-  function updateBills(val) {
+  function updateAlloc(index, val) {
     const v = Math.max(0, Number(val) || 0)
-    setBillsAlloc(v)
-    if (incomeAmount > 0) setSpendingAlloc(Math.max(0, incomeAmount - v - savingsAlloc))
-  }
-
-  function updateSavings(val) {
-    const v = Math.max(0, Number(val) || 0)
-    setSavingsAlloc(v)
-    if (incomeAmount > 0) setSpendingAlloc(Math.max(0, incomeAmount - billsAlloc - v))
-  }
-
-  function updateSpending(val) {
-    setSpendingAlloc(Math.max(0, Number(val) || 0))
+    setAllocations(prev => prev.map((a, i) => i === index ? { ...a, amount: v } : a))
   }
 
   function handleTotalBudgetChange(val) {
     const v = Math.max(0, Number(val) || 0)
     setTotalBudget(v)
-    setBillsAlloc(0)
-    setSavingsAlloc(0)
-    setSpendingAlloc(0)
+    if (v > 0 && settingsAllocation.length > 0) {
+      setAllocations(allocsFromSettings(settingsAllocation, v))
+    } else {
+      setAllocations(prev => prev.map(a => ({ ...a, amount: 0 })))
+    }
   }
 
-  const validation = incomeAmount > 0
-    ? validateAllocation(billsAlloc, savingsAlloc, spendingAlloc, incomeAmount)
-    : { isBalanced: true, unallocated: 0, overAllocated: 0 }
+  const totalAlloc = allocations.reduce((s, a) => s + a.amount, 0)
 
-  const billsPct = incomeAmount > 0 ? (billsAlloc / incomeAmount) * 100 : 0
-  const savingsPct = incomeAmount > 0 ? (savingsAlloc / incomeAmount) * 100 : 0
-  const spendingPct = incomeAmount > 0 ? (spendingAlloc / incomeAmount) * 100 : 0
+  const validation = incomeAmount > 0
+    ? (() => {
+        const diff = Math.round((incomeAmount - totalAlloc) * 100) / 100
+        return {
+          isBalanced: Math.abs(diff) < 0.01,
+          unallocated: diff > 0 ? diff : 0,
+          overAllocated: diff < 0 ? Math.abs(diff) : 0,
+        }
+      })()
+    : { isBalanced: true, unallocated: 0, overAllocated: 0 }
 
   function getPeriodDates() {
     if (periodType === 'custom' && customStart && customEnd) {
@@ -127,16 +182,29 @@ export default function PaycheckAllocator() {
     return { start, end }
   }
 
+  function getMappedBudgets() {
+    const billsBudget = allocations.filter(a => isBillsLabel(a.label)).reduce((s, a) => s + a.amount, 0)
+    const savingsBudget = allocations.filter(a => isSavingsLabel(a.label)).reduce((s, a) => s + a.amount, 0)
+    const expensesBudget = allocations
+      .filter(a => !isBillsLabel(a.label) && !isSavingsLabel(a.label))
+      .reduce((s, a) => s + a.amount, 0)
+    return { billsBudget, savingsBudget, expensesBudget }
+  }
+
   async function handleConfirm() {
     setSaving(true)
     try {
+      const { billsBudget, savingsBudget, expensesBudget } = getMappedBudgets()
+      const totalBudgetSaved = billsBudget + savingsBudget + expensesBudget
+
       if (editMode && existingPeriodId) {
         await updateBudgetPeriod(existingPeriodId, {
           periodType,
-          totalBudget: billsAlloc + savingsAlloc + spendingAlloc,
-          expensesBudget: spendingAlloc,
-          billsBudget: billsAlloc,
-          savingsBudget: savingsAlloc,
+          totalBudget: totalBudgetSaved,
+          expensesBudget,
+          billsBudget,
+          savingsBudget,
+          customAllocations: allocations,
         })
         showToast('Budget updated ✓')
       } else {
@@ -146,10 +214,11 @@ export default function PaycheckAllocator() {
           startDate: start,
           endDate: end,
           mode: 'separate',
-          totalBudget: billsAlloc + savingsAlloc + spendingAlloc,
-          expensesBudget: spendingAlloc,
-          billsBudget: billsAlloc,
-          savingsBudget: savingsAlloc,
+          totalBudget: totalBudgetSaved,
+          expensesBudget,
+          billsBudget,
+          savingsBudget,
+          customAllocations: allocations,
         })
         showToast('Budget period created ✓')
       }
@@ -171,6 +240,8 @@ export default function PaycheckAllocator() {
   }
 
   const isFromIncome = rawAmount > 0 && !editMode && !isCarryForward
+  const activeBillsTotal = billsData.filter(b => b.isActive).reduce((s, b) => s + b.amount, 0)
+  const goalsNeeded = goalsData.reduce((s, g) => s + Math.max(0, (g.targetAmount || 0) - (g.savedAmount || 0)), 0)
 
   return (
     <div className={styles.container}>
@@ -226,51 +297,61 @@ export default function PaycheckAllocator() {
         </>
       )}
 
-      <div className={styles.bucket}>
-        <div className={styles.bucketHeader}>
-          <span className={styles.bucketLabel}>Bills</span>
-          <span className={styles.bucketRef}>Active bills: {formatCurrency(billsData.filter(b => b.isActive).reduce((s, b) => s + b.amount, 0))}</span>
-        </div>
-        <div className={styles.sliderRow}>
-          {incomeAmount > 0 && (
-            <input type="range" className={styles.slider} min="0" max={incomeAmount} value={billsAlloc} onChange={e => updateBills(e.target.value)} />
-          )}
-          <input type="number" className={styles.amountInput} value={billsAlloc || ''} onChange={e => updateBills(e.target.value)} placeholder="₱0" inputMode="decimal" />
-        </div>
-      </div>
-
-      <div className={styles.bucket}>
-        <div className={styles.bucketHeader}>
-          <span className={styles.bucketLabel}>Savings</span>
-          <span className={styles.bucketRef}>Goals need: {formatCurrency(goalsData.reduce((s, g) => s + Math.max(0, (g.targetAmount || 0) - (g.savedAmount || 0)), 0))}</span>
-        </div>
-        <div className={styles.sliderRow}>
-          {incomeAmount > 0 && (
-            <input type="range" className={styles.slider} min="0" max={incomeAmount} value={savingsAlloc} onChange={e => updateSavings(e.target.value)} />
-          )}
-          <input type="number" className={styles.amountInput} value={savingsAlloc || ''} onChange={e => updateSavings(e.target.value)} placeholder="₱0" inputMode="decimal" />
-        </div>
-      </div>
-
-      <div className={styles.bucket}>
-        <div className={styles.bucketHeader}>
-          <span className={styles.bucketLabel}>Daily Expenses</span>
-          <span className={styles.bucketRef}>{incomeAmount > 0 ? 'Remaining' : 'Spending budget'}</span>
-        </div>
-        <div className={styles.sliderRow}>
-          {incomeAmount > 0 && (
-            <input type="range" className={styles.slider} min="0" max={incomeAmount} value={spendingAlloc} onChange={e => updateSpending(e.target.value)} />
-          )}
-          <input type="number" className={styles.amountInput} value={spendingAlloc || ''} onChange={e => updateSpending(e.target.value)} placeholder="₱0" inputMode="decimal" />
-        </div>
-      </div>
+      {allocations.map((alloc, i) => {
+        const isBills = isBillsLabel(alloc.label)
+        const isSavings = isSavingsLabel(alloc.label)
+        return (
+          <div key={alloc.label} className={styles.bucket}>
+            <div className={styles.bucketHeader}>
+              <span className={styles.bucketLabel}>{alloc.label}</span>
+              {isBills && (
+                <span className={styles.bucketRef}>Active bills: {formatCurrency(activeBillsTotal)}</span>
+              )}
+              {isSavings && (
+                <span className={styles.bucketRef}>Goals need: {formatCurrency(goalsNeeded)}</span>
+              )}
+              {!isBills && !isSavings && incomeAmount > 0 && (
+                <span className={styles.bucketRef}>{Math.round(alloc.amount / incomeAmount * 100)}% of income</span>
+              )}
+            </div>
+            <div className={styles.sliderRow}>
+              {incomeAmount > 0 && (
+                <input
+                  type="range"
+                  className={styles.slider}
+                  style={{ accentColor: BUCKET_COLORS[i % BUCKET_COLORS.length] }}
+                  min="0"
+                  max={incomeAmount}
+                  value={alloc.amount}
+                  onChange={e => updateAlloc(i, e.target.value)}
+                />
+              )}
+              <input
+                type="number"
+                className={styles.amountInput}
+                value={alloc.amount || ''}
+                onChange={e => updateAlloc(i, e.target.value)}
+                placeholder="₱0"
+                inputMode="decimal"
+              />
+            </div>
+          </div>
+        )
+      })}
 
       {incomeAmount > 0 && (
         <>
           <div className={styles.mathBar}>
-            <div className={styles.mathSegment} style={{ width: `${billsPct}%`, backgroundColor: 'var(--color-warning)' }} />
-            <div className={styles.mathSegment} style={{ width: `${savingsPct}%`, backgroundColor: 'var(--color-success)' }} />
-            <div className={styles.mathSegment} style={{ width: `${spendingPct}%`, backgroundColor: 'var(--color-primary)' }} />
+            {allocations.map((alloc, i) => {
+              const pct = incomeAmount > 0 ? (alloc.amount / incomeAmount) * 100 : 0
+              return (
+                <div
+                  key={alloc.label}
+                  className={styles.mathSegment}
+                  style={{ width: `${pct}%`, backgroundColor: BUCKET_COLORS[i % BUCKET_COLORS.length] }}
+                />
+              )
+            })}
           </div>
           <div className={`${styles.unallocated} ${validation.isBalanced ? styles.balanced : styles.unbalanced}`}>
             {validation.isBalanced
@@ -284,7 +365,11 @@ export default function PaycheckAllocator() {
       )}
 
       <div className={styles.actions}>
-        <button className="btn-primary" onClick={handleConfirm} disabled={saving || (billsAlloc === 0 && savingsAlloc === 0 && spendingAlloc === 0)}>
+        <button
+          className="btn-primary"
+          onClick={handleConfirm}
+          disabled={saving || allocations.every(a => a.amount === 0)}
+        >
           {saving ? 'Saving...' : editMode ? 'Update Budget' : 'Confirm Budget'}
         </button>
         <button className={styles.skipLink} onClick={() => navigate('/budget-tracker')}>

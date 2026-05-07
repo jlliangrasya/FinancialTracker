@@ -1,4 +1,4 @@
-.container { padding: 16px; padding-bottom: 88px; max-width: 480px; margin: 0 auto; }
+.container { padding: var(--container-padding-x, 16px); padding-bottom: var(--container-padding-bottom, 88px); max-width: var(--container-max-width, 480px); margin: 0 auto; width: 100%; }
 .title { font-size: 1.25rem; font-weight: 700; margin-bottom: 20px; letter-spacing: -0.02em; }
 .section { margin-bottom: 24px; }
 .sectionTitle { font-size: 0.9375rem; font-weight: 700; margin-bottom: 12px; color: var(--color-text-primary); padding-bottom: 6px; border-bottom: 1px solid var(--color-border); }

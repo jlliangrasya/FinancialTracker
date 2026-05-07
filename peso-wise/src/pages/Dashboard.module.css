@@ -1,7 +1,7 @@
 .container {
-  padding: 16px;
-  padding-bottom: 88px;
-  max-width: 480px;
+  padding: var(--container-padding-x, 16px);
+  padding-bottom: var(--container-padding-bottom, 88px);
+  max-width: var(--container-max-width, 480px);
   margin: 0 auto;
   width: 100%;
   overflow-x: hidden;
@@ -285,6 +285,17 @@
 }
 
 .bankScroll::-webkit-scrollbar { display: none; }
+
+@media (min-width: 768px) {
+  .bankScroll {
+    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: visible;
+    flex-wrap: wrap;
+    scroll-snap-type: none;
+  }
+}
 
 /* Budget list */
 .budgetList {

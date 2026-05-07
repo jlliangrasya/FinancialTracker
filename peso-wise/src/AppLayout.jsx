@@ -4,6 +4,7 @@ import { useAuth } from './auth/AuthContext'
 import { getUserSettings } from './firebase/settings'
 import BottomNav from './components/BottomNav'
 import QuickAdd from './components/QuickAdd'
+import styles from './AppLayout.module.css'
 
 export default function AppLayout() {
   const [quickAddOpen, setQuickAddOpen] = useState(false)
@@ -32,7 +33,9 @@ export default function AppLayout() {
 
   return (
     <>
-      <Outlet />
+      <div className={styles.content}>
+        <Outlet />
+      </div>
       <QuickAdd
         open={quickAddOpen}
         onClose={() => setQuickAddOpen(false)}

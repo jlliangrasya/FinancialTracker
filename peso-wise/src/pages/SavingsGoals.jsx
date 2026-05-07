@@ -30,6 +30,7 @@ export default function SavingsGoals() {
   const [saving, setSaving] = useState(false)
   const [transactions, setTransactions] = useState([])
   const [transfers, setTransfers] = useState([])
+  const [efModalGoal, setEfModalGoal] = useState(null)
   const { currentUser } = useAuth()
   const { showToast } = useToast()
 
@@ -255,7 +256,7 @@ export default function SavingsGoals() {
         }
 
         return (
-          <div key={g.id} className={`${styles.goalCard} ${isEF ? styles.efCard : ''}`}>
+          <div key={g.id} className={`${styles.goalCard} ${isEF ? styles.efCard : ''}`} onClick={isEF ? () => setEfModalGoal({ g, effectiveSaved }) : undefined} style={isEF ? { cursor: 'pointer' } : undefined}>
             <div className={styles.goalHeader}>
               <div>
                 <div className={styles.goalName}>
@@ -314,6 +315,70 @@ export default function SavingsGoals() {
       }) : (
         <div className={styles.empty}><div className={styles.emptyIcon}>🎯</div><p>No savings goals yet. Create your Emergency Fund above or add a custom goal.</p></div>
       )}
+
+      {efModalGoal && (() => {
+        const { g, effectiveSaved } = efModalGoal
+        const target = suggestedEFTarget || 0
+        const target6 = target * 2
+        const pct = target > 0 ? Math.min(100, (effectiveSaved / target) * 100) : 0
+        const monthsCovered = target > 0 ? (effectiveSaved / (target / 3)) : 0
+        const barColor = monthsCovered >= 3 ? 'var(--color-success)' : monthsCovered >= 1 ? 'var(--color-warning)' : 'var(--color-danger)'
+        const avgMonthly = target / 3
+        return (
+          <div className={styles.efOverlay} onClick={() => setEfModalGoal(null)}>
+            <div className={styles.efModal} onClick={e => e.stopPropagation()}>
+              <div className={styles.efModalHeader}>
+                <h2 className={styles.efModalTitle}>🛡️ {g.name}</h2>
+                <button className={styles.efModalClose} onClick={() => setEfModalGoal(null)}>✕</button>
+              </div>
+              <div className={styles.efModalBody}>
+                <p className={styles.efModalDesc}>
+                  An emergency fund covers 3–6 months of expenses so you're protected from unexpected events without going into debt.
+                </p>
+
+                <div className={styles.efCalcCard}>
+                  <div className={styles.efCalcTitle}>How the suggested target was calculated</div>
+                  <div className={styles.efCalcRow}>
+                    <span>Avg monthly expenses (last 3 mo.)</span>
+                    <strong>{formatCurrency(avgMonthly)}</strong>
+                  </div>
+                  <div className={styles.efCalcRow}>
+                    <span>× 3 months <span className={styles.efBadge}>Minimum</span></span>
+                    <strong>{formatCurrency(target)}</strong>
+                  </div>
+                  <div className={`${styles.efCalcRow} ${styles.efCalcIdeal}`}>
+                    <span>× 6 months <span className={styles.efBadgeIdeal}>Ideal</span></span>
+                    <strong>{formatCurrency(target6)}</strong>
+                  </div>
+                </div>
+
+                <div className={styles.efProgressSection}>
+                  <div className={styles.efProgressHeader}>
+                    <span>Your progress</span>
+                    <span><strong>{formatCurrency(effectiveSaved)}</strong> / {formatCurrency(target)}</span>
+                  </div>
+                  <div className={styles.efProgressTrack}>
+                    <div className={styles.efProgressFill} style={{ width: `${pct}%`, backgroundColor: barColor }} />
+                  </div>
+                  <div className={styles.efProgressLabels}>
+                    <span>₱0</span>
+                    <span>3 months</span>
+                  </div>
+                  <div className={styles.efCoverage} style={{ color: barColor }}>
+                    {avgMonthly > 0
+                      ? `Covers ${monthsCovered.toFixed(1)} month${monthsCovered !== 1 ? 's' : ''} of expenses`
+                      : 'No expense data yet — add transactions to calculate'}
+                  </div>
+                </div>
+
+                {g.linkedBank && g.bank && (
+                  <div className={styles.efLinkedNote}>Auto-synced from <strong>{g.bank}</strong> balance</div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

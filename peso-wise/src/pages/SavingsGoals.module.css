@@ -47,3 +47,29 @@
 .efCard { border-color: rgba(74,124,111,0.3); background: linear-gradient(135deg, rgba(74,124,111,0.05) 0%, transparent 100%); }
 .efSuggested { font-size: 0.8125rem; color: var(--color-primary); font-weight: 600; }
 .noTargetBar { height: 6px; border-radius: 3px; background: var(--color-border); margin: 8px 0; }
+
+.efOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-end; }
+.efModal { background-color: var(--color-surface-solid); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; width: 100%; max-height: 85vh; overflow-y: auto; }
+.efModalHeader { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 12px; border-bottom: 1px solid var(--color-border-solid); position: sticky; top: 0; background-color: var(--color-surface-solid); z-index: 1; }
+.efModalTitle { font-size: 1.125rem; font-weight: 700; margin: 0; }
+.efModalClose { background: none; border: none; font-size: 1.25rem; color: var(--color-text-secondary); cursor: pointer; padding: 4px 8px; }
+.efModalBody { padding: 16px 20px 32px; display: flex; flex-direction: column; gap: 16px; }
+.efModalDesc { font-size: 0.875rem; color: var(--color-text-secondary); line-height: 1.6; margin: 0; }
+
+.efCalcCard { background-color: var(--color-background); border-radius: var(--border-radius-md); padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.efCalcTitle { font-size: 0.75rem; font-weight: 700; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 2px; }
+.efCalcRow { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; color: var(--color-text-secondary); }
+.efCalcRow strong { color: var(--color-text-primary); }
+.efCalcIdeal { padding-top: 10px; border-top: 1px solid var(--color-border-solid); }
+.efCalcIdeal strong { color: var(--color-success); }
+.efBadge { font-size: 0.6875rem; font-weight: 700; padding: 2px 7px; border-radius: 8px; background-color: var(--color-warning-light); color: var(--color-warning); margin-left: 6px; }
+.efBadgeIdeal { font-size: 0.6875rem; font-weight: 700; padding: 2px 7px; border-radius: 8px; background-color: var(--color-success-light); color: var(--color-success); margin-left: 6px; }
+
+.efProgressSection { display: flex; flex-direction: column; gap: 8px; }
+.efProgressHeader { display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--color-text-secondary); }
+.efProgressHeader strong { color: var(--color-text-primary); }
+.efProgressTrack { height: 14px; background-color: var(--color-background); border-radius: 7px; overflow: hidden; border: 1px solid var(--color-border-solid); }
+.efProgressFill { height: 100%; border-radius: 7px; transition: width 0.6s ease; }
+.efProgressLabels { display: flex; justify-content: space-between; font-size: 0.6875rem; color: var(--color-text-secondary); }
+.efCoverage { font-size: 0.875rem; font-weight: 700; text-align: center; padding: 10px; background-color: var(--color-background); border-radius: var(--border-radius-sm); }
+.efLinkedNote { font-size: 0.8125rem; color: var(--color-primary); background-color: var(--color-primary-light); padding: 8px 12px; border-radius: var(--border-radius-sm); }

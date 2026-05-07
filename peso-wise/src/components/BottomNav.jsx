@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
 import { getAllUsers } from '../firebase/settings'
+import PesoWiseLogo from './PesoWiseLogo'
 import styles from './BottomNav.module.css'
 
 /* ── All navigation items ── */
@@ -151,12 +152,7 @@ export default function BottomNav({ onAddClick }) {
       <aside className={styles.sideNav}>
         {/* Brand */}
         <div className={styles.sideNavBrand}>
-          <div className={styles.sideNavLogo}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="9"/>
-              <path d="M15 9.5a3.5 3.5 0 1 0 0 5M12 7v10M9.5 9.5h3"/>
-            </svg>
-          </div>
+          <PesoWiseLogo size={32} />
           <span className={styles.sideNavBrandName}>PesoWise</span>
         </div>
 

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useAuth } from '../auth/AuthContext'
+import { useOutletContext } from 'react-router-dom'
 import { getTransactions, deleteTransaction } from '../firebase/transactions'
 import { getTransfers } from '../firebase/transfers'
 import { useToast } from '../components/Toast'
@@ -27,10 +28,7 @@ export default function Transactions() {
   const [monthFilter, setMonthFilter] = useState(getCurrentMonthString())
   const { currentUser } = useAuth()
   const { showToast } = useToast()
-
-  useEffect(() => {
-    loadData()
-  }, [currentUser])
+  const { onTransactionAddedRef } = useOutletContext()
 
   async function loadData() {
     if (!currentUser) return
@@ -49,6 +47,17 @@ export default function Transactions() {
     }
     setLoading(false)
   }
+
+  useEffect(() => {
+    onTransactionAddedRef.current = (newTxn) => {
+      setTransactions(prev => [newTxn, ...prev])
+    }
+    return () => { onTransactionAddedRef.current = null }
+  }, [onTransactionAddedRef])
+
+  useEffect(() => {
+    loadData() // eslint-disable-line react-hooks/set-state-in-effect
+  }, [currentUser]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate month options from all data
   const monthOptions = useMemo(() => {

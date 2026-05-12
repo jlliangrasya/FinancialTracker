@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from './auth/AuthContext'
 import { getUserSettings } from './firebase/settings'
@@ -9,6 +9,7 @@ import styles from './AppLayout.module.css'
 export default function AppLayout() {
   const [quickAddOpen, setQuickAddOpen] = useState(false)
   const [banks, setBanks] = useState([])
+  const onTransactionAddedRef = useRef(null)
   const { currentUser } = useAuth()
   const navigate = useNavigate()
 
@@ -25,7 +26,10 @@ export default function AppLayout() {
     loadBanks()
   }, [currentUser])
 
-  function handleSaved(type, amount) {
+  function handleSaved(type, amount, newTransaction) {
+    if (newTransaction && onTransactionAddedRef.current) {
+      onTransactionAddedRef.current(newTransaction)
+    }
     if (type === 'income' && amount > 0) {
       navigate(`/paycheck-allocator?amount=${amount}`)
     }
@@ -34,7 +38,7 @@ export default function AppLayout() {
   return (
     <>
       <div className={styles.content}>
-        <Outlet />
+        <Outlet context={{ onTransactionAddedRef }} />
       </div>
       <QuickAdd
         open={quickAddOpen}

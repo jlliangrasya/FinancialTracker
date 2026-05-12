@@ -118,6 +118,7 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
     if (!amount || Number(amount) <= 0) return
     setSaving(true)
     try {
+      let newTransaction = null
       if (activeTab === 'transfer') {
         await addTransfer(currentUser.uid, {
           fromBank,
@@ -135,7 +136,7 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
         if (!goal.linkedBank) {
           await updateSavingsGoal(selectedGoalId, { savedAmount: (goal.savedAmount || 0) + Number(amount) })
         }
-        await addTransaction(currentUser.uid, {
+        const txnData = {
           type: 'expense',
           amount: Number(amount),
           description: `Savings: ${goal.name}`,
@@ -146,11 +147,13 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
           isIncome: false,
           date,
           periodId: null,
-        })
+        }
+        const newId = await addTransaction(currentUser.uid, txnData)
+        newTransaction = { ...txnData, id: newId, date: { toDate: () => new Date(date) } }
         showToast(`${formatCurrency(Number(amount))} added to ${goal.name}${goal.linkedBank ? ' (bank balance will update)' : ''} \u2713`)
       } else {
         const isIncome = activeTab === 'income'
-        await addTransaction(currentUser.uid, {
+        const txnData = {
           type: isIncome ? 'income' : 'expense',
           amount: Number(amount),
           description: description || (isIncome ? category : description),
@@ -162,7 +165,9 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
           date,
           periodId: null,
           billId: selectedBillId || null,
-        })
+        }
+        const newId = await addTransaction(currentUser.uid, txnData)
+        newTransaction = { ...txnData, id: newId, date: { toDate: () => new Date(date) } }
         if (selectedBillId) {
           await markBillPaid(selectedBillId, getCurrentMonthString(), Number(amount))
           showToast('Expense saved & bill marked as paid \u2713')
@@ -171,7 +176,7 @@ export default function QuickAdd({ open, onClose, banks, onSaved }) {
         }
       }
       resetForm()
-      if (onSaved) onSaved(activeTab, Number(amount))
+      if (onSaved) onSaved(activeTab, Number(amount), newTransaction)
       onClose()
     } catch (err) {
       showToast('Failed to save. Check your connection.', 'error')

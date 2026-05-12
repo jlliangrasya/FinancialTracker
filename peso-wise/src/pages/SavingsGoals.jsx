@@ -279,7 +279,9 @@ export default function SavingsGoals() {
 
             {hasTarget
               ? <ProgressBar value={effectiveSaved} max={g.targetAmount} showLabel={false} />
-              : <div className={styles.noTargetBar} />
+              : isEF && suggestedEFTarget > 0
+                ? <ProgressBar value={effectiveSaved} max={suggestedEFTarget} showLabel={false} />
+                : <div className={styles.noTargetBar} />
             }
 
             <div className={styles.goalValues}>

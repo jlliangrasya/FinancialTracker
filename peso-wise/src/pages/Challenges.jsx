@@ -40,6 +40,11 @@ export default function Challenges() {
   const [customReward, setCustomReward] = useState('')
   const [saving, setSaving] = useState(false)
 
+  // activation modal
+  const [pendingPreset, setPendingPreset] = useState(null) // the preset being configured
+  const [modalDuration, setModalDuration] = useState('')
+  const [modalAmount, setModalAmount] = useState('')
+
   const { currentUser } = useAuth()
   const { showToast } = useToast()
 
@@ -54,7 +59,6 @@ export default function Challenges() {
         getTransactions(currentUser.uid),
         getBudgets(currentUser.uid),
       ])
-      // auto-sweep: mark expired active challenges as failed/completed
       const updates = []
       for (const c of ch) {
         if (c.status !== 'active') continue
@@ -75,23 +79,39 @@ export default function Challenges() {
     setLoading(false)
   }
 
-  async function handleStartPreset(preset) {
+  function openActivationModal(preset) {
+    setPendingPreset(preset)
+    setModalDuration(String(preset.durationDays))
+    setModalAmount(preset.targetAmount > 0 ? String(preset.targetAmount) : '')
+  }
+
+  function closeActivationModal() {
+    setPendingPreset(null)
+    setModalDuration('')
+    setModalAmount('')
+  }
+
+  async function handleConfirmStart() {
+    if (!pendingPreset) return
     setSaving(true)
     const today = new Date().toISOString().split('T')[0]
+    const duration = Math.max(1, Number(modalDuration) || pendingPreset.durationDays)
+    const amount = Number(modalAmount) || pendingPreset.targetAmount || 0
     try {
       await addChallenge(currentUser.uid, {
-        name: preset.name,
-        type: preset.type,
+        name: pendingPreset.name,
+        type: pendingPreset.type,
         isPreset: true,
-        targetAmount: preset.targetAmount || 0,
-        targetCategory: preset.targetCategory || '',
-        allowedCategories: preset.allowedCategories || [],
-        durationDays: preset.durationDays,
+        targetAmount: amount,
+        targetCategory: pendingPreset.targetCategory || '',
+        allowedCategories: pendingPreset.allowedCategories || [],
+        durationDays: duration,
         startDate: today,
-        endDate: addDays(today, preset.durationDays),
+        endDate: addDays(today, duration),
         rewardNote: '',
       })
-      showToast(`"${preset.name}" started!`)
+      showToast(`"${pendingPreset.name}" started!`)
+      closeActivationModal()
       setActiveTab('active')
       await loadData()
     } catch { showToast('Failed to start', 'error') }
@@ -186,7 +206,7 @@ export default function Challenges() {
                 <div className={styles.presetMeta}>{preset.durationDays} days</div>
                 <button
                   className={styles.startBtn}
-                  onClick={() => handleStartPreset(preset)}
+                  onClick={() => openActivationModal(preset)}
                   disabled={saving || activePresetIds.has(preset.name)}
                 >
                   {activePresetIds.has(preset.name) ? 'In Progress' : 'Start'}
@@ -251,6 +271,54 @@ export default function Challenges() {
               <button className={styles.deleteHistoryBtn} onClick={() => handleDelete(c.id)}>Remove</button>
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Activation Modal */}
+      {pendingPreset && (
+        <div className={styles.modalOverlay} onClick={closeActivationModal}>
+          <div className={styles.modal} onClick={e => e.stopPropagation()}>
+            <div className={styles.modalEmoji}>{pendingPreset.emoji}</div>
+            <h2 className={styles.modalTitle}>{pendingPreset.name}</h2>
+            <p className={styles.modalDesc}>{pendingPreset.description}</p>
+
+            <div className={styles.modalFields}>
+              <div className={styles.modalField}>
+                <label className={styles.modalLabel}>Duration (days)</label>
+                <input
+                  type="number"
+                  className="input-field"
+                  min="1"
+                  max="90"
+                  value={modalDuration}
+                  onChange={e => setModalDuration(e.target.value)}
+                  inputMode="numeric"
+                />
+              </div>
+
+              {pendingPreset.type === 'save-amount' && (
+                <div className={styles.modalField}>
+                  <label className={styles.modalLabel}>Target amount (₱)</label>
+                  <input
+                    type="number"
+                    className="input-field"
+                    min="1"
+                    value={modalAmount}
+                    onChange={e => setModalAmount(e.target.value)}
+                    inputMode="decimal"
+                    placeholder={`Default: ₱${pendingPreset.targetAmount?.toLocaleString()}`}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className={styles.modalActions}>
+              <button className={styles.modalCancel} onClick={closeActivationModal}>Cancel</button>
+              <button className={styles.modalConfirm} onClick={handleConfirmStart} disabled={saving}>
+                {saving ? 'Starting...' : 'Start Challenge'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

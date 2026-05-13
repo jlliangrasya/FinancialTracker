@@ -70,15 +70,16 @@ function buildSlices(data, total, CX, CY, R, INNER, ELBOW_R, TICK) {
 }
 
 function SpendingPieChart({ data, onFullReport }) {
-  const [active, setActive] = useState(null) // index of zoomed slice, or null
+  const [active, setActive] = useState(null)
   const total = data.reduce((s, [, amt]) => s + amt, 0)
 
-  // Layout constants
-  const VW = 500, VH = 440
+  // Layout constants — smaller chart height since labels move to legend
+  const VW = 320, VH = 320
   const CX = VW / 2, CY = VH / 2
-  const R = 95, INNER = 52, ELBOW_R = 118, TICK = 24
-  const MIN_LABEL_PCT = 0.04
-  const ZOOM = 10 // how many px a selected slice pops out
+  const R = 110, INNER = 60, ELBOW_R = 132, TICK = 22
+  // Only draw leader-line labels for slices that are large enough to read
+  const MIN_LABEL_PCT = 0.08
+  const ZOOM = 10
 
   const slices = useMemo(
     () => buildSlices(data, total, CX, CY, R, INNER, ELBOW_R, TICK),
@@ -97,7 +98,7 @@ function SpendingPieChart({ data, onFullReport }) {
         Spending by Category
         <button className={styles.seeAll} onClick={onFullReport}>Full report</button>
       </div>
-      <div className={styles.card} style={{ padding: '12px 4px 4px' }}>
+      <div className={styles.card} style={{ padding: '12px 4px 8px' }}>
         {/* Active slice detail banner */}
         {activeSlice && (
           <div style={{
@@ -136,7 +137,6 @@ function SpendingPieChart({ data, onFullReport }) {
           {slices.map((s, idx) => {
             const isActive = active === idx
             const dimmed = active !== null && !isActive
-            // pop selected slice outward along its mid-angle
             const dx = isActive ? ZOOM * Math.cos(s.mid) : 0
             const dy = isActive ? ZOOM * Math.sin(s.mid) : 0
             return (
@@ -154,7 +154,7 @@ function SpendingPieChart({ data, onFullReport }) {
             )
           })}
 
-          {/* Leader lines + labels — hide dimmed ones */}
+          {/* Leader lines + labels only for large-enough slices */}
           {slices.map((s, idx) => {
             if (s.pct < MIN_LABEL_PCT) return null
             const isActive = active === idx
@@ -162,9 +162,8 @@ function SpendingPieChart({ data, onFullReport }) {
             if (dimmed) return null
             const dx = isActive ? ZOOM * Math.cos(s.mid) : 0
             const dy = isActive ? ZOOM * Math.sin(s.mid) : 0
-            const short = s.cat.length > 14 ? s.cat.slice(0, 13) + '…' : s.cat
+            const short = s.cat.length > 12 ? s.cat.slice(0, 11) + '…' : s.cat
             const pctLabel = (s.pct * 100).toFixed(1) + '%'
-            const amtLabel = formatCurrency(s.amt)
             return (
               <g key={`lbl-${s.cat}`} style={{ cursor: 'pointer' }} onClick={() => handleSliceClick(idx)}>
                 <polyline
@@ -175,11 +174,11 @@ function SpendingPieChart({ data, onFullReport }) {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                 />
-                <text x={s.tx + dx} y={s.ty + dy - 5} textAnchor={s.anchor} fontSize={isActive ? 12 : 11} fontWeight="700" fill={s.color}>
+                <text x={s.tx + dx} y={s.ty + dy - 4} textAnchor={s.anchor} fontSize={isActive ? 11 : 10} fontWeight="700" fill={s.color}>
                   {short}
                 </text>
-                <text x={s.tx + dx} y={s.ty + dy + 9} textAnchor={s.anchor} fontSize={isActive ? 11 : 10} fontWeight="500" fill={s.color} opacity="0.85">
-                  {pctLabel} · {amtLabel}
+                <text x={s.tx + dx} y={s.ty + dy + 8} textAnchor={s.anchor} fontSize={isActive ? 10 : 9} fontWeight="500" fill={s.color} opacity="0.85">
+                  {pctLabel}
                 </text>
               </g>
             )
@@ -188,17 +187,62 @@ function SpendingPieChart({ data, onFullReport }) {
           {/* Centre total when nothing selected */}
           {active === null && (
             <>
-              <text x={CX} y={CY - 6} textAnchor="middle" fontSize="11" fill="var(--color-text-hint)" fontWeight="500">Total</text>
-              <text x={CX} y={CY + 12} textAnchor="middle" fontSize="13" fill="var(--color-text-primary)" fontWeight="700">
+              <text x={CX} y={CY - 6} textAnchor="middle" fontSize="10" fill="var(--color-text-hint)" fontWeight="500">Total</text>
+              <text x={CX} y={CY + 11} textAnchor="middle" fontSize="12" fill="var(--color-text-primary)" fontWeight="700">
                 {formatCurrency(total)}
               </text>
             </>
           )}
         </svg>
 
-        <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--color-text-hint)', paddingBottom: 10 }}>
-          Tap a slice to zoom in
-        </p>
+        {/* Full legend — every category, always visible */}
+        <div style={{ padding: '4px 12px 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {slices.map((s, idx) => {
+            const isActive = active === idx
+            const dimmed = active !== null && !isActive
+            return (
+              <div
+                key={`leg-${s.cat}`}
+                onClick={() => handleSliceClick(idx)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 8,
+                  cursor: 'pointer',
+                  opacity: dimmed ? 0.4 : 1,
+                  transition: 'opacity 0.2s',
+                  padding: '4px 6px',
+                  borderRadius: 8,
+                  backgroundColor: isActive ? `${s.color}18` : 'transparent',
+                }}
+              >
+                <span style={{
+                  width: 10, height: 10, borderRadius: 3, flexShrink: 0,
+                  backgroundColor: s.color,
+                  boxShadow: isActive ? `0 0 0 2px ${s.color}55` : 'none',
+                }} />
+                <span style={{
+                  flex: 1, fontSize: '0.8125rem', fontWeight: isActive ? 700 : 500,
+                  color: isActive ? s.color : 'var(--color-text-primary)',
+                  whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                }}>
+                  {s.cat}
+                </span>
+                <span style={{
+                  fontSize: '0.75rem', color: 'var(--color-text-secondary)',
+                  flexShrink: 0,
+                }}>
+                  {(s.pct * 100).toFixed(1)}%
+                </span>
+                <span style={{
+                  fontSize: '0.8125rem', fontWeight: 600,
+                  color: isActive ? s.color : 'var(--color-text-primary)',
+                  flexShrink: 0, minWidth: 72, textAlign: 'right',
+                }}>
+                  {formatCurrency(s.amt)}
+                </span>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )
@@ -474,6 +518,28 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Insight */}
+      {insights.length > 0 && (
+        <div className={styles.section}>
+          <div className={styles.sectionTitle}>
+            <span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" style={{ marginRight: 6, verticalAlign: -2 }}>
+                <circle cx="12" cy="12" r="10"/>
+                <path d="M12 16v-4M12 8h.01"/>
+              </svg>
+              Tip for You
+            </span>
+          </div>
+          <InsightCard
+            type={insights[0].type}
+            headline={insights[0].headline}
+            detail={insights[0].detail}
+            tip={insights[0].tip}
+            onClick={() => navigate('/insights')}
+          />
+        </div>
+      )}
+
       {/* Last period summary — only show rows with actual data */}
       {lastPeriod?.summary && (
         <div className={styles.section}>
@@ -729,28 +795,6 @@ export default function Dashboard() {
         <SpendingPieChart data={spendingByCategory} onFullReport={() => navigate('/reports')} />
       )}
 
-      {/* Insight */}
-      {insights.length > 0 && (
-        <div className={styles.section}>
-          <div className={styles.sectionTitle}>
-            <span>
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" strokeWidth="2" strokeLinecap="round" style={{ marginRight: 6, verticalAlign: -2 }}>
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 16v-4M12 8h.01"/>
-              </svg>
-              Tip for You
-            </span>
-          </div>
-          <InsightCard
-            type={insights[0].type}
-            headline={insights[0].headline}
-            detail={insights[0].detail}
-            tip={insights[0].tip}
-            onClick={() => navigate('/insights')}
-          />
-        </div>
-      )}
-
       {/* Savings goals */}
       {savingsGoals.length > 0 && (
         <div className={styles.section}>
@@ -766,11 +810,11 @@ export default function Dashboard() {
                 <div key={g.id} className={styles.goalRow} onClick={() => navigate('/savings-goals')}>
                   <div className={styles.goalHeader}>
                     <span className={styles.goalName}>{g.name}{g.linkedBank ? ' (linked)' : ''}</span>
-                    <span className={styles.goalPct}>{(pct * 100).toFixed(0)}%</span>
+                    {g.targetAmount > 0 && <span className={styles.goalPct}>{(pct * 100).toFixed(0)}%</span>}
                   </div>
-                  <ProgressBar value={effectiveSaved} max={g.targetAmount} showLabel={false} />
+                  {g.targetAmount > 0 && <ProgressBar value={effectiveSaved} max={g.targetAmount} showLabel={false} />}
                   <div className={styles.goalValues}>
-                    {formatCurrency(effectiveSaved)} saved of {formatCurrency(g.targetAmount)}
+                    {formatCurrency(effectiveSaved)} saved{g.targetAmount > 0 ? ` of ${formatCurrency(g.targetAmount)}` : ' — no target set'}
                   </div>
                 </div>
               )

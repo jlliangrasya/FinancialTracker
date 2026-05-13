@@ -25,6 +25,7 @@ import PaycheckAllocator from './pages/PaycheckAllocator'
 import Settings from './pages/Settings'
 import Business from './pages/Business'
 import Challenges from './pages/Challenges'
+import LoanTracker from './pages/LoanTracker'
 import PendingApproval from './pages/PendingApproval'
 import RejectedAccount from './pages/RejectedAccount'
 import AdminDashboard from './pages/admin/AdminDashboard'
@@ -94,6 +95,9 @@ export default function App() {
                 } />
                 <Route path="/challenges" element={
                   <ProtectedRoute><Challenges /></ProtectedRoute>
+                } />
+                <Route path="/loans" element={
+                  <ProtectedRoute><LoanTracker /></ProtectedRoute>
                 } />
               </Route>
               <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -1,6 +1,22 @@
 {
   "indexes": [
     {
+      "collectionGroup": "sharedBudgets",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "inviteToken", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "businessTransactions",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "userId", "order": "ASCENDING" },
+        { "fieldPath": "date", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "transactions",
       "queryScope": "COLLECTION",
       "fields": [

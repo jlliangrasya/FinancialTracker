@@ -52,6 +52,22 @@
 .historyMeta { font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 8px; }
 .deleteHistoryBtn { font-size: 0.75rem; color: var(--color-text-hint); background: none; border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-sm); padding: 4px 10px; cursor: pointer; }
 
+/* Activation modal */
+.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; display: flex; align-items: flex-end; justify-content: center; padding: 0 0 env(safe-area-inset-bottom); }
+@media (min-height: 600px) { .modalOverlay { align-items: center; } }
+.modal { background: var(--color-surface-solid); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; width: 100%; max-width: 480px; padding: 24px 20px 28px; }
+@media (min-height: 600px) { .modal { border-radius: var(--border-radius-lg); } }
+.modalEmoji { font-size: 2rem; margin-bottom: 6px; }
+.modalTitle { font-size: 1.1rem; font-weight: 700; margin-bottom: 4px; }
+.modalDesc { font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 20px; line-height: 1.4; }
+.modalFields { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+.modalField { display: flex; flex-direction: column; gap: 6px; }
+.modalLabel { font-size: 0.8125rem; font-weight: 600; color: var(--color-text-primary); }
+.modalActions { display: flex; gap: 10px; }
+.modalCancel { flex: 1; padding: 12px; border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-sm); background: none; color: var(--color-text-secondary); font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+.modalConfirm { flex: 2; padding: 12px; border: none; border-radius: var(--border-radius-sm); background: var(--color-primary); color: white; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+.modalConfirm:disabled { opacity: 0.6; cursor: default; }
+
 /* Empty */
 .empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }
 .emptyEmoji { font-size: 2.5rem; margin-bottom: 8px; }

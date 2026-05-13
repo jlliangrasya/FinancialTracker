@@ -9,10 +9,8 @@ service cloud.firestore {
 
     // Settings collection (document ID = userId)
     match /settings/{userId} {
-      // Any authenticated user can create their OWN settings doc
       allow create: if request.auth != null
         && request.auth.uid == userId;
-      // Users can read/write their own settings
       allow read, update, delete: if request.auth != null
         && request.auth.uid == userId;
       // Superadmins can read and update ANY settings (admin dashboard)
@@ -20,36 +18,78 @@ service cloud.firestore {
         && get(/databases/$(database)/documents/settings/$(request.auth.uid)).data.role == 'superadmin';
     }
 
-    // All other user-scoped collections (transactions, transfers, bills, budgets, etc.)
+    // Shared budgets (Couples Mode)
+    // - Creator and partner can read/update/delete their shared budget doc
+    // - Any authenticated user can query by inviteToken to join (acceptInvite)
+    // - Any authenticated user can create (createSharedBudget)
+    match /sharedBudgets/{docId} {
+      allow create: if request.auth != null
+        && request.auth.uid in request.resource.data.members;
+      allow read: if request.auth != null
+        && (request.auth.uid in resource.data.members
+            || resource.data.status == 'pending');
+      allow update: if request.auth != null
+        && (request.auth.uid in resource.data.members
+            || resource.data.status == 'pending');
+      allow delete: if request.auth != null
+        && request.auth.uid in resource.data.members;
+    }
+
+    // Transactions — own user only
     match /transactions/{docId} {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
+
     match /transfers/{docId} {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
+
     match /bills/{docId} {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
+
     match /budgets/{docId} {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
+
     match /budgetPeriods/{docId} {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
+
     match /savingsGoals/{docId} {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
+
     match /investments/{docId} {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }
+
     match /debts/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Loan Tracker (Feature 1)
+    match /loans/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Financial Challenges (Feature 3)
+    match /challenges/{docId} {
+      allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+    }
+
+    // Business Mode transactions (Feature 2)
+    match /businessTransactions/{docId} {
       allow read, update, delete: if request.auth != null && resource.data.userId == request.auth.uid;
       allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
     }

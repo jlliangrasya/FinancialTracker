@@ -1,7 +1,7 @@
 import { db } from './config'
 import {
   collection, addDoc, updateDoc, deleteDoc, doc, getDoc,
-  query, where, getDocs, Timestamp
+  query, where, getDocs, Timestamp, arrayRemove
 } from 'firebase/firestore'
 
 const COLLECTION = 'sharedBudgets'
@@ -45,6 +45,20 @@ export async function getSharedBudget(sharedBudgetId) {
   return { id: snap.id, ...snap.data() }
 }
 
-export async function leaveSharedBudget(sharedBudgetId, userId) {
-  await deleteDoc(doc(db, COLLECTION, sharedBudgetId))
+export async function leaveSharedBudget(sharedBudgetId, userId, userEmail) {
+  const ref = doc(db, COLLECTION, sharedBudgetId)
+  const snap = await getDoc(ref)
+  if (!snap.exists()) return
+  const data = snap.data()
+  const remainingMembers = (data.members || []).filter(m => m !== userId)
+  if (remainingMembers.length === 0) {
+    await deleteDoc(ref)
+  } else {
+    await updateDoc(ref, {
+      members: arrayRemove(userId),
+      memberEmails: (data.memberEmails || []).filter(e => e !== userEmail),
+      status: 'pending',
+      inviteToken: Math.random().toString(36).substring(2, 8).toUpperCase(),
+    })
+  }
 }

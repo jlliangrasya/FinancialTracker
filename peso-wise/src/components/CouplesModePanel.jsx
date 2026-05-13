@@ -1,12 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../auth/AuthContext'
-import { createSharedBudget, acceptInvite, leaveSharedBudget } from '../firebase/sharedBudgets'
+import { createSharedBudget, acceptInvite, leaveSharedBudget, getSharedBudget } from '../firebase/sharedBudgets'
 import { updateUserSettings } from '../firebase/settings'
 import { useToast } from './Toast'
 import styles from './CouplesModePanel.module.css'
 
 export default function CouplesModePanel({ settings, onUpdated }) {
-  const [tab, setTab] = useState(settings?.sharedBudgetId ? 'active' : 'setup')
+  const [tab, setTab] = useState('setup')
   const [inviteToken, setInviteToken] = useState(null)
   const [joinCode, setJoinCode] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,6 +16,15 @@ export default function CouplesModePanel({ settings, onUpdated }) {
   const isConnected = !!settings?.sharedBudgetId
   const partnerEmail = settings?.partnerEmail || null
 
+  // If user already created a shared budget but partner hasn't joined yet,
+  // fetch the invite token from Firestore so it survives page reloads.
+  useEffect(() => {
+    if (!settings?.sharedBudgetId || inviteToken) return
+    getSharedBudget(settings.sharedBudgetId).then(doc => {
+      if (doc?.inviteToken) setInviteToken(doc.inviteToken)
+    }).catch(() => {})
+  }, [settings?.sharedBudgetId])
+
   async function handleCreate() {
     setLoading(true)
     try {
@@ -24,7 +33,10 @@ export default function CouplesModePanel({ settings, onUpdated }) {
       setInviteToken(token)
       showToast('Invite code created ✓')
       onUpdated()
-    } catch (err) { showToast('Failed to create', 'error') }
+    } catch (err) {
+      console.error('createSharedBudget error:', err)
+      showToast(err.message || 'Failed to create invite code', 'error')
+    }
     setLoading(false)
   }
 
@@ -37,7 +49,10 @@ export default function CouplesModePanel({ settings, onUpdated }) {
       showToast('Joined shared budget ✓')
       setJoinCode('')
       onUpdated()
-    } catch (err) { showToast(err.message || 'Invalid code', 'error') }
+    } catch (err) {
+      console.error('acceptInvite error:', err)
+      showToast(err.message || 'Invalid or expired code', 'error')
+    }
     setLoading(false)
   }
 
@@ -45,11 +60,15 @@ export default function CouplesModePanel({ settings, onUpdated }) {
     if (!window.confirm('Leave the shared budget? This cannot be undone.')) return
     setLoading(true)
     try {
-      await leaveSharedBudget(settings.sharedBudgetId, currentUser.uid)
+      await leaveSharedBudget(settings.sharedBudgetId, currentUser.uid, currentUser.email)
       await updateUserSettings(currentUser.uid, { sharedBudgetId: null, partnerEmail: null })
+      setInviteToken(null)
       showToast('Left shared budget')
       onUpdated()
-    } catch (err) { showToast('Failed to leave', 'error') }
+    } catch (err) {
+      console.error('leaveSharedBudget error:', err)
+      showToast('Failed to leave', 'error')
+    }
     setLoading(false)
   }
 
@@ -57,7 +76,7 @@ export default function CouplesModePanel({ settings, onUpdated }) {
     navigator.clipboard.writeText(code).then(() => showToast('Code copied!')).catch(() => {})
   }
 
-  if (isConnected) {
+  if (isConnected && !inviteToken) {
     return (
       <div className={styles.panel}>
         <div className={styles.connectedBadge}>Connected</div>
@@ -79,16 +98,23 @@ export default function CouplesModePanel({ settings, onUpdated }) {
         <div className={styles.tabContent}>
           <p className={styles.hint}>Generate an invite code and share it with your partner. They enter it on their account to connect.</p>
           {inviteToken ? (
-            <div className={styles.codeBox}>
-              <span className={styles.code}>{inviteToken}</span>
-              <button className={styles.copyBtn} onClick={() => copyCode(inviteToken)}>Copy</button>
-            </div>
+            <>
+              <div className={styles.codeBox}>
+                <span className={styles.code}>{inviteToken}</span>
+                <button className={styles.copyBtn} onClick={() => copyCode(inviteToken)}>Copy</button>
+              </div>
+              <p className={styles.hint} style={{ marginTop: 8 }}>Share this code with your partner. It expires once used.</p>
+              {isConnected && (
+                <button className={styles.leaveBtn} style={{ marginTop: 12 }} onClick={handleLeave} disabled={loading}>
+                  Cancel &amp; Leave
+                </button>
+              )}
+            </>
           ) : (
             <button className="btn-primary" onClick={handleCreate} disabled={loading}>
               {loading ? 'Creating...' : 'Generate Invite Code'}
             </button>
           )}
-          {inviteToken && <p className={styles.hint} style={{ marginTop: 8 }}>Share this code with your partner. It expires once used.</p>}
         </div>
       )}
 

@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../auth/AuthContext'
 import { getLoans, addLoan, deleteLoan, markLoanPayment, unmarkLoanPayment } from '../firebase/loans'
+
 import { calculateAmortizationSchedule, getLoanSummary } from '../engine/loanAmortization'
 import { formatCurrency } from '../utils/formatCurrency'
-import { formatDate } from '../utils/dateHelpers'
 import { useToast } from '../components/Toast'
 import styles from './LoanTracker.module.css'
 
@@ -85,11 +85,9 @@ export default function LoanTracker() {
       } else {
         await markLoanPayment(loan.id, period.periodNumber, period.paymentAmount)
       }
-      await loadData()
-      setSelectedLoan(prev => {
-        if (!prev || prev.id !== loan.id) return prev
-        return loans.find(l => l.id === loan.id) ?? prev
-      })
+      const fresh = await getLoans(currentUser.uid)
+      setLoans(fresh)
+      setSelectedLoan(prev => prev?.id === loan.id ? (fresh.find(l => l.id === loan.id) ?? prev) : prev)
     } catch (err) { showToast('Failed to update payment', 'error') }
   }
 

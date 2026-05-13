@@ -28,8 +28,9 @@ export function evaluateChallenge(challenge, transactions, budgets = []) {
       })
       const isComplete = violations.length === 0 && isExpired
       const isFailed = violations.length > 0 && isExpired
+      const parseUTC = s => new Date(s + 'T12:00:00Z')
       const daysElapsed = Math.min(
-        Math.ceil((new Date(Math.min(new Date(today), new Date(end))) - new Date(start)) / 86400000),
+        Math.ceil((parseUTC(today < end ? today : end) - parseUTC(start)) / 86400000),
         challenge.durationDays
       )
       return {
@@ -69,11 +70,14 @@ export function evaluateChallenge(challenge, transactions, budgets = []) {
           .map(t => toDateStr(t.date))
       )
       let streak = 0
-      let cur = new Date(start)
-      const endD = new Date(Math.min(new Date(today), new Date(end)))
+      // Parse as UTC noon to avoid timezone day-shift issues
+      const parseUTCNoon = s => new Date(s + 'T12:00:00Z')
+      let cur = parseUTCNoon(start)
+      const endD = parseUTCNoon(today < end ? today : end)
       while (cur <= endD) {
-        if (savingsDays.has(cur.toISOString().split('T')[0])) streak++
-        cur.setDate(cur.getDate() + 1)
+        const dayStr = cur.toISOString().split('T')[0]
+        if (savingsDays.has(dayStr)) streak++
+        cur = new Date(cur.getTime() + 86400000)
       }
       const isComplete = streak >= challenge.durationDays
       const isFailed = isExpired && !isComplete

@@ -33,6 +33,9 @@ export function AuthProvider({ children }) {
         const patch = {}
         if (profile.role === undefined) patch.role = 'user'
         if (profile.status === undefined) patch.status = 'approved'
+        if (profile.couplesMode === undefined) patch.couplesMode = false
+        if (profile.sharedBudgetId === undefined) patch.sharedBudgetId = null
+        if (profile.businessMode === undefined) patch.businessMode = false
         if (Object.keys(patch).length > 0) {
           await updateUserSettings(uid, patch)
           Object.assign(profile, patch)

@@ -1,0 +1,58 @@
+.container { padding: var(--container-padding-x, 16px); padding-bottom: var(--container-padding-bottom, 88px); max-width: var(--container-max-width, 480px); margin: 0 auto; width: 100%; }
+.title { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; }
+
+.tabs { display: flex; gap: 0; background-color: var(--color-background); border-radius: var(--border-radius-sm); padding: 3px; margin-bottom: 16px; }
+.tab { flex: 1; padding: 10px; font-size: 0.8125rem; font-weight: 500; border: none; background: none; cursor: pointer; border-radius: var(--border-radius-sm); color: var(--color-text-secondary); display: flex; align-items: center; justify-content: center; gap: 6px; }
+.tabActive { background-color: var(--color-surface-solid); color: var(--color-primary); font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.tabBadge { background-color: var(--color-primary); color: white; font-size: 0.625rem; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
+
+/* Active challenge card */
+.challengeCard { padding: 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-solid); background-color: var(--color-surface-solid); box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 12px; }
+.challengeHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.challengeType { font-size: 0.6875rem; font-weight: 600; color: var(--color-primary); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 3px; }
+.challengeName { font-size: 1rem; font-weight: 700; }
+.deleteBtn { font-size: 0.6875rem; color: var(--color-text-hint); background: none; border: none; cursor: pointer; padding: 4px 6px; }
+
+.progressTrack { height: 8px; background-color: var(--color-background); border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+.progressFill { height: 100%; border-radius: 4px; transition: width 0.5s ease; min-width: 4px; }
+.progressMeta { display: flex; justify-content: space-between; font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 6px; }
+.detailNote { font-size: 0.75rem; color: var(--color-warning); background-color: var(--color-warning-light); border-radius: var(--border-radius-sm); padding: 5px 10px; margin-bottom: 6px; }
+.challengeFooter { display: flex; justify-content: space-between; align-items: center; }
+.daysLeft { font-size: 0.75rem; color: var(--color-text-hint); }
+.rewardNote { font-size: 0.75rem; color: var(--color-text-secondary); font-style: italic; }
+
+/* Presets grid */
+.presetsGrid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.presetCard { padding: 14px 12px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-solid); background-color: var(--color-surface-solid); display: flex; flex-direction: column; gap: 4px; }
+.presetEmoji { font-size: 1.75rem; margin-bottom: 4px; }
+.presetName { font-size: 0.875rem; font-weight: 700; line-height: 1.3; }
+.presetDesc { font-size: 0.75rem; color: var(--color-text-secondary); line-height: 1.4; flex: 1; }
+.presetMeta { font-size: 0.6875rem; color: var(--color-text-hint); margin-top: 2px; }
+.startBtn { margin-top: 8px; padding: 8px; border: 1px solid var(--color-primary); border-radius: var(--border-radius-sm); background: none; color: var(--color-primary); font-size: 0.8125rem; font-weight: 600; cursor: pointer; }
+.startBtn:disabled { border-color: var(--color-border-solid); color: var(--color-text-hint); cursor: default; }
+
+/* Custom form */
+.customSection { margin-top: 4px; }
+.customToggle { width: 100%; padding: 12px; border: 1px dashed var(--color-primary); border-radius: var(--border-radius-sm); background: none; color: var(--color-primary); font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+.customForm { margin-top: 12px; padding: 16px; border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-md); background-color: var(--color-surface-solid); }
+.customForm h3 { font-size: 0.9375rem; margin-bottom: 12px; }
+.formGrid { display: flex; flex-direction: column; gap: 10px; }
+.formRow { display: flex; gap: 8px; }
+.formRow > * { flex: 1; min-width: 0; }
+
+/* History */
+.historyCard { padding: 12px 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-solid); background-color: var(--color-surface-solid); margin-bottom: 10px; }
+.completedCard { border-left: 3px solid var(--color-success); }
+.failedCard { border-left: 3px solid var(--color-danger); }
+.historyHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.historyName { font-size: 0.9375rem; font-weight: 600; }
+.statusBadge { font-size: 0.6875rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+.completedBadge { background-color: var(--color-success-light); color: var(--color-success); }
+.failedBadge { background-color: var(--color-danger-light); color: var(--color-danger); }
+.historyMeta { font-size: 0.8125rem; color: var(--color-text-secondary); margin-bottom: 8px; }
+.deleteHistoryBtn { font-size: 0.75rem; color: var(--color-text-hint); background: none; border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-sm); padding: 4px 10px; cursor: pointer; }
+
+/* Empty */
+.empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }
+.emptyEmoji { font-size: 2.5rem; margin-bottom: 8px; }
+.exploreBtn { margin-top: 12px; padding: 10px 20px; border: 1px solid var(--color-primary); border-radius: var(--border-radius-sm); background: none; color: var(--color-primary); font-size: 0.875rem; font-weight: 600; cursor: pointer; }

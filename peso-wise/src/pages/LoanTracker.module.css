@@ -1,0 +1,53 @@
+.addBtn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1px dashed var(--color-primary); border-radius: var(--border-radius-sm); background: none; cursor: pointer; width: 100%; color: var(--color-primary); font-size: 0.875rem; margin-bottom: 16px; }
+.addForm { padding: 16px; border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-md); background-color: var(--color-surface-solid); box-shadow: 0 1px 4px rgba(0,0,0,0.05); margin-bottom: 16px; }
+.addForm h3 { font-size: 0.9375rem; margin-bottom: 12px; }
+.formGrid { display: flex; flex-direction: column; gap: 10px; }
+.formRow { display: flex; gap: 10px; }
+.formRow > * { flex: 1; }
+.fieldLabel { font-size: 0.8125rem; color: var(--color-text-secondary); display: block; margin-bottom: 4px; }
+.fiveSixNote { font-size: 0.75rem; color: var(--color-warning); margin-top: 6px; padding: 6px 10px; background-color: var(--color-warning-light); border-radius: var(--border-radius-sm); }
+
+.loanList { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+.loanCard { padding: 14px; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-solid); background-color: var(--color-surface-solid); box-shadow: 0 1px 4px rgba(0,0,0,0.05); }
+.loanHeader { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+.loanTypeBadge { display: inline-block; font-size: 0.6875rem; font-weight: 600; padding: 2px 8px; border-radius: 10px; margin-bottom: 4px; }
+.loanName { font-size: 0.9375rem; font-weight: 600; }
+.deleteBtn { font-size: 0.6875rem; color: var(--color-danger); background: none; border: none; cursor: pointer; padding: 4px; }
+
+.loanAmounts { display: flex; gap: 8px; margin-bottom: 10px; }
+.loanAmounts > div { flex: 1; }
+.amountLabel { font-size: 0.6875rem; color: var(--color-text-secondary); text-transform: uppercase; }
+.amountValue { font-size: 0.875rem; font-weight: 700; margin-top: 2px; }
+
+.progressTrack { height: 6px; background-color: var(--color-background); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+.progressFill { height: 100%; border-radius: 3px; transition: width 0.4s ease; min-width: 4px; }
+.progressMeta { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--color-text-secondary); margin-bottom: 8px; }
+
+.overdueBadge { font-size: 0.75rem; font-weight: 600; color: var(--color-danger); background-color: var(--color-danger-light); border-radius: var(--border-radius-sm); padding: 4px 10px; margin-bottom: 8px; display: inline-block; }
+.viewScheduleBtn { width: 100%; padding: 8px; border: 1px solid var(--color-border-solid); border-radius: var(--border-radius-sm); background: none; color: var(--color-primary); font-size: 0.8125rem; font-weight: 600; cursor: pointer; margin-top: 4px; }
+
+.empty { text-align: center; padding: 48px 24px; color: var(--color-text-secondary); }
+
+.modalOverlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-end; }
+.modal { background-color: var(--color-surface-solid); border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0; width: 100%; max-height: 88vh; overflow-y: auto; display: flex; flex-direction: column; }
+.modalHeader { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 20px 12px; border-bottom: 1px solid var(--color-border-solid); position: sticky; top: 0; background-color: var(--color-surface-solid); z-index: 1; }
+.modalTitle { font-size: 1.0625rem; font-weight: 700; margin: 0 0 2px; }
+.modalSubtitle { font-size: 0.8125rem; color: var(--color-text-secondary); }
+.modalClose { background: none; border: none; font-size: 1.25rem; color: var(--color-text-secondary); cursor: pointer; padding: 4px 8px; }
+
+.modalSummary { display: flex; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--color-border); }
+.modalSummaryCard { flex: 1; text-align: center; }
+.modalSummaryLabel { font-size: 0.6875rem; color: var(--color-text-secondary); text-transform: uppercase; }
+.modalSummaryValue { font-size: 0.9375rem; font-weight: 700; margin-top: 2px; }
+
+.fiveSixHighlight { margin: 10px 16px; padding: 10px 14px; background-color: var(--color-danger-light); border-radius: var(--border-radius-sm); font-size: 0.875rem; color: var(--color-danger); }
+
+.tableWrap { overflow-x: auto; padding: 8px 0 24px; }
+.table { width: 100%; border-collapse: collapse; font-size: 0.75rem; min-width: 480px; }
+.table th { padding: 8px 10px; text-align: left; font-size: 0.6875rem; text-transform: uppercase; color: var(--color-text-secondary); border-bottom: 1px solid var(--color-border-solid); background-color: var(--color-background); position: sticky; top: 0; }
+.table td { padding: 8px 10px; border-bottom: 1px solid var(--color-border); }
+.paidRow td { color: var(--color-text-hint); text-decoration: line-through; }
+.paidRow .checkbox { accent-color: var(--color-success); }
+.principal { color: var(--color-primary); }
+.interest { color: var(--color-warning); }
+.checkbox { width: 16px; height: 16px; cursor: pointer; accent-color: var(--color-success); }

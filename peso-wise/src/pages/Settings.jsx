@@ -13,6 +13,7 @@ import { formatCurrency } from '../utils/formatCurrency'
 import { exportToCSV, exportToJSON } from '../utils/exportData'
 import { EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '../utils/categories'
 import { useTheme } from '../auth/ThemeContext'
+import CouplesModePanel from '../components/CouplesModePanel'
 import styles from './Settings.module.css'
 
 export default function Settings() {
@@ -212,6 +213,20 @@ export default function Settings() {
     showToast('Allocation added ✓')
   }
 
+  async function handleToggleCouplesMode() {
+    const next = !settings?.couplesMode
+    await updateUserSettings(currentUser.uid, { couplesMode: next })
+    showToast(`Couples Mode ${next ? 'enabled' : 'disabled'} ✓`)
+    await loadData()
+  }
+
+  async function handleToggleBusinessMode() {
+    const next = !settings?.businessMode
+    await updateUserSettings(currentUser.uid, { businessMode: next })
+    showToast(`Business Mode ${next ? 'enabled' : 'disabled'} ✓`)
+    await loadData()
+  }
+
   async function handleInstall() {
     if (!installPrompt) return
     installPrompt.prompt()
@@ -396,6 +411,31 @@ export default function Settings() {
         <div className={styles.alertRow}>
           <label>Low balance threshold (₱)</label>
           <input type="number" value={lowAlert} onChange={e => setLowAlert(e.target.value)} onBlur={updateLowAlert} inputMode="decimal" />
+        </div>
+      </div>
+
+      <div className={styles.section}>
+        <div className={styles.sectionTitle}>Features</div>
+        <div className={styles.row}>
+          <div>
+            <span className={styles.rowLabel}>Couples Mode</span>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-hint)', marginTop: 2 }}>Share budgets &amp; transactions with a partner</div>
+          </div>
+          <button className={`${styles.themeToggle} ${settings?.couplesMode ? styles.toggleOn : ''}`} onClick={handleToggleCouplesMode} aria-label="Toggle couples mode">
+            <span className={styles.toggleThumb} />
+          </button>
+        </div>
+        {settings?.couplesMode && (
+          <CouplesModePanel settings={settings} onUpdated={loadData} />
+        )}
+        <div className={styles.row}>
+          <div>
+            <span className={styles.rowLabel}>Business Mode</span>
+            <div style={{ fontSize: '0.75rem', color: 'var(--color-text-hint)', marginTop: 2 }}>Separate sari-sari / side hustle tracking</div>
+          </div>
+          <button className={`${styles.themeToggle} ${settings?.businessMode ? styles.toggleOn : ''}`} onClick={handleToggleBusinessMode} aria-label="Toggle business mode">
+            <span className={styles.toggleThumb} />
+          </button>
         </div>
       </div>
 

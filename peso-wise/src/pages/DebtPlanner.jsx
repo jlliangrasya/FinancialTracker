@@ -7,11 +7,13 @@ import { formatCurrency } from '../utils/formatCurrency'
 import ProgressBar from '../components/ProgressBar'
 import VerseCard from '../components/VerseCard'
 import { PAGE_VERSES } from '../utils/verses'
+import LoanTracker from './LoanTracker'
 import styles from './DebtPlanner.module.css'
 
 const DEBT_TYPES = ['Credit Card', 'Personal Loan', 'Home Loan', 'Car Loan', 'Other']
 
 export default function DebtPlanner() {
+  const [activeView, setActiveView] = useState('debts')
   const [debts, setDebts] = useState([])
   const [loading, setLoading] = useState(true)
   const [showInfo, setShowInfo] = useState(false)
@@ -72,9 +74,15 @@ export default function DebtPlanner() {
   return (
     <div className={styles.container}>
       <div className={styles.titleRow}>
-        <h1 className={styles.title}>Debt Payoff Planner</h1>
-        <button className={styles.infoBtn} onClick={() => setShowInfo(true)} aria-label="How it works">?</button>
+        <h1 className={styles.title}>{activeView === 'debts' ? 'Debt Payoff Planner' : 'Loan Tracker'}</h1>
+        {activeView === 'debts' && <button className={styles.infoBtn} onClick={() => setShowInfo(true)} aria-label="How it works">?</button>}
       </div>
+      <div className={styles.viewToggle}>
+        <button className={`${styles.viewBtn} ${activeView === 'debts' ? styles.active : ''}`} onClick={() => setActiveView('debts')}>Debt Payoff</button>
+        <button className={`${styles.viewBtn} ${activeView === 'loans' ? styles.active : ''}`} onClick={() => setActiveView('loans')}>Loan Tracker</button>
+      </div>
+      {activeView === 'loans' && <LoanTracker />}
+      {activeView === 'debts' && <>
       <VerseCard quote={PAGE_VERSES.debtPlanner.quote} reference={PAGE_VERSES.debtPlanner.reference} context="bills" />
 
       {showInfo && (
@@ -301,6 +309,7 @@ export default function DebtPlanner() {
           )}
         </div>
       )}
+      </>}
     </div>
   )
 }

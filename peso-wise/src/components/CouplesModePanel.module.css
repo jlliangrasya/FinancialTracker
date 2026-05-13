@@ -1,0 +1,13 @@
+.panel { margin-top: 10px; padding: 14px; background-color: var(--color-background); border-radius: var(--border-radius-md); border: 1px solid var(--color-border-solid); }
+.tabRow { display: flex; gap: 0; background-color: var(--color-surface-solid); border-radius: var(--border-radius-sm); padding: 3px; margin-bottom: 12px; }
+.tabBtn { flex: 1; padding: 8px; font-size: 0.8125rem; font-weight: 500; border: none; background: none; cursor: pointer; border-radius: var(--border-radius-sm); color: var(--color-text-secondary); }
+.tabActive { background-color: var(--color-primary); color: white; font-weight: 600; }
+.tabContent { display: flex; flex-direction: column; gap: 10px; }
+.hint { font-size: 0.8125rem; color: var(--color-text-secondary); line-height: 1.5; margin: 0; }
+.codeBox { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background-color: var(--color-surface-solid); border-radius: var(--border-radius-sm); border: 1px solid var(--color-border-solid); }
+.code { font-size: 1.5rem; font-weight: 800; letter-spacing: 0.2em; color: var(--color-primary); flex: 1; text-align: center; }
+.copyBtn { padding: 6px 14px; border: 1px solid var(--color-primary); border-radius: var(--border-radius-sm); background: none; color: var(--color-primary); font-size: 0.8125rem; font-weight: 600; cursor: pointer; }
+.joinRow { display: flex; gap: 8px; }
+.connectedBadge { display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 10px; background-color: var(--color-success-light); color: var(--color-success); margin-bottom: 8px; }
+.partnerInfo { font-size: 0.875rem; color: var(--color-text-secondary); margin: 0 0 8px; }
+.leaveBtn { padding: 8px 16px; border: 1px solid var(--color-danger); border-radius: var(--border-radius-sm); background: none; color: var(--color-danger); font-size: 0.8125rem; cursor: pointer; margin-top: 8px; }

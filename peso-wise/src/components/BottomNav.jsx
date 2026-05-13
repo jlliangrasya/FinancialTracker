@@ -21,6 +21,7 @@ const DRAWER_ITEMS = [
   { label: 'Health', icon: 'health', path: '/health-score', bg: 'var(--color-success-light)' },
   { label: 'Insights', icon: 'insights', path: '/insights', bg: 'var(--accent-sand)' },
   { label: 'Reports', icon: 'reports', path: '/reports', bg: 'var(--accent-ice)' },
+  { label: 'Challenges', icon: 'challenges', path: '/challenges', bg: 'var(--color-warning-light)' },
   { label: 'Settings', icon: 'settings', path: '/settings', bg: 'var(--accent-fog)' },
 ]
 
@@ -47,12 +48,16 @@ function NavIcon({ icon, size = 20 }) {
     case 'reports': return <svg {...p}><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
     case 'settings': return <svg {...p}><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     case 'admin': return <svg {...p}><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+    case 'business': return <svg {...p}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/><rect x="9" y="5" width="6" height="4"/></svg>
+    case 'challenges': return <svg {...p}><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
     case 'add': return <svg {...p} strokeWidth="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     default: return null
   }
 }
 
-export default function BottomNav({ onAddClick }) {
+const BUSINESS_ITEM = { label: 'Business', icon: 'business', path: '/business', bg: 'var(--accent-teal)' }
+
+export default function BottomNav({ onAddClick, featureFlags = {} }) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [pendingCount, setPendingCount] = useState(0)
   const navigate = useNavigate()
@@ -66,7 +71,9 @@ export default function BottomNav({ onAddClick }) {
       .catch(() => {})
   }, [isAdmin, drawerOpen])
 
-  const allDrawerItems = isAdmin ? [...DRAWER_ITEMS, ADMIN_ITEM] : DRAWER_ITEMS
+  let allDrawerItems = [...DRAWER_ITEMS]
+  if (featureFlags.businessMode) allDrawerItems = [...allDrawerItems, BUSINESS_ITEM]
+  if (isAdmin) allDrawerItems = [...allDrawerItems, ADMIN_ITEM]
 
   function handleNav(path) {
     setDrawerOpen(false)
